@@ -41,7 +41,8 @@ public class GamePanel extends JPanel {
                 if (!player.isMoving) {
                     player.targetY -= TILE_SIZE;
                     player.isMoving = true;
-                    player.setDirection(200, 34, 52);
+                    player.setDirection(200, 35, 52, 14, 29);
+                    player.startAnimation();
                 }
             }
         });
@@ -51,7 +52,8 @@ public class GamePanel extends JPanel {
                 if (!player.isMoving) {
                     player.targetX -= TILE_SIZE;
                     player.isMoving = true;
-                    player.setDirection(76, 32, 48);
+                    player.setDirection(76, 33, 48, 15, 32);
+                    player.startAnimation();
                 }
             }
         });
@@ -61,7 +63,8 @@ public class GamePanel extends JPanel {
                 if (!player.isMoving) {
                     player.targetY += TILE_SIZE;
                     player.isMoving = true;
-                    player.setDirection(10, 34, 50);
+                    player.setDirection(10, 35, 50, 14, 29);
+                    player.startAnimation();
                 }
             }
         });
@@ -71,7 +74,8 @@ public class GamePanel extends JPanel {
                 if (!player.isMoving) {
                     player.targetX += TILE_SIZE;
                     player.isMoving = true;
-                    player.setDirection(140, 32, 48);
+                    player.setDirection(140, 33, 48, 15, 32);
+                    player.startAnimation();
                 }
             }
         });
