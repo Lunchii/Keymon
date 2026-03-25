@@ -1,55 +1,107 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import javax.swing.*;
 
 public class MenuPanel extends JPanel {
     private Image backgroundGif;
+    private ArrayList<JButton> buttons = new ArrayList<>();
+    private int focusedIndex = 0; // Starts at the first button
 
     public MenuPanel(CardLayout layout, JPanel container) {
-        // 1. Load the GIF
         backgroundGif = new ImageIcon("menuBackground.gif").getImage();
+        this.setLayout(new BorderLayout());
+        this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150));
 
-        // 2. Setup Layout
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
+        JPanel menuContent = new JPanel();
+        menuContent.setOpaque(false);
+        menuContent.setLayout(new BoxLayout(menuContent, BoxLayout.Y_AXIS));
 
-        // 3. Add Title
+        // Title
         JLabel title = new JLabel("Keymon");
         title.setFont(new Font("Arial", Font.BOLD, 150));
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        menuContent.add(Box.createVerticalGlue());
+        menuContent.add(title);
+        menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        this.add(Box.createVerticalGlue());
-        this.add(title);
-        this.add(Box.createRigidArea(new Dimension(0, 50)));
+        // Buttons
+        String[] labels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
+        for (String label : labels) {
+            OutlinedButton btn = new OutlinedButton(label);
 
-        // 4. Button Loop
-        String[] buttonLabels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL" };
-        Dimension buttonSize = new Dimension(400, 500);
+            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btn.setMaximumSize(new Dimension(400, 60));
+            btn.setFont(new Font("Arial", Font.BOLD, 24)); // Bold makes the outline look better
+            btn.setFocusable(false);
+            btn.setForeground(Color.BLACK); // Main text color
 
-        for (String label : buttonLabels) {
-            JButton button = new JButton(label);
-            button.setAlignmentX(Component.CENTER_ALIGNMENT);
-            button.setMaximumSize(buttonSize);
-            button.setFont(new Font("Arial", Font.PLAIN, 24));
+            buttons.add(btn);
+            menuContent.add(btn);
+            menuContent.add(Box.createRigidArea(new Dimension(0, 20)));
 
-            // Make buttons slightly transparent so they look "Modern"
-            button.setBackground(new Color(255, 255, 255, 200));
-            button.setOpaque(true);
-
-            button.addActionListener(e -> layout.show(container, label));
-
-            this.add(button);
-            this.add(Box.createRigidArea(new Dimension(0, 20)));
+            btn.addActionListener(e -> layout.show(container, label));
         }
+        menuContent.add(Box.createVerticalGlue());
+        this.add(menuContent, BorderLayout.EAST);
 
-        this.add(Box.createVerticalGlue());
+        // INITIAL HIGHLIGHT
+        updateButtonStyles();
+
+        // KEY BINDINGS
+        setupKeyboardNavigation();
     }
 
-    // This is the "Magic" that fills the screen
+    private void setupKeyboardNavigation() {
+        InputMap im = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = this.getActionMap();
+
+        // UP (W)
+        im.put(KeyStroke.getKeyStroke("W"), "moveUp");
+        am.put("moveUp", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                focusedIndex = (focusedIndex > 0) ? focusedIndex - 1 : buttons.size() - 1;
+                updateButtonStyles();
+            }
+        });
+
+        // DOWN (S)
+        im.put(KeyStroke.getKeyStroke("S"), "moveDown");
+        am.put("moveDown", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                focusedIndex = (focusedIndex < buttons.size() - 1) ? focusedIndex + 1 : 0;
+                updateButtonStyles();
+            }
+        });
+
+        // SELECT (ENTER)
+        im.put(KeyStroke.getKeyStroke("ENTER"), "select");
+        am.put("select", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                buttons.get(focusedIndex).doClick(); // Simulates a mouse click
+            }
+        });
+    }
+
+    private void updateButtonStyles() {
+        for (int i = 0; i < buttons.size(); i++) {
+            if (i == focusedIndex) {
+                // Highlighted Style
+                buttons.get(i).setForeground(Color.BLACK);
+                buttons.get(i).setBorder(BorderFactory.createLineBorder(Color.WHITE, 4));
+            } else {
+                // Default Style
+                buttons.get(i).setBackground(new Color(255, 255, 255, 200));
+                buttons.get(i).setForeground(Color.GRAY);
+                buttons.get(i).setBorder(BorderFactory.createEmptyBorder());
+            }
+        }
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Draw the GIF stretched to the current width and height of the panel
         if (backgroundGif != null) {
             g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
         }
