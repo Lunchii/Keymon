@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 
@@ -17,23 +18,37 @@ public class MenuPanel extends JPanel {
         menuContent.setOpaque(false);
         menuContent.setLayout(new BoxLayout(menuContent, BoxLayout.Y_AXIS));
 
+        loadCustomFont();
+
         // Title
-        JLabel title = new JLabel("Keymon");
-        title.setFont(new Font("Arial", Font.BOLD, 150));
-        title.setForeground(Color.WHITE);
+        OutlinedLabel title = new OutlinedLabel("Keymon");
+        title.setFont(customFont.deriveFont(Font.BOLD, 100f));
+        title.setForeground(Color.BLACK);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Add extra width (e.g., 800) and height (e.g., 150) to prevent cropping
+        title.setPreferredSize(new Dimension(800, 150));
+        title.setMaximumSize(new Dimension(800, 150)); // BoxLayout respects MaximumSize
+
+        OutlinedLabel title2 = new OutlinedLabel("Journey");
+        title2.setFont(customFont.deriveFont(Font.BOLD, 100f));
+        title2.setForeground(Color.BLACK);
+        title2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title2.setPreferredSize(new Dimension(800, 150));
+        title2.setMaximumSize(new Dimension(800, 150));
+
         menuContent.add(Box.createVerticalGlue());
         menuContent.add(title);
+        menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
         // Buttons
         String[] labels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
         for (String label : labels) {
             OutlinedButton btn = new OutlinedButton(label);
+            btn.setFont(customFont.deriveFont(Font.PLAIN, 28f)); // Set size to 28
 
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             btn.setMaximumSize(new Dimension(400, 60));
-            btn.setFont(new Font("Arial", Font.BOLD, 24)); // Bold makes the outline look better
             btn.setFocusable(false);
             btn.setForeground(Color.BLACK); // Main text color
 
@@ -104,6 +119,25 @@ public class MenuPanel extends JPanel {
         super.paintComponent(g);
         if (backgroundGif != null) {
             g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
+
+    private Font customFont;
+
+    private void loadCustomFont() {
+        try {
+            // 1. Load the file (Make sure the path is correct!)
+            File fontFile = new File("ka1.ttf");
+            customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile);
+
+            // 2. Register it so the OS can "see" it
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(customFont);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to a default font if the file is missing
+            customFont = new Font("Arial", Font.BOLD, 24);
         }
     }
 }
