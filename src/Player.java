@@ -40,6 +40,24 @@ public class Player {
         }
     }
 
+    // Constructor for loading from a save file (Added for Issue #14)
+    public Player(int pixelX, int pixelY, int row, int tileSize) {
+        // Direct pixel assignment instead of tile-based calculation
+        this.x = pixelX;
+        this.y = pixelY;
+        this.targetX = x;
+        this.targetY = y;
+        this.spriteRow = row;
+
+        try {
+            spriteSheet = ImageIO.read(new File("spritesheet.png"));
+            // Re-initialize with Isaac's animation parameters
+            setDirection(row, 35, 50, 14, 29);
+        } catch (Exception e) {
+            System.err.println("Error: Could not load spritesheet during save loading");
+        }
+    }
+
     // New Helper Method to set the direction from GamePanel
     public void setDirection(int row, int width, int height, int xOffset, int gap) {
         this.spriteRow = row;
@@ -100,5 +118,10 @@ public class Player {
             int drawY = y - (frameHeight - TILE_SIZE);
             g.drawImage(currentFrame, x, drawY, null);
         }
+    }
+
+    // Getter for the current sprite row to save the player's facing direction
+    public int getSpriteRow() {
+        return this.spriteRow;
     }
 }

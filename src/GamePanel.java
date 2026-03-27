@@ -8,11 +8,28 @@ public class GamePanel extends JPanel {
     private int[][] map;
     private Player player;
     private final int TILE_SIZE = 32;
+    // Added for screen switching and saving
+    private CardLayout cardLayout;
+    private JPanel container;
 
-    public GamePanel(int[][] map) {
+    // Modified Constructor to accept data from Main.java
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map) {
+        this.cardLayout = layout;
+        this.container = container;
+        this.player = player; // Use the player instance passed from Main.java
         this.map = map;
-        this.player = new Player(5, 5, TILE_SIZE); // Start at tile (5,5)
+
         this.setBackground(Color.BLACK);
+        this.setFocusable(true);
+
+        // Add a button to save and go back to menu
+        JButton backButton = new JButton("Save & Back");
+        backButton.addActionListener(e -> {
+            // Save current state before switching screens
+            SaveManager.saveGame(player.x, player.y, player.getSpriteRow());
+            cardLayout.show(container, "MENU");
+        });
+        this.add(backButton);
 
         setupInputs();
 
