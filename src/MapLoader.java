@@ -18,7 +18,16 @@ public class MapLoader {
                 String line = sc.nextLine();
                 String[] values = line.split(",");
                 for (int col = 0; col < values.length && col < WIDTH; col++) {
-                    worldMap[row][col] = Integer.parseInt(values[col].trim());
+                    String token = values[col].trim();
+                    if (token.isEmpty()) {
+                        worldMap[row][col] = 0;
+                    } else {
+                        try {
+                            worldMap[row][col] = Integer.parseInt(token);
+                        } catch (NumberFormatException e) {
+                            worldMap[row][col] = 0;
+                        }
+                    }
                 }
                 row++;
             }
