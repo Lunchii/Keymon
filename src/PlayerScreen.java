@@ -12,7 +12,7 @@ public class PlayerScreen extends JPanel {
         this.player = player;
 
         this.setLayout(new BorderLayout());
-        this.setBackground(new Color(20, 20, 20)); // 深色背景
+        this.setBackground(new Color(20, 20, 20));
 
         // 1. Title at top
         JLabel title = new JLabel("PLAYER PROFILE", SwingConstants.CENTER);
