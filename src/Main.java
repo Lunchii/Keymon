@@ -18,6 +18,8 @@ public class Main {
         // Just create instances of your other files
         mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
         mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap()), "PLAY GAME");
+        PlayerScreen playerScreen = new PlayerScreen(cardLayout, mainContainer, player);
+        mainContainer.add(playerScreen, "PLAYER_SCREEN");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

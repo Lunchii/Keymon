@@ -124,4 +124,5 @@ public class Player {
     public int getSpriteRow() {
         return this.spriteRow;
     }
+    public java.awt.image.BufferedImage getCurrentFrame() { return this.currentFrame; }
 }

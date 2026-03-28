@@ -96,6 +96,12 @@ public class GamePanel extends JPanel {
                 }
             }
         });
+        im.put(KeyStroke.getKeyStroke("P"), "open_player_screen");
+        am.put("open_player_screen", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(container, "PLAYER_SCREEN");
+            }
+        });
     }
 
     @Override
