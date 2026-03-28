@@ -20,6 +20,7 @@ public class Main {
         mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap()), "PLAY GAME");
         PlayerScreen playerScreen = new PlayerScreen(cardLayout, mainContainer, player);
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
+        mainContainer.add(new LoginPanel(cardLayout, mainContainer), "LOGIN");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
