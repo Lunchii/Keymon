@@ -1,14 +1,13 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.*;
 
 public class GamePanel extends JPanel {
     private int[][] map;
     private Player player;
     private final int TILE_SIZE = 32;
-    // Added for screen switching and saving
+
     private CardLayout cardLayout;
     private JPanel container;
 
@@ -30,7 +29,7 @@ public class GamePanel extends JPanel {
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
 
-        setupInputs();
+        new InputHandler(this);
         timeManager.resume();
 
         // Inside GamePanel constructor
@@ -50,103 +49,51 @@ public class GamePanel extends JPanel {
         timer.start();
     }
 
-    private void setupInputs() {
-        InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
-        ActionMap am = getActionMap();
-
-        // ESCAPE KEY - Toggles Pause
-        im.put(KeyStroke.getKeyStroke("ESCAPE"), "toggle_pause");
-        am.put("toggle_pause", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                togglePause();
-            }
-        });
-
-        // UP (W)
-        im.put(KeyStroke.getKeyStroke("W"), "move_up");
-        am.put("move_up", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (isPaused) {
-                    // Menu Navigation
-                    pauseOptionIndex = (pauseOptionIndex > 0) ? pauseOptionIndex - 1 : pauseOptions.length - 1;
-                    repaint();
-                } else if (!player.isMoving) {
-                    // Player Movement
-                    player.targetY -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(200, 35, 52, 14, 29);
-                    player.startAnimation();
-                }
-            }
-        });
-
-        // DOWN (S)
-        im.put(KeyStroke.getKeyStroke("S"), "move_down");
-        am.put("move_down", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (isPaused) {
-                    // Menu Navigation
-                    pauseOptionIndex = (pauseOptionIndex < pauseOptions.length - 1) ? pauseOptionIndex + 1 : 0;
-                    repaint();
-                } else if (!player.isMoving) {
-                    // Player Movement
-                    player.targetY += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(10, 35, 50, 14, 29);
-                    player.startAnimation();
-                }
-            }
-        });
-
-        // LEFT (A) - Add pause check to prevent moving while paused
-        im.put(KeyStroke.getKeyStroke("A"), "move_left");
-        am.put("move_left", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!isPaused && !player.isMoving) {
-                    player.targetX -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(76, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-
-        // RIGHT (D) - Add pause check to prevent moving while paused
-        im.put(KeyStroke.getKeyStroke("D"), "move_right");
-        am.put("move_right", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!isPaused && !player.isMoving) {
-                    player.targetX += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(140, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-
-        // ENTER (Select Pause Option)
-        im.put(KeyStroke.getKeyStroke("ENTER"), "pause_select");
-        am.put("pause_select", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (isPaused) {
-                    handlePauseSelection();
-                }
-            }
-        });
+    public boolean isPaused() {
+        return isPaused;
     }
 
-    public void togglePause() {
-        isPaused = !isPaused;
-        if (isPaused) {
-            timeManager.pause(); // Stop clock while paused
-        } else {
-            timeManager.resume(); // Start clock when resuming
-        }
-        pauseOptionIndex = 0;
+    public boolean isStat() {
+        return isStat;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    // Helper for menu navigation
+    public void navigateMenuUp() {
+        pauseOptionIndex = (pauseOptionIndex > 0) ? pauseOptionIndex - 1 : pauseOptions.length - 1;
         repaint();
     }
 
-    private void handlePauseSelection() {
+    public void navigateMenuDown() {
+        pauseOptionIndex = (pauseOptionIndex < pauseOptions.length - 1) ? pauseOptionIndex + 1 : 0;
+        repaint();
+    }
+
+    public void togglePause() {
+        // If we are currently looking at Stats, Escape should go back to the Pause menu
+        if (isStat) {
+            isStat = false;
+            repaint();
+            return;
+        }
+
+        // Normal Pause/Unpause logic
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            timeManager.pause();
+        } else {
+            timeManager.resume();
+        }
+
+        pauseOptionIndex = 0; // Reset menu selection
+        repaint();
+    }
+
+    public void handlePauseSelection() {
         // If we are currently looking at stats, ENTER should take us back
         if (isStat) {
             isStat = false;
@@ -161,8 +108,28 @@ public class GamePanel extends JPanel {
         else if (pauseOptionIndex == 2) {
             isStat = true; // Open Stats
             repaint();
-        } else if (pauseOptionIndex == 3)
-            cardLayout.show(container, "MENU"); // Quit
+        } else if (pauseOptionIndex == 3) {
+            isPaused = false;
+            isStat = false;
+            timeManager.pause();
+            cardLayout.show(container, "MENU");
+        }
+    }
+
+    public TimeManager getTimeManager() {
+        return timeManager;
+    }
+
+    public boolean getIsStat() {
+        return isStat;
+    }
+
+    public String[] getPauseOptions() {
+        return pauseOptions;
+    }
+
+    public int getPauseOptionIndex() {
+        return pauseOptionIndex;
     }
 
     private void drawMap(Graphics2D g2d) {
@@ -181,111 +148,7 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void drawPaused(Graphics2D g2d) {
-
-        g2d.setColor(new Color(0, 0, 0, 220));
-        g2d.fillRect(0, 0, getWidth(), getHeight());
-
-        if (isStat) {
-            drawPlayerStat(g2d); // Draw the cool Stats UI
-        } else {
-            // Draw Main Pause Menu
-            g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 50));
-            g2d.drawString("PAUSED", getWidth() / 2 - 100, 150);
-
-            g2d.setFont(new Font("Arial", Font.PLAIN, 30));
-            for (int i = 0; i < pauseOptions.length; i++) {
-                if (i == pauseOptionIndex) {
-                    g2d.setColor(Color.YELLOW);
-                    g2d.drawString("> " + pauseOptions[i], getWidth() / 2 - 100, 250 + (i * 50));
-                } else {
-                    g2d.setColor(Color.WHITE);
-                    g2d.drawString("  " + pauseOptions[i], getWidth() / 2 - 100, 250 + (i * 50));
-                }
-            }
-        }
-    }
-
-    private void drawPlayerStat(Graphics2D g2d) {
-        int x = 200;
-        int y = 200;
-        int w = getWidth() / 3;
-        int h = getHeight() / 3;
-
-        // 1. Draw player box
-        g2d.setColor(new Color(45, 52, 71)); // Dark blue-grey
-        g2d.fillRoundRect(x, y, w, h, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.setStroke(new BasicStroke(3));
-        g2d.drawRoundRect(x, y, w, h, 20, 20);
-
-        // 2. Draw Header
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 35));
-        g2d.drawString("PLAYER STATS:", x + 30, y + 50);
-        g2d.drawLine(x + 30, y + 60, x + 350, y + 60);
-
-        // 3. Stats Data
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 25));
-        g2d.drawString("NAME: ASH", x + 30, y + 110);
-
-        // HP Bar
-        g2d.drawString("HP: ", x + 30, y + 160);
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(x + 100, y + 140, 200, 25);
-        g2d.setColor(new Color(114, 186, 158)); // Greenish
-        g2d.fillRect(x + 100, y + 140, 200, 25); // Set width to (currentHP/maxHP * 200)
-
-        // MP Bar
-        g2d.setColor(Color.WHITE);
-        g2d.drawString("MP: ", x + 30, y + 210);
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(x + 100, y + 190, 200, 25);
-        g2d.setColor(new Color(103, 146, 219)); // Blue
-        g2d.fillRect(x + 100, y + 190, 100, 25); // Example 50% fill
-
-        // -- Top right -- //
-        int rx = x + 700; // Horizontal offset for right column
-        int rw = 400;
-        int rh = 200;
-
-        g2d.setColor(new Color(45, 52, 71, 230));
-        g2d.fillRoundRect(rx, y, rw, rh, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.drawRoundRect(rx, y, rw, rh, 20, 20);
-
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g2d.drawString("GAME PROGRESS", rx + 30, y + 45);
-        g2d.drawLine(rx + 30, y + 55, rx + 250, y + 55);
-
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("🕒 WPM:         75 WPM", rx + 30, y + 100);
-        g2d.drawString("🕒 TIME PLAYED: " + timeManager.getFormattedTime(), rx + 30, y + 150);
-
-        // -- Bottom Right -- //
-        int ry_bottom = y + 250;
-        int rh_bottom = 250;
-
-        g2d.setColor(new Color(45, 52, 71, 230));
-        g2d.fillRoundRect(rx, ry_bottom, rw, rh_bottom, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.drawRoundRect(rx, ry_bottom, rw, rh_bottom, 20, 20);
-
-        // Trainers Content
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g2d.drawString("TRAINERS BEAT:", rx + 30, ry_bottom + 45);
-
-        // Big Centered Counter
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 50));
-        g2d.drawString("32 / 50", rx + 80, ry_bottom + 130);
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("TOTAL", rx + 160, ry_bottom + 160);
-
-        // -- Press Enter to go back label -- //
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Monospaced", Font.ITALIC, 20));
-        g2d.drawString("PRESS ENTER TO GO BACK", getWidth() / 2 - 150, getHeight() - 50);
-    }
+    private UIManager uiManager = new UIManager(this);
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -295,9 +158,7 @@ public class GamePanel extends JPanel {
         drawMap(g2d);
         player.draw(g);
 
-        if (isPaused) {
-            drawPaused(g2d);
-        }
+        uiManager.draw(g2d);
     }
 
 }

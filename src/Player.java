@@ -113,6 +113,34 @@ public class Player {
         }
     }
 
+    public void moveUp() {
+        this.targetY -= TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(200, 35, 52, 14, 29);
+        this.startAnimation();
+    }
+
+    public void moveDown() {
+        this.targetY += TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(10, 35, 50, 14, 29);
+        this.startAnimation();
+    }
+
+    public void moveLeft() {
+        this.targetX -= TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(76, 33, 48, 15, 32);
+        this.startAnimation();
+    }
+
+    public void moveRight() {
+        this.targetX += TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(140, 33, 48, 15, 32);
+        this.startAnimation();
+    }
+
     public void draw(Graphics g) {
         if (currentFrame != null) {
             int drawY = y - (frameHeight - TILE_SIZE);
