@@ -27,7 +27,9 @@ public class InputHandler {
         im.put(KeyStroke.getKeyStroke("W"), "move_up");
         am.put("move_up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                if (gp.isPaused() && !gp.isStat()) {
+                    gp.navigateMenuUp();
+                } else if (!gp.isPaused() && !gp.getPlayer().isMoving) {
                     int newY = gp.getPlayer().targetY - gp.getTileSize(); // change to getTileSize()
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
@@ -42,7 +44,9 @@ public class InputHandler {
         im.put(KeyStroke.getKeyStroke("S"), "move_down");
         am.put("move_down", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                if (gp.isPaused() && !gp.isStat()) {
+                    gp.navigateMenuDown();
+                } else if (!gp.isPaused() && !gp.getPlayer().isMoving) {
                     int newY = gp.getPlayer().targetY + gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
