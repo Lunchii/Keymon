@@ -1,23 +1,31 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.*;
 
 public class GamePanel extends JPanel {
     private int[][] map;
     private Player player;
+    private Trainer trainer;
+    private List<TerrainObjects> terrainObjects;
     private final int TILE_SIZE = 32;
     // Added for screen switching and saving
     private CardLayout cardLayout;
     private JPanel container;
 
-    // Modified Constructor to accept data from Main.java
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map) {
+    // Modified Constructor to accept data from Main.java (including static trainer
+    // and terrain objects)
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+            List<TerrainObjects> terrainObjects) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player; // Use the player instance passed from Main.java
         this.map = map;
+        this.trainer = trainer;
+        this.terrainObjects = terrainObjects;
+        this.player.setTerrainObjects(terrainObjects);
 
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
@@ -56,10 +64,13 @@ public class GamePanel extends JPanel {
         am.put("move_up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!player.isMoving) {
-                    player.targetY -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(200, 35, 52, 14, 29);
-                    player.startAnimation();
+                    int newY = player.targetY - TILE_SIZE;
+                    if (player.isPositionWalkable(player.targetX, newY)) {
+                        player.targetY = newY;
+                        player.isMoving = true;
+                        player.setDirection(200, 35, 52, 14, 29);
+                        player.startAnimation();
+                    }
                 }
             }
         });
@@ -67,10 +78,13 @@ public class GamePanel extends JPanel {
         am.put("move_left", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!player.isMoving) {
-                    player.targetX -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(76, 33, 48, 15, 32);
-                    player.startAnimation();
+                    int newX = player.targetX - TILE_SIZE;
+                    if (player.isPositionWalkable(newX, player.targetY)) {
+                        player.targetX = newX;
+                        player.isMoving = true;
+                        player.setDirection(76, 33, 48, 15, 32);
+                        player.startAnimation();
+                    }
                 }
             }
         });
@@ -78,10 +92,13 @@ public class GamePanel extends JPanel {
         am.put("move_down", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!player.isMoving) {
-                    player.targetY += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(10, 35, 50, 14, 29);
-                    player.startAnimation();
+                    int newY = player.targetY + TILE_SIZE;
+                    if (player.isPositionWalkable(player.targetX, newY)) {
+                        player.targetY = newY;
+                        player.isMoving = true;
+                        player.setDirection(10, 35, 50, 14, 29);
+                        player.startAnimation();
+                    }
                 }
             }
         });
@@ -89,10 +106,13 @@ public class GamePanel extends JPanel {
         am.put("move_right", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!player.isMoving) {
-                    player.targetX += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(140, 33, 48, 15, 32);
-                    player.startAnimation();
+                    int newX = player.targetX + TILE_SIZE;
+                    if (player.isPositionWalkable(newX, player.targetY)) {
+                        player.targetX = newX;
+                        player.isMoving = true;
+                        player.setDirection(140, 33, 48, 15, 32);
+                        player.startAnimation();
+                    }
                 }
             }
         });
@@ -121,6 +141,18 @@ public class GamePanel extends JPanel {
                 g2d.setColor(new Color(0, 100, 0));
                 g2d.drawRect(x, y, TILE_SIZE, TILE_SIZE);
             }
+        }
+
+        // Draw Terrain Objects
+        if (terrainObjects != null) {
+            for (TerrainObjects obj : terrainObjects) {
+                obj.draw(g2d);
+            }
+        }
+
+        // Draw Trainer (static object)
+        if (trainer != null) {
+            trainer.draw(g2d);
         }
 
         // Draw Player
