@@ -76,8 +76,14 @@ public class MenuPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("EXIT")) {
             System.exit(0);
+        } else if (label.equals("PLAY GAME")) {
+            // Show a quick message to guide the user
+            JOptionPane.showMessageDialog(container,
+                    "Identify yourself before starting the journey!",
+                    "Trainer Login",
+                    JOptionPane.INFORMATION_MESSAGE);
+            cardLayout.show(container, "LOGIN");
         } else {
-            // Switches screen based on button text
             cardLayout.show(container, label);
         }
     }

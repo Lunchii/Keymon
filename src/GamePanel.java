@@ -14,6 +14,7 @@ public class GamePanel extends JPanel {
 
     private CardLayout cardLayout;
     private JPanel container;
+    private String currentUsername; // Added to identify the user session
 
     private boolean isPaused = false;
     private int pauseOptionIndex = 0;
@@ -25,14 +26,16 @@ public class GamePanel extends JPanel {
 
     // Modified Constructor to accept data from Main.java (including static trainer
     // and terrain objects)
+    // Addition: Added 'String username' to the parameter list
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
-            List<TerrainObjects> terrainObjects) {
+                     List<TerrainObjects> terrainObjects, String username) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player; // Use the player instance passed from Main.java
         this.map = map;
         this.trainer = trainer;
         this.terrainObjects = terrainObjects;
+        this.currentUsername = username; // Store the session username
         this.player.setTerrainObjects(terrainObjects);
 
         this.setBackground(Color.BLACK);
@@ -137,6 +140,8 @@ public class GamePanel extends JPanel {
             isStat = true; // Open Stats
             repaint();
         } else if (pauseOptionIndex == 3) {
+            // Addition: Save game data before returning to the menu
+            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow());
             isPaused = false;
             isStat = false;
             timeManager.pause();
