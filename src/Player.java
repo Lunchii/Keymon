@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 public class Player {
@@ -26,6 +27,9 @@ public class Player {
     public boolean isMoving = false;
     private final int SPEED = 4;;
 
+    // Terrain collision
+    private List<TerrainObjects> terrainObjects;
+
     public Player(int startTileX, int startTileY, int tileSize) {
         this.x = startTileX * tileSize;
         this.y = startTileY * tileSize;
@@ -33,10 +37,10 @@ public class Player {
         this.targetY = y;
 
         try {
-            spriteSheet = ImageIO.read(new File("spritesheet.png"));
+            spriteSheet = ImageIO.read(new File("playerSprite.png"));
             setDirection(10, 35, 50, 14, 29);
         } catch (Exception e) {
-            System.err.println("Error: Could not load spritesheet.png");
+            System.err.println("Error: Could not load playerSprite.png");
         }
     }
 
@@ -50,11 +54,11 @@ public class Player {
         this.spriteRow = row;
 
         try {
-            spriteSheet = ImageIO.read(new File("spritesheet.png"));
+            spriteSheet = ImageIO.read(new File("playerSprite.png"));
             // Re-initialize with Isaac's animation parameters
             setDirection(row, 35, 50, 14, 29);
         } catch (Exception e) {
-            System.err.println("Error: Could not load spritesheet during save loading");
+            System.err.println("Error: Could not load playerSprite during save loading");
         }
     }
 
@@ -113,6 +117,34 @@ public class Player {
         }
     }
 
+    public void moveUp() {
+        this.targetY -= TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(200, 35, 52, 14, 29);
+        this.startAnimation();
+    }
+
+    public void moveDown() {
+        this.targetY += TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(10, 35, 50, 14, 29);
+        this.startAnimation();
+    }
+
+    public void moveLeft() {
+        this.targetX -= TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(76, 33, 48, 15, 32);
+        this.startAnimation();
+    }
+
+    public void moveRight() {
+        this.targetX += TILE_SIZE;
+        this.isMoving = true;
+        this.setDirection(140, 33, 48, 15, 32);
+        this.startAnimation();
+    }
+
     public void draw(Graphics g) {
         if (currentFrame != null) {
             int drawY = y - (frameHeight - TILE_SIZE);
@@ -123,5 +155,23 @@ public class Player {
     // Getter for the current sprite row to save the player's facing direction
     public int getSpriteRow() {
         return this.spriteRow;
+    }
+
+    public void setTerrainObjects(List<TerrainObjects> terrainObjects) {
+        this.terrainObjects = terrainObjects;
+    }
+
+    // Check if a position is walkable (no terrain collision)
+    public boolean isPositionWalkable(int pixelX, int pixelY) {
+        if (terrainObjects == null) {
+            return true;
+        }
+
+        for (TerrainObjects terrain : terrainObjects) {
+            if (terrain.collidesWith(pixelX, pixelY)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

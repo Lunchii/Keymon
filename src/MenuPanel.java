@@ -1,5 +1,5 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -7,10 +7,18 @@ import javax.swing.*;
 public class MenuPanel extends JPanel {
     private Image backgroundGif;
     private ArrayList<JButton> buttons = new ArrayList<>();
-    private int focusedIndex = 0; // Starts at the first button
+    private int focusedIndex = 0;
+    private Font customFont;
+    private CardLayout cardLayout;
+    private JPanel container;
 
     public MenuPanel(CardLayout layout, JPanel container) {
+        this.cardLayout = layout;
+        this.container = container;
+
         backgroundGif = new ImageIcon("menuBackground.gif").getImage();
+        loadCustomFont();
+
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150));
 
@@ -18,61 +26,72 @@ public class MenuPanel extends JPanel {
         menuContent.setOpaque(false);
         menuContent.setLayout(new BoxLayout(menuContent, BoxLayout.Y_AXIS));
 
-        loadCustomFont();
-
-        // Title
-        OutlinedLabel title = new OutlinedLabel("Keymon");
-        title.setFont(customFont.deriveFont(Font.BOLD, 100f));
-        title.setForeground(Color.BLACK);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Add extra width (e.g., 800) and height (e.g., 150) to prevent cropping
-        title.setPreferredSize(new Dimension(800, 150));
-        title.setMaximumSize(new Dimension(800, 150)); // BoxLayout respects MaximumSize
-
-        OutlinedLabel title2 = new OutlinedLabel("Journey");
-        title2.setFont(customFont.deriveFont(Font.BOLD, 100f));
-        title2.setForeground(Color.BLACK);
-        title2.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title2.setPreferredSize(new Dimension(800, 150));
-        title2.setMaximumSize(new Dimension(800, 150));
+        // --- TITLES ---
+        OutlinedLabel title = createTitle("Keymon");
+        OutlinedLabel title2 = createTitle("Journey");
 
         menuContent.add(Box.createVerticalGlue());
         menuContent.add(title);
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // Buttons
+        // --- BUTTON LOOP ---
         String[] labels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
-        for (String label : labels) {
-            OutlinedButton btn = new OutlinedButton(label);
-            btn.setFont(customFont.deriveFont(Font.PLAIN, 28f)); // Set size to 28
+        for (int i = 0; i < labels.length; i++) {
+            final int index = i; // Critical for the listeners
+            final String label = labels[i];
 
+            OutlinedButton btn = new OutlinedButton(label);
+            btn.setFont(customFont.deriveFont(Font.PLAIN, 28f));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             btn.setMaximumSize(new Dimension(400, 60));
-            btn.setFocusable(false);
-            btn.setForeground(Color.BLACK); // Main text color
+            btn.setFocusable(false); // We handle focus manually
+
+            // MOUSE LOGIC
+            btn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    focusedIndex = index; // Move highlight to mouse
+                    updateButtonStyles();
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    handleSelection(label); // Mouse Click
+                }
+            });
 
             buttons.add(btn);
             menuContent.add(btn);
             menuContent.add(Box.createRigidArea(new Dimension(0, 20)));
-
-            btn.addActionListener(e -> layout.show(container, label));
         }
+
         menuContent.add(Box.createVerticalGlue());
         this.add(menuContent, BorderLayout.EAST);
 
-        // INITIAL HIGHLIGHT
         updateButtonStyles();
-
-        // KEY BINDINGS
         setupKeyboardNavigation();
+    }
+
+    private void handleSelection(String label) {
+        if (label.equals("EXIT")) {
+            System.exit(0);
+        } else if (label.equals("PLAY GAME")) {
+            // Show a quick message to guide the user
+            JOptionPane.showMessageDialog(container,
+                    "Identify yourself before starting the journey!",
+                    "Trainer Login",
+                    JOptionPane.INFORMATION_MESSAGE);
+            cardLayout.show(container, "LOGIN");
+        } else {
+            cardLayout.show(container, label);
+        }
     }
 
     private void setupKeyboardNavigation() {
         InputMap im = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = this.getActionMap();
 
-        // UP (W)
         im.put(KeyStroke.getKeyStroke("W"), "moveUp");
         am.put("moveUp", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -81,7 +100,6 @@ public class MenuPanel extends JPanel {
             }
         });
 
-        // DOWN (S)
         im.put(KeyStroke.getKeyStroke("S"), "moveDown");
         am.put("moveDown", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -90,28 +108,39 @@ public class MenuPanel extends JPanel {
             }
         });
 
-        // SELECT (ENTER)
         im.put(KeyStroke.getKeyStroke("ENTER"), "select");
         am.put("select", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                buttons.get(focusedIndex).doClick(); // Simulates a mouse click
+                // Keyboard Click
+                handleSelection(buttons.get(focusedIndex).getText());
             }
         });
     }
 
     private void updateButtonStyles() {
         for (int i = 0; i < buttons.size(); i++) {
+            JButton btn = buttons.get(i);
+
+            btn.setBackground(new Color(0, 0, 0, 0));
+
             if (i == focusedIndex) {
-                // Highlighted Style
-                buttons.get(i).setForeground(Color.BLACK);
-                buttons.get(i).setBorder(BorderFactory.createLineBorder(Color.WHITE, 4));
+                btn.setForeground(Color.BLACK); // Only the label turns Yellow
+                btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             } else {
-                // Default Style
-                buttons.get(i).setBackground(new Color(255, 255, 255, 200));
-                buttons.get(i).setForeground(Color.GRAY);
-                buttons.get(i).setBorder(BorderFactory.createEmptyBorder());
+                btn.setForeground(Color.LIGHT_GRAY);
+                btn.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         }
+        repaint();
+    }
+
+    private OutlinedLabel createTitle(String text) {
+        OutlinedLabel lbl = new OutlinedLabel(text);
+        lbl.setFont(customFont.deriveFont(Font.BOLD, 100f));
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lbl.setPreferredSize(new Dimension(800, 150));
+        lbl.setMaximumSize(new Dimension(800, 150));
+        return lbl;
     }
 
     @Override
@@ -122,21 +151,12 @@ public class MenuPanel extends JPanel {
         }
     }
 
-    private Font customFont;
-
     private void loadCustomFont() {
         try {
-            // 1. Load the file (Make sure the path is correct!)
             File fontFile = new File("ka1.ttf");
             customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile);
-
-            // 2. Register it so the OS can "see" it
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(customFont);
-
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(customFont);
         } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback to a default font if the file is missing
             customFont = new Font("Arial", Font.BOLD, 24);
         }
     }

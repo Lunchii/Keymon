@@ -4,16 +4,20 @@ import javax.swing.*;
 class OutlinedButton extends JButton {
     public OutlinedButton(String text) {
         super(text);
-        setContentAreaFilled(false); // We will draw the background ourselves
+        setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
+        setOpaque(false); // Ensures the area behind the rounded corners is transparent
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        // Essential for speed and quality
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // 1. Always draw the Grey Box Background
+        g2.setColor(getBackground());
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
 
         String text = getText();
         if (text.isEmpty())
@@ -23,17 +27,14 @@ class OutlinedButton extends JButton {
         int x = (getWidth() - metrics.stringWidth(text)) / 2;
         int y = ((getHeight() - metrics.getHeight()) / 2) + metrics.getAscent();
 
-        // 1. Create a "Shape" out of the text
         java.awt.font.TextLayout tl = new java.awt.font.TextLayout(text, getFont(), g2.getFontRenderContext());
         Shape shape = tl.getOutline(java.awt.geom.AffineTransform.getTranslateInstance(x, y));
 
-        // 2. Draw the Outline (The "Stroke")
+        // 2. Draw the White Outline (Stroke)
         g2.setColor(Color.WHITE);
-        // 6.0f is the thickness. BasicStroke is MUCH faster than loops.
-        g2.setStroke(new BasicStroke(6.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2.draw(shape);
 
-        // 3. Fill the Center (Black)
         g2.setColor(getForeground());
         g2.fill(shape);
     }
