@@ -11,9 +11,17 @@ public class GamePanel extends JPanel {
     private Trainer trainer;
     private List<TerrainObjects> terrainObjects;
     private final int TILE_SIZE = 32;
-    // Added for screen switching and saving
+
     private CardLayout cardLayout;
     private JPanel container;
+
+    private boolean isPaused = false;
+    private int pauseOptionIndex = 0;
+    private String[] pauseOptions = { "RESUME", "OPTIONS", "STATS", "QUIT TO MENU" };
+
+    private boolean isStat = false;
+
+    private TimeManager timeManager = new TimeManager(0);
 
     // Modified Constructor to accept data from Main.java (including static trainer
     // and terrain objects)
@@ -30,21 +38,15 @@ public class GamePanel extends JPanel {
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
 
-        // Add a button to save and go back to menu
-        JButton backButton = new JButton("Save & Back");
-        backButton.addActionListener(e -> {
-            // Save current state before switching screens
-            SaveManager.saveGame(player.x, player.y, player.getSpriteRow());
-            cardLayout.show(container, "MENU");
-        });
-        this.add(backButton);
-
-        setupInputs();
+        new InputHandler(this);
+        timeManager.resume();
 
         // Inside GamePanel constructor
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (player != null) {
+                    if (isPaused)
+                        return;
                     player.update(); // Move the player
                 }
                 repaint(); // Redraw the screen
@@ -56,88 +58,103 @@ public class GamePanel extends JPanel {
         timer.start();
     }
 
-    private void setupInputs() {
-        InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
-        ActionMap am = getActionMap();
-
-        im.put(KeyStroke.getKeyStroke("W"), "move_up");
-        am.put("move_up", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    int newY = player.targetY - TILE_SIZE;
-                    if (player.isPositionWalkable(player.targetX, newY)) {
-                        player.targetY = newY;
-                        player.isMoving = true;
-                        player.setDirection(200, 35, 52, 14, 29);
-                        player.startAnimation();
-                    }
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("A"), "move_left");
-        am.put("move_left", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    int newX = player.targetX - TILE_SIZE;
-                    if (player.isPositionWalkable(newX, player.targetY)) {
-                        player.targetX = newX;
-                        player.isMoving = true;
-                        player.setDirection(76, 33, 48, 15, 32);
-                        player.startAnimation();
-                    }
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("S"), "move_down");
-        am.put("move_down", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    int newY = player.targetY + TILE_SIZE;
-                    if (player.isPositionWalkable(player.targetX, newY)) {
-                        player.targetY = newY;
-                        player.isMoving = true;
-                        player.setDirection(10, 35, 50, 14, 29);
-                        player.startAnimation();
-                    }
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("D"), "move_right");
-        am.put("move_right", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    int newX = player.targetX + TILE_SIZE;
-                    if (player.isPositionWalkable(newX, player.targetY)) {
-                        player.targetX = newX;
-                        player.isMoving = true;
-                        player.setDirection(140, 33, 48, 15, 32);
-                        player.startAnimation();
-                    }
-                }
-            }
-        });
+    public boolean isPaused() {
+        return isPaused;
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+    public boolean isStat() {
+        return isStat;
+    }
 
-        // Loop through the 64x64 array
+    public Player getPlayer() {
+        return player;
+    }
+
+    // Helper for menu navigation
+    public void navigateMenuUp() {
+        pauseOptionIndex = (pauseOptionIndex > 0) ? pauseOptionIndex - 1 : pauseOptions.length - 1;
+        repaint();
+    }
+
+    public void navigateMenuDown() {
+        pauseOptionIndex = (pauseOptionIndex < pauseOptions.length - 1) ? pauseOptionIndex + 1 : 0;
+        repaint();
+    }
+
+    public void togglePause() {
+        // If we are currently looking at Stats, Escape should go back to the Pause menu
+        if (isStat) {
+            isStat = false;
+            repaint();
+            return;
+        }
+
+        // Normal Pause/Unpause logic
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            timeManager.pause();
+        } else {
+            timeManager.resume();
+        }
+
+        pauseOptionIndex = 0; // Reset menu selection
+        repaint();
+    }
+
+    public void handlePauseSelection() {
+        // If we are currently looking at stats, ENTER should take us back
+        if (isStat) {
+            isStat = false;
+            repaint();
+            return;
+        }
+
+        if (pauseOptionIndex == 0)
+            togglePause(); // Resume
+        else if (pauseOptionIndex == 1)
+            System.out.println("Options...");
+        else if (pauseOptionIndex == 2) {
+            isStat = true; // Open Stats
+            repaint();
+        } else if (pauseOptionIndex == 3) {
+            isPaused = false;
+            isStat = false;
+            timeManager.pause();
+            cardLayout.show(container, "MENU");
+        }
+    }
+
+    public TimeManager getTimeManager() {
+        return timeManager;
+    }
+
+    public boolean getIsStat() {
+        return isStat;
+    }
+
+    public String[] getPauseOptions() {
+        return pauseOptions;
+    }
+
+    public int getPauseOptionIndex() {
+        return pauseOptionIndex;
+    }
+
+    public int getTileSize() {
+        return TILE_SIZE;
+    }
+
+    private void drawMap(Graphics2D g2d) {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
-
-                // For now, 0 = Green (Grass)
-                if (map[row][col] == 0) {
+                if (map[row][col] == 0)
                     g2d.setColor(new Color(34, 139, 34));
-                }
 
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
-
                 g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-                // Draw grid lines so you can see the tiles
                 g2d.setColor(new Color(0, 100, 0));
                 g2d.drawRect(x, y, TILE_SIZE, TILE_SIZE);
             }
@@ -154,8 +171,19 @@ public class GamePanel extends JPanel {
         if (trainer != null) {
             trainer.draw(g2d);
         }
-
-        // Draw Player
-        player.draw(g);
     }
+
+    private UIManager uiManager = new UIManager(this);
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        drawMap(g2d);
+        player.draw(g);
+
+        uiManager.draw(g2d);
+    }
+
 }
