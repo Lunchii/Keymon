@@ -42,6 +42,25 @@ public class GamePanel extends JPanel {
         timeManager.resume();
 
         // Inside GamePanel constructor
+        this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(java.awt.event.MouseEvent e) {
+                if (isPaused && !isStat) {
+                    handleMouseHover(e.getX(), e.getY());
+                }
+            }
+        });
+
+        this.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                if (isPaused) {
+                    handlePauseSelection(); // This already uses pauseOptionIndex
+                }
+            }
+        });
+
+        // Inside GamePanel constructor
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (player != null) {
@@ -143,6 +162,29 @@ public class GamePanel extends JPanel {
 
     public int getTileSize() {
         return TILE_SIZE;
+    }
+
+    private void handleMouseHover(int mouseX, int mouseY) {
+        int menuX = getWidth() / 2 - 100;
+        int menuWidth = 200; // Approximate width of your text area
+        int startY = 220; // Just above the first option
+        int optionHeight = 50;
+
+        // Check if mouse is within the horizontal bounds of the menu
+        if (mouseX >= menuX && mouseX <= menuX + menuWidth) {
+            for (int i = 0; i < pauseOptions.length; i++) {
+                int top = startY + (i * optionHeight);
+                int bottom = top + optionHeight;
+
+                if (mouseY >= top && mouseY <= bottom) {
+                    if (pauseOptionIndex != i) {
+                        pauseOptionIndex = i;
+                        repaint(); // Update the yellow highlight
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     private void drawMap(Graphics2D g2d) {

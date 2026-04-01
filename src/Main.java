@@ -20,7 +20,8 @@ public class Main {
         Player player = new Player(savedData[0], savedData[1], savedData[2], TILE_SIZE);
 
         mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
-        mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap(), trainer, loader.getTerrainObjects()), "PLAY GAME");
+        mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap(), trainer,
+                loader.getTerrainObjects()), "PLAY GAME");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

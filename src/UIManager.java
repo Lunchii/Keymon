@@ -18,7 +18,7 @@ public class UIManager {
             if (gp.isStat()) {
                 statsScreen.drawPlayerStat(g2d);
             } else {
-                pauseMenu.drawPaused(g2d);
+                pauseMenu.draw(g2d);
             }
         }
     }
