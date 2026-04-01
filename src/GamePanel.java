@@ -27,8 +27,9 @@ public class GamePanel extends JPanel {
     // Modified Constructor to accept data from Main.java (including static trainer
     // and terrain objects)
     // Addition: Added 'String username' to the parameter list
+    private Main mainApp;
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
-                     List<TerrainObjects> terrainObjects, String username) {
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player; // Use the player instance passed from Main.java
@@ -36,6 +37,7 @@ public class GamePanel extends JPanel {
         this.trainer = trainer;
         this.terrainObjects = terrainObjects;
         this.currentUsername = username; // Store the session username
+        this.mainApp = mainApp;
         this.player.setTerrainObjects(terrainObjects);
 
         this.setBackground(Color.BLACK);
@@ -140,12 +142,15 @@ public class GamePanel extends JPanel {
             isStat = true; // Open Stats
             repaint();
         } else if (pauseOptionIndex == 3) {
-            // Addition: Save game data before returning to the menu
-            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow());
+            // Save data including current level and high score (Need to pass these)
+            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1);
+
             isPaused = false;
             isStat = false;
             timeManager.pause();
-            cardLayout.show(container, "MENU");
+
+            // Modified: Return to PLAYER_SCREEN instead of MENU
+            mainApp.showPlayerScreen(currentUsername);
         }
     }
 

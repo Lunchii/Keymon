@@ -1,24 +1,35 @@
 import java.awt.*;
 
 public class StatsScreen {
-    private GamePanel gp;
+    // Modified: Using PlayerData and username instead of GamePanel
+    private SaveManager.PlayerData data;
+    private String username;
 
-    public StatsScreen(GamePanel gp) {
-        this.gp = gp;
+    public StatsScreen() {
+        // Constructor no longer requires GamePanel
     }
 
-    public void drawPlayerStat(Graphics2D g2d) {
+    // New method to update data before drawing
+    public void updateData(String username, SaveManager.PlayerData data) {
+        this.username = username;
+        this.data = data;
+    }
 
+    public void drawPlayerStat(Graphics2D g2d, int screenWidth, int screenHeight) {
+        // If data is null, provide default/empty data to prevent crash
+        if (data == null) return;
+
+        // Dark semi-transparent overlay
         g2d.setColor(new Color(0, 0, 0, 220));
-        g2d.fillRect(0, 0, gp.getWidth(), gp.getHeight());
+        g2d.fillRect(0, 0, screenWidth, screenHeight);
 
         int x = 200;
         int y = 200;
-        int w = gp.getWidth() / 3;
-        int h = gp.getHeight() / 3;
+        int w = screenWidth / 3;
+        int h = screenHeight / 3;
 
-        // 1. Draw player box
-        g2d.setColor(new Color(45, 52, 71)); // Dark blue-grey
+        // 1. Draw player box (Background)
+        g2d.setColor(new Color(45, 52, 71));
         g2d.fillRoundRect(x, y, w, h, 20, 20);
         g2d.setColor(Color.WHITE);
         g2d.setStroke(new BasicStroke(3));
@@ -29,27 +40,27 @@ public class StatsScreen {
         g2d.drawString("PLAYER STATS:", x + 30, y + 50);
         g2d.drawLine(x + 30, y + 60, x + 350, y + 60);
 
-        // 3. Stats Data
+        // 3. Stats Data (Modified to use real username)
         g2d.setFont(new Font("Monospaced", Font.PLAIN, 25));
-        g2d.drawString("NAME: ASH", x + 30, y + 110);
+        g2d.drawString("NAME: " + (username != null ? username.toUpperCase() : "N/A"), x + 30, y + 110);
 
         // HP Bar
         g2d.drawString("HP: ", x + 30, y + 160);
         g2d.setColor(Color.DARK_GRAY);
         g2d.fillRect(x + 100, y + 140, 200, 25);
-        g2d.setColor(new Color(114, 186, 158)); // Greenish
-        g2d.fillRect(x + 100, y + 140, 200, 25); // Set width to (currentHP/maxHP * 200)
+        g2d.setColor(new Color(114, 186, 158));
+        g2d.fillRect(x + 100, y + 140, 200, 25);
 
         // MP Bar
         g2d.setColor(Color.WHITE);
         g2d.drawString("MP: ", x + 30, y + 210);
         g2d.setColor(Color.DARK_GRAY);
         g2d.fillRect(x + 100, y + 190, 200, 25);
-        g2d.setColor(new Color(103, 146, 219)); // Blue
-        g2d.fillRect(x + 100, y + 190, 100, 25); // Example 50% fill
+        g2d.setColor(new Color(103, 146, 219));
+        g2d.fillRect(x + 100, y + 190, 100, 25);
 
-        // -- Top right -- //
-        int rx = x + 700; // Horizontal offset for right column
+        // -- Top right (Progress Box) -- //
+        int rx = x + 700;
         int rw = 400;
         int rh = 200;
 
@@ -63,10 +74,12 @@ public class StatsScreen {
         g2d.drawLine(rx + 30, y + 55, rx + 250, y + 55);
 
         g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("🕒 WPM:         75 WPM", rx + 30, y + 100);
-        g2d.drawString("🕒 TIME PLAYED: " + gp.getTimeManager().getFormattedTime(), rx + 30, y + 150);
+        // Using real highScore from SaveManager
+        g2d.drawString("🏆 BEST SCORE:  " + data.highScore, rx + 30, y + 100);
+        // Note: Real Time played needs a TimeManager save logic; showing Level for now
+        g2d.drawString("📍 LEVEL:        " + data.currentLevel, rx + 30, y + 150);
 
-        // -- Bottom Right -- //
+        // -- Bottom Right (Trainer Box) -- //
         int ry_bottom = y + 250;
         int rh_bottom = 250;
 
@@ -75,19 +88,12 @@ public class StatsScreen {
         g2d.setColor(Color.WHITE);
         g2d.drawRoundRect(rx, ry_bottom, rw, rh_bottom, 20, 20);
 
-        // Trainers Content
         g2d.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g2d.drawString("TRAINERS BEAT:", rx + 30, ry_bottom + 45);
+        g2d.drawString("TOTAL PROGRESS:", rx + 30, ry_bottom + 45);
 
-        // Big Centered Counter
         g2d.setFont(new Font("Monospaced", Font.BOLD, 50));
-        g2d.drawString("32 / 50", rx + 80, ry_bottom + 130);
+        g2d.drawString(data.currentLevel + " / 3", rx + 80, ry_bottom + 130);
         g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("TOTAL", rx + 160, ry_bottom + 160);
-
-        // -- Press Enter to go back label -- //
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Monospaced", Font.ITALIC, 20));
-        g2d.drawString("PRESS ENTER TO GO BACK", gp.getWidth() / 2 - 150, gp.getHeight() - 50);
+        g2d.drawString("STAGES", rx + 160, ry_bottom + 160);
     }
 }
