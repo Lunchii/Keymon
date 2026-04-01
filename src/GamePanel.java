@@ -1,11 +1,15 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+
 import javax.swing.*;
 
 public class GamePanel extends JPanel {
     private int[][] map;
     private Player player;
+    private Trainer trainer;
+    private List<TerrainObjects> terrainObjects;
     private final int TILE_SIZE = 32;
 
     private CardLayout cardLayout;
@@ -19,12 +23,17 @@ public class GamePanel extends JPanel {
 
     private TimeManager timeManager = new TimeManager(0);
 
-    // Modified Constructor to accept data from Main.java
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map) {
+    // Modified Constructor to accept data from Main.java (including static trainer
+    // and terrain objects)
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+            List<TerrainObjects> terrainObjects) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player; // Use the player instance passed from Main.java
         this.map = map;
+        this.trainer = trainer;
+        this.terrainObjects = terrainObjects;
+        this.player.setTerrainObjects(terrainObjects);
 
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
@@ -145,6 +154,18 @@ public class GamePanel extends JPanel {
                 g2d.setColor(new Color(0, 100, 0));
                 g2d.drawRect(x, y, TILE_SIZE, TILE_SIZE);
             }
+        }
+
+        // Draw Terrain Objects
+        if (terrainObjects != null) {
+            for (TerrainObjects obj : terrainObjects) {
+                obj.draw(g2d);
+            }
+        }
+
+        // Draw Trainer (static object)
+        if (trainer != null) {
+            trainer.draw(g2d);
         }
     }
 

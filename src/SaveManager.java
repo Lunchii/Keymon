@@ -16,9 +16,9 @@ public class SaveManager {
         PlayerData data = new PlayerData(x, y, row);
         try (FileWriter writer = new FileWriter(FILE_PATH)) {
             gson.toJson(data, writer);
-            System.out.println("成功保存进度到: " + FILE_PATH);
+            System.out.println("Save successful: " + FILE_PATH);
         } catch (IOException e) {
-            System.err.println("存档失败: " + e.getMessage());
+            System.err.println("Save failed: " + e.getMessage());
         }
     }
 

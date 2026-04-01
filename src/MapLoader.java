@@ -1,13 +1,18 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class MapLoader {
     private final int WIDTH = 64;
     private final int HEIGHT = 64;
     private int[][] worldMap;
+    private Trainer trainer;
+    private List<TerrainObjects> terrainObjects;
 
     public MapLoader(String filePath) {
         worldMap = new int[HEIGHT][WIDTH];
+        terrainObjects = new ArrayList<>();
         load(filePath);
     }
 
@@ -18,7 +23,18 @@ public class MapLoader {
                 String line = sc.nextLine();
                 String[] values = line.split(",");
                 for (int col = 0; col < values.length && col < WIDTH; col++) {
-                    worldMap[row][col] = Integer.parseInt(values[col].trim());
+                    int value = Integer.parseInt(values[col].trim());
+
+                    if (value == 8) {
+                        trainer = new Trainer(col * 32, row * 32, "trainerSprite.png");
+                        worldMap[row][col] = 0; // still draw grass under trainer
+                    } else if (value >= 1 && value <= 7) {
+                        // Terrain objects (trees, rocks, etc.)
+                        terrainObjects.add(new TerrainObjects(col, row, value));
+                        worldMap[row][col] = 0; // draw grass under terrain object
+                    } else {
+                        worldMap[row][col] = value;
+                    }
                 }
                 row++;
             }
@@ -29,5 +45,13 @@ public class MapLoader {
 
     public int[][] getWorldMap() {
         return worldMap;
+    }
+
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public List<TerrainObjects> getTerrainObjects() {
+        return terrainObjects;
     }
 }
