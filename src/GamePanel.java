@@ -141,6 +141,10 @@ public class GamePanel extends JPanel {
         return pauseOptionIndex;
     }
 
+    public int getTileSize() {
+        return TILE_SIZE;
+    }
+
     private void drawMap(Graphics2D g2d) {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {

@@ -28,7 +28,7 @@ public class InputHandler {
         am.put("move_up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!gp.isPaused() && !gp.getPlayer().isMoving) {
-                    int newY = gp.getPlayer().targetY - 32; // change to getTileSize()
+                    int newY = gp.getPlayer().targetY - gp.getTileSize(); // change to getTileSize()
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
                         gp.getPlayer().isMoving = true;
@@ -43,7 +43,7 @@ public class InputHandler {
         am.put("move_down", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!gp.isPaused() && !gp.getPlayer().isMoving) {
-                    int newY = gp.getPlayer().targetY + 32;
+                    int newY = gp.getPlayer().targetY + gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
                         gp.getPlayer().isMoving = true;
@@ -58,7 +58,7 @@ public class InputHandler {
         am.put("move_left", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!gp.isPaused() && !gp.getPlayer().isMoving) {
-                    int newX = gp.getPlayer().targetX - 32;
+                    int newX = gp.getPlayer().targetX - gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
                         gp.getPlayer().targetX = newX;
                         gp.getPlayer().isMoving = true;
@@ -73,7 +73,7 @@ public class InputHandler {
         am.put("move_right", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (!gp.isPaused() && !gp.getPlayer().isMoving) {
-                    int newX = gp.getPlayer().targetX + 32;
+                    int newX = gp.getPlayer().targetX + gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
                         gp.getPlayer().targetX = newX;
                         gp.getPlayer().isMoving = true;
