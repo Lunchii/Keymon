@@ -28,6 +28,8 @@ public class MapLoader {
                     if (value == 8) {
                         trainer = new Trainer(col * 32, row * 32, "trainerSprite.png");
                         worldMap[row][col] = 0; // still draw grass under trainer
+                    } else if (value == 5) {
+                        worldMap[row][col] = 5; // End tile, walkable finish
                     } else if (value >= 1 && value <= 7) {
                         // Terrain objects (trees, rocks, etc.)
                         terrainObjects.add(new TerrainObjects(col, row, value));

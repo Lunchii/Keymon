@@ -55,4 +55,12 @@ public class Trainer {
             g.drawImage(currentFrame, x, drawY, null);
         }
     }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
 }

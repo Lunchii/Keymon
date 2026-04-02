@@ -15,6 +15,9 @@ public class GamePanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel container;
     private String currentUsername; // Added to identify the user session
+    private boolean tutorialMode = false;
+    private boolean levelEnded = false;
+    private Point endTilePoint;
 
     private boolean isPaused = false;
     private int pauseOptionIndex = 0;
@@ -30,6 +33,11 @@ public class GamePanel extends JPanel {
     private Main mainApp;
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
+        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false);
+    }
+
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player; // Use the player instance passed from Main.java
@@ -38,7 +46,9 @@ public class GamePanel extends JPanel {
         this.terrainObjects = terrainObjects;
         this.currentUsername = username; // Store the session username
         this.mainApp = mainApp;
+        this.tutorialMode = tutorialMode;
         this.player.setTerrainObjects(terrainObjects);
+        this.endTilePoint = findEndTilePoint();
 
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
@@ -72,6 +82,7 @@ public class GamePanel extends JPanel {
                     if (isPaused)
                         return;
                     player.update(); // Move the player
+                    checkLevelEnd();
                 }
                 repaint(); // Redraw the screen
             }
@@ -142,15 +153,19 @@ public class GamePanel extends JPanel {
             isStat = true; // Open Stats
             repaint();
         } else if (pauseOptionIndex == 3) {
-            // Save data including current level and high score (Need to pass these)
-            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1);
+            if (!tutorialMode) {
+                SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1);
+            }
 
             isPaused = false;
             isStat = false;
             timeManager.pause();
 
-            // Modified: Return to PLAYER_SCREEN instead of MENU
-            mainApp.showPlayerScreen(currentUsername);
+            if (tutorialMode) {
+                mainApp.returnToMenu();
+            } else {
+                mainApp.showPlayerScreen(currentUsername);
+            }
         }
     }
 
@@ -197,11 +212,108 @@ public class GamePanel extends JPanel {
         }
     }
 
+    private void checkLevelEnd() {
+        if (levelEnded || player.isMoving)
+            return;
+
+        int col = player.x / TILE_SIZE;
+        int row = player.y / TILE_SIZE;
+        if (row < 0 || row >= map.length || col < 0 || col >= map[row].length)
+            return;
+
+        if (map[row][col] == 5) {
+            levelEnded = true;
+            timeManager.pause();
+            JOptionPane.showMessageDialog(this, "Level complete!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (tutorialMode) {
+                cardLayout.show(container, "TUTORIAL");
+            } else {
+                mainApp.showPlayerScreen(currentUsername);
+            }
+        }
+    }
+
+    private void drawTutorialBubbles(Graphics2D g2d) {
+        if (trainer != null) {
+            int bubbleX = trainer.getX() + 50;
+            int bubbleY = trainer.getY() - 60;
+            drawBubble(g2d, bubbleX, bubbleY, "This is a trainer. Walking in front of him will start a battle.");
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new BasicStroke(2));
+            int arrowX = trainer.getX() + 16;
+            int arrowY = trainer.getY() - 8;
+            g2d.drawLine(bubbleX + 20, bubbleY + 45, arrowX, arrowY);
+            g2d.drawLine(arrowX, arrowY, arrowX - 6, arrowY - 6);
+            g2d.drawLine(arrowX, arrowY, arrowX + 6, arrowY - 6);
+        }
+
+        if (endTilePoint != null) {
+            int bubbleX = endTilePoint.x + 60;
+            int bubbleY = endTilePoint.y - 40;
+            drawBubble(g2d, bubbleX, bubbleY, "This is an end tile. It ends the level.");
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new BasicStroke(2));
+            int arrowX = endTilePoint.x + TILE_SIZE / 2;
+            int arrowY = endTilePoint.y + TILE_SIZE / 2;
+            g2d.drawLine(bubbleX + 20, bubbleY + 35, arrowX, arrowY);
+            g2d.drawLine(arrowX, arrowY, arrowX - 6, arrowY - 6);
+            g2d.drawLine(arrowX, arrowY, arrowX + 6, arrowY - 6);
+        }
+    }
+
+    private void drawBubble(Graphics2D g2d, int x, int y, String text) {
+        int width = 300;
+        int height = 60;
+        g2d.setColor(new Color(0, 0, 0, 200));
+        g2d.fillRoundRect(x, y, width, height, 16, 16);
+        g2d.setColor(Color.WHITE);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRoundRect(x, y, width, height, 16, 16);
+
+        g2d.setFont(new Font("Arial", Font.BOLD, 12));
+        drawStringWrapped(g2d, text, x + 12, y + 18, width - 24, 16);
+    }
+
+    private void drawStringWrapped(Graphics2D g2d, String text, int x, int y, int maxWidth, int lineHeight) {
+        FontMetrics fm = g2d.getFontMetrics();
+        String[] words = text.split(" ");
+        String line = "";
+        for (String word : words) {
+            String test = line.isEmpty() ? word : line + " " + word;
+            if (fm.stringWidth(test) > maxWidth) {
+                g2d.drawString(line, x, y);
+                line = word;
+                y += lineHeight;
+            } else {
+                line = test;
+            }
+        }
+        if (!line.isEmpty()) {
+            g2d.drawString(line, x, y);
+        }
+    }
+
+    private Point findEndTilePoint() {
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
+                if (map[row][col] == 5) {
+                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
+                }
+            }
+        }
+        return null;
+    }
+
     private void drawMap(Graphics2D g2d) {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
-                if (map[row][col] == 0)
+                if (map[row][col] == 0) {
                     g2d.setColor(new Color(34, 139, 34));
+                } else if (map[row][col] == 5) {
+                    g2d.setColor(new Color(255, 215, 0));
+                } else {
+                    g2d.setColor(new Color(34, 139, 34));
+                }
 
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
@@ -234,6 +346,10 @@ public class GamePanel extends JPanel {
 
         drawMap(g2d);
         player.draw(g);
+
+        if (tutorialMode) {
+            drawTutorialBubbles(g2d);
+        }
 
         uiManager.draw(g2d);
     }
