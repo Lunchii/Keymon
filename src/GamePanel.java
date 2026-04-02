@@ -21,6 +21,7 @@ public class GamePanel extends JPanel {
     private BufferedImage tallGrassSprite;
     private boolean inBattle = false;
     private boolean showingPartyMenu = false;
+    private boolean showingBagMenu = false;
 
     // Trainer spotted overlay
     private boolean showSpottedMessage = false;
@@ -89,6 +90,17 @@ public class GamePanel extends JPanel {
         escBtn.addActionListener(e -> { togglePause(); this.requestFocusInWindow(); });
         this.add(escBtn);
 
+        JButton bagBtn = new JButton("BAG  [B]");
+        bagBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        bagBtn.setBackground(new Color(80, 55, 120));
+        bagBtn.setForeground(Color.WHITE);
+        bagBtn.setFocusPainted(false);
+        bagBtn.setBorderPainted(false);
+        bagBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        bagBtn.setBounds(290, 10, 130, 34);
+        bagBtn.addActionListener(e -> { toggleBagMenu(); this.requestFocusInWindow(); });
+        this.add(bagBtn);
+
         new InputHandler(this);
         timeManager.resume();
 
@@ -155,9 +167,17 @@ public class GamePanel extends JPanel {
     // ── Party menu ──────────────────────────────────────────────────────────
 
     public boolean isShowingPartyMenu() { return showingPartyMenu; }
+    public boolean isShowingBagMenu() { return showingBagMenu; }
 
     public void togglePartyMenu() {
+        if (!showingPartyMenu) showingBagMenu = false;
         showingPartyMenu = !showingPartyMenu;
+        repaint();
+    }
+
+    public void toggleBagMenu() {
+        if (!showingBagMenu) showingPartyMenu = false;
+        showingBagMenu = !showingBagMenu;
         repaint();
     }
 
@@ -313,6 +333,7 @@ public class GamePanel extends JPanel {
 
         // Draw party overlay if open
         if (showingPartyMenu) drawPartyOverlay(g2d);
+        if (showingBagMenu) drawBagOverlay(g2d);
 
         // Draw trainer spotted overlay
         if (showSpottedMessage) drawSpottedOverlay(g2d);
@@ -428,6 +449,58 @@ public class GamePanel extends JPanel {
                 g2.setColor(new Color(80, 120, 90));
                 g2.drawString("Empty", sx + 100, sy + 55);
             }
+        }
+    }
+
+    private void drawBagOverlay(Graphics2D g2) {
+        int w = getWidth();
+        int h = getHeight();
+
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, w, h);
+
+        int panelW = 560, panelH = 340;
+        int panelX = (w - panelW) / 2;
+        int panelY = (h - panelH) / 2;
+
+        g2.setColor(new Color(30, 20, 55, 240));
+        g2.fillRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+        g2.setColor(new Color(170, 140, 220));
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+
+        g2.setFont(new Font("SansSerif", Font.BOLD, 20));
+        g2.setColor(Color.WHITE);
+        g2.drawString("ITEM BAG  (B to close)", panelX + 20, panelY + 32);
+
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        g2.setColor(new Color(215, 205, 235));
+        g2.drawString("Items are used during battles. This screen shows what you have available.", panelX + 20, panelY + 54);
+
+        int cardX = panelX + 20;
+        int cardY = panelY + 76;
+        int cardW = panelW - 40;
+        int cardH = 52;
+        int gap = 12;
+
+        Item[] items = Item.values();
+        for (int i = 0; i < items.length; i++) {
+            Item item = items[i];
+            int y = cardY + i * (cardH + gap);
+            int count = itemBag.getCount(item);
+
+            g2.setColor(item.color.darker());
+            g2.fillRoundRect(cardX, y, cardW, cardH, 14, 14);
+            g2.setColor(new Color(255, 255, 255, 90));
+            g2.drawRoundRect(cardX, y, cardW, cardH, 14, 14);
+
+            g2.setFont(new Font("SansSerif", Font.BOLD, 16));
+            g2.setColor(Color.WHITE);
+            g2.drawString(item.displayName + "  x" + count, cardX + 16, y + 22);
+
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            g2.setColor(new Color(240, 240, 240));
+            g2.drawString(item.description, cardX + 16, y + 40);
         }
     }
 }

@@ -100,6 +100,17 @@ public class InputHandler {
             }
         });
 
+        im.put(KeyStroke.getKeyStroke("B"), "bag_menu");
+        am.put("bag_menu", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (!gp.isPaused() && !gp.isInBattle() && !gp.isShowingBagMenu()) {
+                    gp.toggleBagMenu();
+                } else if (gp.isShowingBagMenu()) {
+                    gp.toggleBagMenu();
+                }
+            }
+        });
+
         // ENTER (Select Pause Option)
         im.put(KeyStroke.getKeyStroke("ENTER"), "pause_select");
         am.put("pause_select", new AbstractAction() {
