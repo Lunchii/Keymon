@@ -33,6 +33,7 @@ public class GamePanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel container;
     private String currentUsername;
+    private Main mainApp;
 
     private boolean isPaused = false;
     private int pauseOptionIndex = 0;
@@ -41,7 +42,7 @@ public class GamePanel extends JPanel {
     private TimeManager timeManager = new TimeManager(0);
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
-                     List<TerrainObjects> terrainObjects, String username) {
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player;
@@ -49,6 +50,7 @@ public class GamePanel extends JPanel {
         this.trainer = trainer;
         this.terrainObjects = terrainObjects;
         this.currentUsername = username;
+        this.mainApp = mainApp;
         this.player.setTerrainObjects(terrainObjects);
 
         try {
@@ -222,15 +224,19 @@ public class GamePanel extends JPanel {
 
     public void handlePauseSelection() {
         if (isStat) { isStat = false; repaint(); return; }
-        if (pauseOptionIndex == 0) togglePause();
-        else if (pauseOptionIndex == 1) System.out.println("Options...");
-        else if (pauseOptionIndex == 2) { isStat = true; repaint(); }
-        else if (pauseOptionIndex == 3) {
-            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), party);
+        if (pauseOptionIndex == 0) {
+            togglePause();
+        } else if (pauseOptionIndex == 1) {
+            System.out.println("Options...");
+        } else if (pauseOptionIndex == 2) {
+            isStat = true;
+            repaint();
+        } else if (pauseOptionIndex == 3) {
+            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1, party);
             isPaused = false;
             isStat = false;
             timeManager.pause();
-            cardLayout.show(container, "MENU");
+            mainApp.showPlayerScreen(currentUsername);
         }
     }
 
