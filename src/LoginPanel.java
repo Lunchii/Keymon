@@ -65,7 +65,7 @@ public class LoginPanel extends JPanel {
         loginBtn.addActionListener(e -> {
             String username = usernameField.getText().trim();
             if (!username.isEmpty()) {
-                mainApp.startGame(username);
+                mainApp.showPlayerScreen(username);
             } else {
                 JOptionPane.showMessageDialog(this, "A Trainer needs a name!");
             }

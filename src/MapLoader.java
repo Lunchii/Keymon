@@ -38,6 +38,17 @@ public class MapLoader {
                 }
                 row++;
             }
+
+            // Simple diagnostic: count how many encounter tiles (value 1) we loaded
+            int tallGrassCount = 0;
+            for (int r = 0; r < HEIGHT; r++) {
+                for (int c = 0; c < WIDTH; c++) {
+                    if (worldMap[r][c] == 1) {
+                        tallGrassCount++;
+                    }
+                }
+            }
+            System.out.println("MapLoader: loaded " + tallGrassCount + " encounter tiles (value 1).");
         } catch (FileNotFoundException e) {
             System.out.println("Error: Could not find map.csv in project folder!");
         }
