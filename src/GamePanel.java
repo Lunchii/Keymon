@@ -29,6 +29,9 @@ public class GamePanel extends JPanel {
     private List<Pokemon> party = new ArrayList<>();
     private int activePartyIndex = 0;
 
+    // Item bag
+    private ItemBag itemBag = ItemBag.starterBag();
+
     // Added for screen switching and saving
     private CardLayout cardLayout;
     private JPanel container;
@@ -74,6 +77,17 @@ public class GamePanel extends JPanel {
         partyBtn.setBounds(10, 10, 130, 34);
         partyBtn.addActionListener(e -> { togglePartyMenu(); this.requestFocusInWindow(); });
         this.add(partyBtn);
+
+        JButton escBtn = new JButton("MENU  [ESC]");
+        escBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        escBtn.setBackground(new Color(70, 50, 20));
+        escBtn.setForeground(Color.WHITE);
+        escBtn.setFocusPainted(false);
+        escBtn.setBorderPainted(false);
+        escBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        escBtn.setBounds(150, 10, 130, 34);
+        escBtn.addActionListener(e -> { togglePause(); this.requestFocusInWindow(); });
+        this.add(escBtn);
 
         new InputHandler(this);
         timeManager.resume();
@@ -131,6 +145,8 @@ public class GamePanel extends JPanel {
     }
 
     public int getActivePartyIndex() { return activePartyIndex; }
+
+    public ItemBag getItemBag() { return itemBag; }
 
     public void setActivePartyIndex(int i) {
         if (i >= 0 && i < party.size()) activePartyIndex = i;

@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.util.List;
-
 import javax.swing.*;
 
 public class BattlePanel extends JPanel {
@@ -40,18 +39,27 @@ public class BattlePanel extends JPanel {
     private Timer turnTimer;
     private Timer preTimer;
 
+    // Item state
+    private boolean attackBoostActive = false;
+    private int pendingBonusSeconds = 0;
+
     // Swing components
     private JTextField inputField;
     private JLabel messageLabel;
     private JLabel timerLabel;
     private JLabel feedbackLabel;
     private JButton attackButton;
+    private JButton bagButton;
     private JButton switchButton;
     private JButton runButton;
 
-    // Switch overlay buttons (up to 6 party slots)
+    // Switch overlay
     private JPanel switchOverlay;
     private JButton[] switchSlots = new JButton[6];
+
+    // Bag overlay
+    private JPanel bagOverlay;
+    private JButton[] itemButtons = new JButton[Item.values().length];
 
     public BattlePanel(CardLayout layout, JPanel container, GamePanel gamePanel,
                        Pokemon wildPokemon, List<Pokemon> party) {
@@ -91,6 +99,10 @@ public class BattlePanel extends JPanel {
         attackButton.addActionListener(e -> startPlayerTurn());
         add(attackButton);
 
+        bagButton = battleBtn("🎒  BAG", new Color(130, 80, 160));
+        bagButton.addActionListener(e -> openBagMenu());
+        add(bagButton);
+
         switchButton = battleBtn("↔  SWITCH", new Color(80, 130, 80));
         switchButton.addActionListener(e -> openSwitchMenu(false));
         add(switchButton);
@@ -123,6 +135,37 @@ public class BattlePanel extends JPanel {
             switchSlots[i].addActionListener(e -> selectSwitch(idx));
             switchOverlay.add(switchSlots[i]);
         }
+
+        // Bag overlay
+        bagOverlay = new JPanel(null);
+        bagOverlay.setBackground(new Color(20, 10, 40, 235));
+        bagOverlay.setVisible(false);
+        add(bagOverlay);
+
+        JLabel bagTitle = new JLabel("Use an item  (costs your turn):");
+        bagTitle.setForeground(Color.WHITE);
+        bagTitle.setFont(new Font("SansSerif", Font.BOLD, 15));
+        bagTitle.setBounds(10, 6, 340, 22);
+        bagOverlay.add(bagTitle);
+
+        Item[] items = Item.values();
+        for (int i = 0; i < items.length; i++) {
+            final Item item = items[i];
+            JButton btn = new JButton();
+            btn.setFont(new Font("SansSerif", Font.BOLD, 12));
+            btn.setForeground(Color.WHITE);
+            btn.setBackground(item.color.darker());
+            btn.setFocusPainted(false);
+            btn.setBorderPainted(false);
+            btn.addActionListener(e -> useItem(item));
+            itemButtons[i] = btn;
+            bagOverlay.add(btn);
+        }
+
+        JButton closeBagBtn = battleBtn("✕  BACK", new Color(80, 80, 80));
+        closeBagBtn.setBounds(10, 130, 100, 26);
+        closeBagBtn.addActionListener(e -> { bagOverlay.setVisible(false); showMenu(); });
+        bagOverlay.add(closeBagBtn);
     }
 
     private JLabel label(String text, int style, int size) {
@@ -154,7 +197,9 @@ public class BattlePanel extends JPanel {
         feedbackLabel.setText(" ");
         inputField.setVisible(false);
         switchOverlay.setVisible(false);
+        bagOverlay.setVisible(false);
         attackButton.setVisible(true);
+        bagButton.setVisible(true);
         switchButton.setVisible(hasSwitchOption());
         runButton.setVisible(true);
     }
@@ -170,7 +215,8 @@ public class BattlePanel extends JPanel {
     private void startPlayerTurn() {
         phase = Phase.COUNTDOWN;
         correctWordsThisTurn = 0;
-        secondsLeft = 10;
+        secondsLeft = 10 + pendingBonusSeconds;
+        pendingBonusSeconds = 0;
         preCountdown = 3;
         hideActionButtons();
         inputField.setEnabled(false);
@@ -234,9 +280,14 @@ public class BattlePanel extends JPanel {
         inputField.setVisible(false);
         Pokemon active = party.get(gamePanel.getActivePartyIndex());
         int damage = correctWordsThisTurn * active.attack;
+        boolean boosted = attackBoostActive;
+        if (attackBoostActive) { damage *= 2; attackBoostActive = false; }
         wildPokemon.currentHp = Math.max(0, wildPokemon.currentHp - damage);
         feedbackLabel.setForeground(Color.WHITE);
-        feedbackLabel.setText(damage > 0 ? "You hit " + wildPokemon.name + " for " + damage + " damage!" : "You missed every word…");
+        String dmgText = damage > 0
+            ? "You hit " + wildPokemon.name + " for " + damage + " damage!" + (boosted ? " (BOOSTED)" : "")
+            : "You missed every word…";
+        feedbackLabel.setText(dmgText);
         timerLabel.setText(" ");
         repaint();
 
@@ -368,8 +419,68 @@ public class BattlePanel extends JPanel {
         }).start();
     }
 
+    // ── BAG ───────────────────────────────────────────────────────────────────
+
+    private void openBagMenu() {
+        hideActionButtons();
+        // Refresh item button labels with current counts
+        ItemBag bag = gamePanel.getItemBag();
+        Item[] items = Item.values();
+        for (int i = 0; i < items.length; i++) {
+            int count = bag.getCount(items[i]);
+            itemButtons[i].setText(items[i].displayName + "  x" + count + "   " + items[i].description);
+            itemButtons[i].setEnabled(count > 0);
+            itemButtons[i].setBackground(count > 0 ? items[i].color.darker() : new Color(50, 50, 50));
+        }
+        bagOverlay.setVisible(true);
+        repaint();
+    }
+
+    private void useItem(Item item) {
+        ItemBag bag = gamePanel.getItemBag();
+        if (!bag.use(item)) return;
+
+        Pokemon active = party.get(gamePanel.getActivePartyIndex());
+        String effect;
+
+        switch (item) {
+            case POTION: {
+                int heal = Math.min(30, active.maxHp - active.currentHp);
+                active.currentHp += heal;
+                effect = active.name + " recovered " + heal + " HP!";
+                break;
+            }
+            case FULL_HEAL: {
+                active.currentHp = active.maxHp;
+                effect = active.name + " was fully restored!";
+                break;
+            }
+            case ATTACK_BOOST: {
+                attackBoostActive = true;
+                effect = active.name + "'s next attack is doubled!";
+                break;
+            }
+            case SLOW_TIME: {
+                pendingBonusSeconds += 5;
+                effect = "Next attack turn will have 5 extra seconds!";
+                break;
+            }
+            default:
+                effect = "Used " + item.displayName + "!";
+        }
+
+        bagOverlay.setVisible(false);
+        feedbackLabel.setForeground(new Color(255, 220, 100));
+        feedbackLabel.setText(effect);
+        repaint();
+
+        // Using an item costs the player's turn
+        new Timer(900, e -> { ((Timer) e.getSource()).stop(); startEnemyTurn(); }).start();
+    }
+
     private void hideActionButtons() {
         attackButton.setVisible(false);
+        bagButton.setVisible(false);
         switchButton.setVisible(false);
         runButton.setVisible(false);
     }
@@ -437,20 +548,29 @@ public class BattlePanel extends JPanel {
         inputField.setBounds(45, row2Y, btnX - 80, 36);
         feedbackLabel.setBounds(45, row3Y, btnX - 60, 26);
 
-        // Three action buttons stacked in right column
-        int bh = 36, bgap = 8;
-        attackButton.setBounds(btnX, boxY + 14,                160, bh);
-        switchButton.setBounds(btnX, boxY + 14 + bh + bgap,   160, bh);
-        runButton.setBounds(   btnX, boxY + 14 + 2*(bh+bgap), 160, bh);
+        // Four action buttons stacked in right column
+        int bh = 32, bgap = 6;
+        attackButton.setBounds(btnX, boxY + 10,                160, bh);
+        bagButton.setBounds(   btnX, boxY + 10 +   (bh+bgap), 160, bh);
+        switchButton.setBounds(btnX, boxY + 10 + 2*(bh+bgap), 160, bh);
+        runButton.setBounds(   btnX, boxY + 10 + 3*(bh+bgap), 160, bh);
 
         // Switch overlay (positioned over battle box, left side)
-        switchOverlay.setBounds(30, boxY + 8, btnX - 50, 160);
-        // Layout slots inside overlay
+        int overlayW = btnX - 50;
+        switchOverlay.setBounds(30, boxY + 8, overlayW, 160);
         int slotH = 28, slotGap = 3;
         for (int i = 0; i < 6; i++) {
             int col = i % 2, row = i / 2;
-            int sw = (switchOverlay.getWidth() - 15) / 2;
+            int sw = (overlayW - 15) / 2;
             switchSlots[i].setBounds(5 + col * (sw + 5), 36 + row * (slotH + slotGap), sw, slotH);
+        }
+
+        // Bag overlay (positioned over battle box, left side)
+        bagOverlay.setBounds(30, boxY + 8, overlayW, 162);
+        int itemBtnH = 26, itemBtnGap = 4;
+        Item[] bagItems = Item.values();
+        for (int i = 0; i < bagItems.length; i++) {
+            itemButtons[i].setBounds(5, 32 + i * (itemBtnH + itemBtnGap), overlayW - 10, itemBtnH);
         }
     }
 
