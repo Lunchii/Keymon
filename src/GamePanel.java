@@ -49,6 +49,7 @@ public class GamePanel extends JPanel {
     private String[] pauseOptions = { "RESUME", "OPTIONS", "STATS", "QUIT TO MENU" };
     private boolean isStat = false;
     private TimeManager timeManager = new TimeManager(0);
+    private UIManager uiManager;
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
@@ -122,6 +123,7 @@ public class GamePanel extends JPanel {
 
         new InputHandler(this);
         timeManager.resume();
+        uiManager = new UIManager(this);
 
         this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
@@ -476,6 +478,20 @@ public class GamePanel extends JPanel {
             }
         }
         return null;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            drawMap(g2d);
+            if (tutorialMode) {
+                drawTutorialBubbles(g2d);
+            }
+        } finally {
+            g2d.dispose();
+        }
     }
 
     private void drawMap(Graphics2D g2d) {
