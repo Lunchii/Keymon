@@ -1,9 +1,12 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GamePanel extends JPanel {
@@ -15,173 +18,190 @@ public class GamePanel extends JPanel {
     private int lastTileRow = -1;
     private int lastTileCol = -1;
     private final Random random = new Random();
+    private BufferedImage tallGrassSprite;
+    private boolean inBattle = false;
+    private boolean showingPartyMenu = false;
+
+    // Trainer spotted overlay
+    private boolean showSpottedMessage = false;
+
+    // Party
+    private List<Pokemon> party = new ArrayList<>();
+    private int activePartyIndex = 0;
+
     // Added for screen switching and saving
     private CardLayout cardLayout;
     private JPanel container;
-    private String currentUsername; // Added to identify the user session
+    private String currentUsername;
 
     private boolean isPaused = false;
     private int pauseOptionIndex = 0;
     private String[] pauseOptions = { "RESUME", "OPTIONS", "STATS", "QUIT TO MENU" };
-
     private boolean isStat = false;
-
     private TimeManager timeManager = new TimeManager(0);
 
-    // Modified Constructor to accept data from Main.java (including static trainer
-    // and terrain objects)
-    // Addition: Added 'String username' to the parameter list
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username) {
         this.cardLayout = layout;
         this.container = container;
-        this.player = player; // Use the player instance passed from Main.java
+        this.player = player;
         this.map = map;
         this.trainer = trainer;
         this.terrainObjects = terrainObjects;
-        this.currentUsername = username; // Store the session username
+        this.currentUsername = username;
         this.player.setTerrainObjects(terrainObjects);
+
+        try {
+            tallGrassSprite = ImageIO.read(new File("tall_grass.png"));
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load tall_grass.png");
+        }
 
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
+        this.setLayout(null);
+
+        // Party button — always visible in top-right corner
+        JButton partyBtn = new JButton("PARTY  [P]");
+        partyBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        partyBtn.setBackground(new Color(30, 90, 50));
+        partyBtn.setForeground(Color.WHITE);
+        partyBtn.setFocusPainted(false);
+        partyBtn.setBorderPainted(false);
+        partyBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        partyBtn.setBounds(10, 10, 130, 34);
+        partyBtn.addActionListener(e -> { togglePartyMenu(); this.requestFocusInWindow(); });
+        this.add(partyBtn);
 
         new InputHandler(this);
         timeManager.resume();
 
-        // Inside GamePanel constructor
         this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
             public void mouseMoved(java.awt.event.MouseEvent e) {
-                if (isPaused && !isStat) {
-                    handleMouseHover(e.getX(), e.getY());
-                }
+                if (isPaused && !isStat) handleMouseHover(e.getX(), e.getY());
             }
         });
 
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
-                if (isPaused) {
-                    handlePauseSelection(); // This already uses pauseOptionIndex
-                }
+                if (isPaused) handlePauseSelection();
             }
         });
 
-        // Inside GamePanel constructor
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (player != null) {
-                    if (isPaused)
-                        return;
-                    player.update(); // Move the player
+                    if (isPaused) return;
+                    player.update();
 
-                    // Check for entering tall grass when player finishes moving to a new tile
                     if (!player.isMoving) {
                         int currentCol = player.x / TILE_SIZE;
                         int currentRow = player.y / TILE_SIZE;
 
                         if (currentRow >= 0 && currentRow < map.length &&
                             currentCol >= 0 && currentCol < map[0].length) {
-
                             if (currentRow != lastTileRow || currentCol != lastTileCol) {
                                 lastTileRow = currentRow;
                                 lastTileCol = currentCol;
-
-                                // Prototype: every tile has a chance for an encounter
                                 maybeStartBattle();
+                                GamePanel.this.checkTrainerLoS(currentCol, currentRow);
                             }
                         }
                     }
                 }
-                repaint(); // Redraw the screen
+                repaint();
             }
         };
 
-        // 16ms delay = ~60 frames per second
         Timer timer = new Timer(16, taskPerformer);
         timer.start();
     }
 
-    // Simple prototype typing battle triggered when stepping on a new tile
+    // ── Party ───────────────────────────────────────────────────────────────
+
+    public List<Pokemon> getParty() { return party; }
+
+    public void setParty(List<Pokemon> party) {
+        this.party = party;
+        activePartyIndex = 0;
+    }
+
+    public int getActivePartyIndex() { return activePartyIndex; }
+
+    public void setActivePartyIndex(int i) {
+        if (i >= 0 && i < party.size()) activePartyIndex = i;
+    }
+
+    // ── Party menu ──────────────────────────────────────────────────────────
+
+    public boolean isShowingPartyMenu() { return showingPartyMenu; }
+
+    public void togglePartyMenu() {
+        showingPartyMenu = !showingPartyMenu;
+        repaint();
+    }
+
+    // ── Trainer line-of-sight ────────────────────────────────────────────────
+
+    private void checkTrainerLoS(int playerCol, int playerRow) {
+        if (trainer == null || inBattle) return;
+        if (!trainer.canSeePlayer(playerCol, playerRow)) return;
+
+        inBattle = true;
+        showSpottedMessage = true;
+        repaint();
+
+        // Show "spotted" message for 1.5s then start battle
+        new javax.swing.Timer(1500, e -> {
+            ((javax.swing.Timer) e.getSource()).stop();
+            showSpottedMessage = false;
+            List<Pokemon> trainerTeam = trainer.getTeam();
+            BattlePanel battle = new BattlePanel(cardLayout, container, this,
+                    trainerTeam.get(0), party);
+            battle.setTrainerBattle(trainerTeam);
+            container.add(battle, "BATTLE");
+            cardLayout.show(container, "BATTLE");
+            battle.requestFocusInWindow();
+        }).start();
+    }
+
+    public void onTrainerDefeated() {
+        if (trainer != null) trainer.setDefeated(true);
+    }
+
+    // ── Battle trigger ──────────────────────────────────────────────────────
+
     private void maybeStartBattle() {
-        // 20% chance to start a battle each time you step into tall grass
-        if (random.nextDouble() > 0.2) {
-            return;
-        }
+        int col = player.x / TILE_SIZE;
+        int row = player.y / TILE_SIZE;
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) return;
+        if (map[row][col] != 9) return;
+        if (random.nextDouble() > 0.2) return;
+        if (party.isEmpty()) return; // need a Pokemon to battle
 
-        String[] words = {"keyboard", "typing", "monster", "learning", "practice",
-                          "accuracy", "student", "teacher", "dragon", "forest"};
-        String target = words[random.nextInt(words.length)];
-
-        // Switch to a dedicated battle screen that looks like a Pokémon battle
-        BattlePanel battle = new BattlePanel(cardLayout, container, this, target);
+        inBattle = true;
+        Pokemon wild = Pokemon.random();
+        BattlePanel battle = new BattlePanel(cardLayout, container, this, wild, party);
         container.add(battle, "BATTLE");
         cardLayout.show(container, "BATTLE");
+        battle.requestFocusInWindow();
     }
 
-    private void setupInputs() {
-        InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
-        ActionMap am = getActionMap();
+    // ── State getters/setters ───────────────────────────────────────────────
 
-        im.put(KeyStroke.getKeyStroke("W"), "move_up");
-        am.put("move_up", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetY -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(200, 35, 52, 14, 29);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("A"), "move_left");
-        am.put("move_left", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetX -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(76, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("S"), "move_down");
-        am.put("move_down", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetY += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(10, 35, 50, 14, 29);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("D"), "move_right");
-        am.put("move_right", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetX += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(140, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-    }
+    public boolean isPaused()    { return isPaused; }
+    public boolean isInBattle()  { return inBattle; }
+    public void setInBattle(boolean b) { inBattle = b; }
+    public boolean isStat()      { return isStat; }
+    public Player getPlayer()    { return player; }
+    public int getTileSize()     { return TILE_SIZE; }
+    public String[] getPauseOptions()  { return pauseOptions; }
+    public int getPauseOptionIndex()   { return pauseOptionIndex; }
+    public TimeManager getTimeManager(){ return timeManager; }
+    public boolean getIsStat()   { return isStat; }
 
-    public boolean isPaused() {
-        return isPaused;
-    }
-
-    public boolean isStat() {
-        return isStat;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    // Helper for menu navigation
     public void navigateMenuUp() {
         pauseOptionIndex = (pauseOptionIndex > 0) ? pauseOptionIndex - 1 : pauseOptions.length - 1;
         repaint();
@@ -193,44 +213,20 @@ public class GamePanel extends JPanel {
     }
 
     public void togglePause() {
-        // If we are currently looking at Stats, Escape should go back to the Pause menu
-        if (isStat) {
-            isStat = false;
-            repaint();
-            return;
-        }
-
-        // Normal Pause/Unpause logic
+        if (isStat) { isStat = false; repaint(); return; }
         isPaused = !isPaused;
-
-        if (isPaused) {
-            timeManager.pause();
-        } else {
-            timeManager.resume();
-        }
-
-        pauseOptionIndex = 0; // Reset menu selection
+        if (isPaused) timeManager.pause(); else timeManager.resume();
+        pauseOptionIndex = 0;
         repaint();
     }
 
     public void handlePauseSelection() {
-        // If we are currently looking at stats, ENTER should take us back
-        if (isStat) {
-            isStat = false;
-            repaint();
-            return;
-        }
-
-        if (pauseOptionIndex == 0)
-            togglePause(); // Resume
-        else if (pauseOptionIndex == 1)
-            System.out.println("Options...");
-        else if (pauseOptionIndex == 2) {
-            isStat = true; // Open Stats
-            repaint();
-        } else if (pauseOptionIndex == 3) {
-            // Addition: Save game data before returning to the menu
-            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow());
+        if (isStat) { isStat = false; repaint(); return; }
+        if (pauseOptionIndex == 0) togglePause();
+        else if (pauseOptionIndex == 1) System.out.println("Options...");
+        else if (pauseOptionIndex == 2) { isStat = true; repaint(); }
+        else if (pauseOptionIndex == 3) {
+            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), party);
             isPaused = false;
             isStat = false;
             timeManager.pause();
@@ -238,114 +234,178 @@ public class GamePanel extends JPanel {
         }
     }
 
-    public TimeManager getTimeManager() {
-        return timeManager;
-    }
-
-    public boolean getIsStat() {
-        return isStat;
-    }
-
-    public String[] getPauseOptions() {
-        return pauseOptions;
-    }
-
-    public int getPauseOptionIndex() {
-        return pauseOptionIndex;
-    }
-
-    public int getTileSize() {
-        return TILE_SIZE;
-    }
-
     private void handleMouseHover(int mouseX, int mouseY) {
         int menuX = getWidth() / 2 - 100;
-        int menuWidth = 200; // Approximate width of your text area
-        int startY = 220; // Just above the first option
+        int menuWidth = 200;
+        int startY = 220;
         int optionHeight = 50;
-
-        // Check if mouse is within the horizontal bounds of the menu
         if (mouseX >= menuX && mouseX <= menuX + menuWidth) {
             for (int i = 0; i < pauseOptions.length; i++) {
                 int top = startY + (i * optionHeight);
                 int bottom = top + optionHeight;
-
                 if (mouseY >= top && mouseY <= bottom) {
-                    if (pauseOptionIndex != i) {
-                        pauseOptionIndex = i;
-                        repaint(); // Update the yellow highlight
-                    }
+                    if (pauseOptionIndex != i) { pauseOptionIndex = i; repaint(); }
                     return;
                 }
             }
         }
     }
 
-    private void drawMap(Graphics2D g2d) {
-        for (int row = 0; row < map.length; row++) {
-            for (int col = 0; col < map[row].length; col++) {
-                if (map[row][col] == 0)
-                    g2d.setColor(new Color(34, 139, 34));
-
-                int x = col * TILE_SIZE;
-                int y = row * TILE_SIZE;
-                g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-
-                g2d.setColor(new Color(0, 100, 0));
-                g2d.drawRect(x, y, TILE_SIZE, TILE_SIZE);
-            }
-        }
-
-        // Draw Terrain Objects
-        if (terrainObjects != null) {
-            for (TerrainObjects obj : terrainObjects) {
-                obj.draw(g2d);
-            }
-        }
-
-        // Draw Trainer (static object)
-        if (trainer != null) {
-            trainer.draw(g2d);
-        }
-    }
-
     private UIManager uiManager = new UIManager(this);
+
+    // ── Painting ─────────────────────────────────────────────────────────────
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Loop through the 64x64 array
+        // Draw map tiles
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
-
                 int tile = map[row][col];
-
-                // 0 = regular grass (lighter), 1 = encounter grass (yellow)
-                if (tile == 0) {
-                    g2d.setColor(new Color(60, 170, 60));
-                } else if (tile == 1) {
-                    g2d.setColor(new Color(230, 230, 80)); // yellow patch where monsters may appear
-                } else {
-                    g2d.setColor(new Color(60, 170, 60));
-                }
-
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
 
+                g2d.setColor(new Color(60, 170, 60));
                 g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-                // Draw grid lines so you can see the tiles
+                if (tile == 9 && tallGrassSprite != null) {
+                    g2d.drawImage(tallGrassSprite, x, y, TILE_SIZE, TILE_SIZE, null);
+                }
+
                 g2d.setColor(new Color(0, 100, 0));
                 g2d.drawRect(x, y, TILE_SIZE, TILE_SIZE);
             }
         }
 
-        // Draw Player
-        player.draw(g);
+        // Draw terrain objects and trainer
+        if (terrainObjects != null)
+            for (TerrainObjects obj : terrainObjects) obj.draw(g2d);
+        if (trainer != null)
+            trainer.draw(g2d);
 
+        player.draw(g);
         uiManager.draw(g2d);
+
+        // Draw party overlay if open
+        if (showingPartyMenu) drawPartyOverlay(g2d);
+
+        // Draw trainer spotted overlay
+        if (showSpottedMessage) drawSpottedOverlay(g2d);
     }
 
+    private void drawSpottedOverlay(Graphics2D g2) {
+        int w = getWidth(), h = getHeight();
+        g2.setColor(new Color(0, 0, 0, 160));
+        g2.fillRect(0, 0, w, h);
+
+        // Exclamation box
+        int bw = 340, bh = 80;
+        int bx = (w - bw) / 2, by = h / 2 - 60;
+        g2.setColor(new Color(220, 60, 60));
+        g2.fillRoundRect(bx, by, bw, bh, 16, 16);
+        g2.setColor(Color.WHITE);
+        g2.setStroke(new BasicStroke(3f));
+        g2.drawRoundRect(bx, by, bw, bh, 16, 16);
+
+        g2.setFont(new Font("SansSerif", Font.BOLD, 28));
+        FontMetrics fm = g2.getFontMetrics();
+        String line1 = "! A Trainer spotted you !";
+        g2.drawString(line1, bx + (bw - fm.stringWidth(line1)) / 2, by + 50);
+
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        fm = g2.getFontMetrics();
+        String line2 = "Prepare for battle!";
+        g2.setColor(new Color(255, 220, 220));
+        g2.drawString(line2, bx + (bw - fm.stringWidth(line2)) / 2, by + bh + 26);
+    }
+
+    private void drawPartyOverlay(Graphics2D g2) {
+        int w = getWidth();
+        int h = getHeight();
+
+        // Semi-transparent backdrop
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, w, h);
+
+        // Panel
+        int panelW = 530, panelH = 360;
+        int panelX = (w - panelW) / 2;
+        int panelY = (h - panelH) / 2;
+
+        g2.setColor(new Color(15, 50, 35, 240));
+        g2.fillRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+        g2.setColor(new Color(100, 200, 130));
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+
+        // Title
+        g2.setFont(new Font("SansSerif", Font.BOLD, 20));
+        g2.setColor(Color.WHITE);
+        g2.drawString("YOUR PARTY  (P to close)", panelX + 20, panelY + 30);
+
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        g2.setColor(new Color(180, 220, 180));
+        g2.drawString("Active: " + (party.isEmpty() ? "—" : party.get(activePartyIndex).name), panelX + 20, panelY + 50);
+
+        // Single column, 3 slots
+        int slotW = 480, slotH = 90;
+        int startX = panelX + 20;
+        int startY = panelY + 65;
+        int gapY = 10;
+
+        for (int i = 0; i < 3; i++) {
+            int col = 0;
+            int row = i;
+            int sx = startX + col * slotW;
+            int sy = startY + row * (slotH + gapY);
+
+            if (i < party.size()) {
+                Pokemon p = party.get(i);
+                boolean isActive = (i == activePartyIndex);
+
+                // Slot background
+                g2.setColor(isActive ? new Color(40, 100, 60) : new Color(20, 60, 40));
+                g2.fillRoundRect(sx, sy, slotW, slotH, 10, 10);
+                g2.setColor(isActive ? new Color(100, 220, 140) : new Color(60, 120, 80));
+                g2.setStroke(new BasicStroke(isActive ? 2f : 1f));
+                g2.drawRoundRect(sx, sy, slotW, slotH, 10, 10);
+
+                // Sprite
+                Image spr = p.getSprite();
+                if (spr != null) g2.drawImage(spr, sx + 4, sy + 4, 72, 72, null);
+
+                // Name
+                g2.setFont(new Font("SansSerif", Font.BOLD, 14));
+                g2.setColor(p.isFainted() ? new Color(200, 80, 80) : Color.WHITE);
+                g2.drawString(p.name + (p.isFainted() ? "  [FAINTED]" : ""), sx + 82, sy + 20);
+
+                // HP bar
+                int barX = sx + 82, barY = sy + 30, barW = 148, barH = 10;
+                g2.setColor(new Color(10, 30, 20));
+                g2.fillRoundRect(barX, barY, barW, barH, 4, 4);
+                float ratio = (float) p.currentHp / p.maxHp;
+                g2.setColor(ratio > 0.5f ? new Color(60, 210, 100) : ratio > 0.25f ? new Color(230, 200, 50) : new Color(220, 70, 70));
+                g2.fillRoundRect(barX, barY, (int)(barW * Math.max(0, ratio)), barH, 4, 4);
+
+                // HP numbers
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                g2.setColor(Color.WHITE);
+                g2.drawString(p.currentHp + " / " + p.maxHp, barX, sy + 56);
+                g2.drawString("ATK " + p.attack, barX + 90, sy + 56);
+            } else {
+                // Empty slot
+                g2.setColor(new Color(15, 40, 28));
+                g2.fillRoundRect(sx, sy, slotW, slotH, 10, 10);
+                g2.setColor(new Color(40, 70, 50));
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawRoundRect(sx, sy, slotW, slotH, 10, 10);
+                g2.setFont(new Font("SansSerif", Font.ITALIC, 13));
+                g2.setColor(new Color(80, 120, 90));
+                g2.drawString("Empty", sx + 100, sy + 55);
+            }
+        }
+    }
 }

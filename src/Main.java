@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 
 public class Main {
@@ -12,17 +13,12 @@ public class Main {
         SwingUtilities.invokeLater(() -> new Main().initGUI());
     }
 
-    /**
-     * Initializes the GUI and sets the Menu as the starting screen.
-     */
     private void initGUI() {
         frame = new JFrame("Keymon");
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
 
-        // 1. Register the Main Menu - Set as the first screen
         mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
-        // 2. Register the Login Panel - Pass 'this' to allow calling startGame()
         mainContainer.add(new LoginPanel(mainContainer, this), "LOGIN");
 
         frame.add(mainContainer);
@@ -30,34 +26,33 @@ public class Main {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
 
-        // --- Modification: Show Menu on startup instead of Login ---
         cardLayout.show(mainContainer, "MENU");
     }
 
-    /**
-     * Initializes game data after successful login.
-     * Called by LoginPanel after user submits their username.
-     * @param username The name used for multi-user save file identification.
-     */
-    public void startGame(String username) {
-        // 1. Load data for the specific user using the updated SaveManager
+    /** Called by LoginPanel after username confirmed — show team select screen. */
+    public void showTeamSelect(String username) {
+        // Remove old team select if present
+        try { mainContainer.remove(mainContainer.getComponentCount() - 1); } catch (Exception ignored) {}
+        mainContainer.add(new TeamSelectPanel(mainContainer, this, username), "TEAM_SELECT");
+        cardLayout.show(mainContainer, "TEAM_SELECT");
+    }
+
+    /** Called by TeamSelectPanel after team confirmed. */
+    public void startGame(String username, List<Pokemon> team) {
         int[] savedData = SaveManager.loadGame(username);
 
-        // 2. Load map and trainer resources
         MapLoader loader = new MapLoader("map.csv");
         Trainer trainer = loader.getTrainer();
 
-        // 3. Initialize player with loaded coordinates
-        // 32 is the TILE_SIZE used for positioning and rendering
         Player player = new Player(savedData[0], savedData[1], savedData[2], TILE_SIZE);
 
-        // 4. Create and add GamePanel dynamically to pass the current username
-        mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap(), trainer,
-                loader.getTerrainObjects(), username), "PLAY GAME");
+        GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap(),
+                trainer, loader.getTerrainObjects(), username);
+        gamePanel.setParty(team);
+        mainContainer.add(gamePanel, "PLAY GAME");
 
         System.out.println("Session started for user: " + username);
 
-        // 5. Switch to the game screen and request focus for controls
         cardLayout.show(mainContainer, "PLAY GAME");
         mainContainer.getComponent(mainContainer.getComponentCount() - 1).requestFocusInWindow();
     }
