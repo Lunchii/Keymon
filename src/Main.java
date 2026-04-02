@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
@@ -62,9 +63,45 @@ public class Main {
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
     public void startGame(String username) {
-        try { mainContainer.remove(mainContainer.getComponentCount() - 1); } catch (Exception ignored) {}
-        mainContainer.add(new TeamSelectPanel(mainContainer, this, username), "TEAM_SELECT");
-        cardLayout.show(mainContainer, "TEAM_SELECT");
+        mainContainer.add(new LevelSelectPanel(mainContainer, this, username), "LEVEL_SELECT");
+        cardLayout.show(mainContainer, "LEVEL_SELECT");
+    }
+
+    /** Called by LevelSelectPanel — launch selected map. */
+    public void startGame(String username, String mapFile) {
+        int levelId = getLevelIdFromMap(mapFile);
+        SaveManager.PlayerData data = SaveManager.loadGame(username, levelId);
+        List<Pokemon> team = SaveManager.loadParty(username);
+        if (team == null || team.isEmpty()) {
+            team = new ArrayList<>();
+            List<Pokemon> pool = Pokemon.getPool();
+            for (int i = 0; i < Math.min(3, pool.size()); i++) {
+                Pokemon t = pool.get(i);
+                Pokemon p = new Pokemon(t.name, t.maxHp, t.attack, t.spritePath);
+                p.loadSprite();
+                team.add(p);
+            }
+        }
+
+        MapLoader loader = new MapLoader(mapFile);
+        Trainer trainer = loader.getTrainer();
+        Player player = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
+
+        GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
+            loader.getWorldMap(), trainer, loader.getTerrainObjects(), username, this, false, levelId);
+        gamePanel.setParty(team);
+        mainContainer.add(gamePanel, "PLAY GAME");
+
+        System.out.println("Session started for user: " + username + " on map " + mapFile);
+
+        cardLayout.show(mainContainer, "PLAY GAME");
+        gamePanel.requestFocusInWindow();
+    }
+
+    private int getLevelIdFromMap(String mapFile) {
+        if ("level2_map.csv".equalsIgnoreCase(mapFile)) return 2;
+        if ("level3_map.csv".equalsIgnoreCase(mapFile)) return 3;
+        return 1;
     }
 
     /** Called by TeamSelectPanel after team confirmed — launch game. */

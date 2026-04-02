@@ -35,6 +35,7 @@ public class GamePanel extends JPanel {
     private Main mainApp;
     private String currentUsername; // Added to identify the user session
     private boolean tutorialMode = false;
+    private int currentLevelId = 1;
     private boolean tutorialBattleExplained = false;
     private boolean levelEnded = false;
     private Point endTilePoint;
@@ -47,11 +48,17 @@ public class GamePanel extends JPanel {
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
-        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false);
+        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false, 1);
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
+        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, tutorialMode, 1);
+    }
+
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
+                     int levelId) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player;
@@ -61,6 +68,7 @@ public class GamePanel extends JPanel {
         this.currentUsername = username;
         this.mainApp = mainApp;
         this.tutorialMode = tutorialMode;
+        this.currentLevelId = Math.max(1, Math.min(3, levelId));
         this.player.setTerrainObjects(terrainObjects);
         this.endTilePoint = findEndTilePoint();
 
@@ -306,7 +314,8 @@ public class GamePanel extends JPanel {
             repaint();
         } else if (pauseOptionIndex == 3) {
             if (!tutorialMode) {
-                SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1);
+                SaveManager.saveGame(currentUsername, currentLevelId, player.x, player.y,
+                        player.getSpriteRow(), 0, currentLevelId, party);
             }
 
             isPaused = false;
@@ -354,6 +363,9 @@ public class GamePanel extends JPanel {
             if (tutorialMode) {
                 cardLayout.show(container, "TUTORIAL");
             } else {
+                SaveManager.saveGame(currentUsername, currentLevelId, player.x, player.y,
+                        player.getSpriteRow(), 0, currentLevelId, party);
+                SaveManager.markLevelCompleted(currentUsername, currentLevelId);
                 mainApp.showPlayerScreen(currentUsername);
             }
         }
