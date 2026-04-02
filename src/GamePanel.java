@@ -21,6 +21,7 @@ public class GamePanel extends JPanel {
     private BufferedImage tallGrassSprite;
     private boolean inBattle = false;
     private boolean showingPartyMenu = false;
+    private boolean showingBagMenu = false;
 
     // Trainer spotted overlay
     private boolean showSpottedMessage = false;
@@ -28,6 +29,9 @@ public class GamePanel extends JPanel {
     // Party
     private List<Pokemon> party = new ArrayList<>();
     private int activePartyIndex = 0;
+
+    // Item bag
+    private ItemBag itemBag = ItemBag.starterBag();
 
     // Added for screen switching and saving
     private CardLayout cardLayout;
@@ -45,6 +49,7 @@ public class GamePanel extends JPanel {
     private String[] pauseOptions = { "RESUME", "OPTIONS", "STATS", "QUIT TO MENU" };
     private boolean isStat = false;
     private TimeManager timeManager = new TimeManager(0);
+    private UIManager uiManager;
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
@@ -94,8 +99,31 @@ public class GamePanel extends JPanel {
         partyBtn.addActionListener(e -> { togglePartyMenu(); this.requestFocusInWindow(); });
         this.add(partyBtn);
 
+        JButton escBtn = new JButton("MENU  [ESC]");
+        escBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        escBtn.setBackground(new Color(70, 50, 20));
+        escBtn.setForeground(Color.WHITE);
+        escBtn.setFocusPainted(false);
+        escBtn.setBorderPainted(false);
+        escBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        escBtn.setBounds(150, 10, 130, 34);
+        escBtn.addActionListener(e -> { togglePause(); this.requestFocusInWindow(); });
+        this.add(escBtn);
+
+        JButton bagBtn = new JButton("BAG  [B]");
+        bagBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        bagBtn.setBackground(new Color(80, 55, 120));
+        bagBtn.setForeground(Color.WHITE);
+        bagBtn.setFocusPainted(false);
+        bagBtn.setBorderPainted(false);
+        bagBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        bagBtn.setBounds(290, 10, 130, 34);
+        bagBtn.addActionListener(e -> { toggleBagMenu(); this.requestFocusInWindow(); });
+        this.add(bagBtn);
+
         new InputHandler(this);
         timeManager.resume();
+        uiManager = new UIManager(this);
 
         this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
@@ -148,6 +176,8 @@ public class GamePanel extends JPanel {
 
     public int getActivePartyIndex() { return activePartyIndex; }
 
+    public ItemBag getItemBag() { return itemBag; }
+
     public void setActivePartyIndex(int i) {
         if (i >= 0 && i < party.size()) activePartyIndex = i;
     }
@@ -155,9 +185,17 @@ public class GamePanel extends JPanel {
     // ── Party menu ──────────────────────────────────────────────────────────
 
     public boolean isShowingPartyMenu() { return showingPartyMenu; }
+    public boolean isShowingBagMenu() { return showingBagMenu; }
 
     public void togglePartyMenu() {
+        if (!showingPartyMenu) showingBagMenu = false;
         showingPartyMenu = !showingPartyMenu;
+        repaint();
+    }
+
+    public void toggleBagMenu() {
+        if (!showingBagMenu) showingPartyMenu = false;
+        showingBagMenu = !showingBagMenu;
         repaint();
     }
 
@@ -442,6 +480,20 @@ public class GamePanel extends JPanel {
         return null;
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            drawMap(g2d);
+            if (tutorialMode) {
+                drawTutorialBubbles(g2d);
+            }
+        } finally {
+            g2d.dispose();
+        }
+    }
+
     private void drawMap(Graphics2D g2d) {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
@@ -482,6 +534,7 @@ public class GamePanel extends JPanel {
 
         // Draw party overlay if open
         if (showingPartyMenu) drawPartyOverlay(g2d);
+        if (showingBagMenu) drawBagOverlay(g2d);
 
         // Draw trainer spotted overlay
         if (showSpottedMessage) drawSpottedOverlay(g2d);
@@ -600,21 +653,55 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private UIManager uiManager = new UIManager(this);
+    private void drawBagOverlay(Graphics2D g2) {
+        int w = getWidth();
+        int h = getHeight();
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, w, h);
 
-        drawMap(g2d);
-        player.draw(g);
+        int panelW = 560, panelH = 340;
+        int panelX = (w - panelW) / 2;
+        int panelY = (h - panelH) / 2;
 
-        if (tutorialMode) {
-            drawTutorialBubbles(g2d);
+        g2.setColor(new Color(30, 20, 55, 240));
+        g2.fillRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+        g2.setColor(new Color(170, 140, 220));
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(panelX, panelY, panelW, panelH, 20, 20);
+
+        g2.setFont(new Font("SansSerif", Font.BOLD, 20));
+        g2.setColor(Color.WHITE);
+        g2.drawString("ITEM BAG  (B to close)", panelX + 20, panelY + 32);
+
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        g2.setColor(new Color(215, 205, 235));
+        g2.drawString("Items are used during battles. This screen shows what you have available.", panelX + 20, panelY + 54);
+
+        int cardX = panelX + 20;
+        int cardY = panelY + 76;
+        int cardW = panelW - 40;
+        int cardH = 52;
+        int gap = 12;
+
+        Item[] items = Item.values();
+        for (int i = 0; i < items.length; i++) {
+            Item item = items[i];
+            int y = cardY + i * (cardH + gap);
+            int count = itemBag.getCount(item);
+
+            g2.setColor(item.color.darker());
+            g2.fillRoundRect(cardX, y, cardW, cardH, 14, 14);
+            g2.setColor(new Color(255, 255, 255, 90));
+            g2.drawRoundRect(cardX, y, cardW, cardH, 14, 14);
+
+            g2.setFont(new Font("SansSerif", Font.BOLD, 16));
+            g2.setColor(Color.WHITE);
+            g2.drawString(item.displayName + "  x" + count, cardX + 16, y + 22);
+
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            g2.setColor(new Color(240, 240, 240));
+            g2.drawString(item.description, cardX + 16, y + 40);
         }
-
-        uiManager.draw(g2d);
     }
-
 }

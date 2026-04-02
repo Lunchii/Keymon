@@ -6,18 +6,18 @@
   "currentLevel": 2,
   "unlockedLevel": 2,
   "levelX": [
-    1472,
-    384,
+    256,
+    736,
     320
   ],
   "levelY": [
-    800,
-    256,
+    416,
+    512,
     320
   ],
   "levelSpriteRow": [
-    200,
     10,
+    200,
     10
   ],
   "party": [
@@ -25,7 +25,7 @@
       "name": "Flamezard",
       "spritePath": "keymonsters/flamezard.png",
       "maxHp": 95,
-      "currentHp": 95,
+      "currentHp": 78,
       "attack": 26
     },
     {

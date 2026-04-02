@@ -84,11 +84,13 @@ public class Main {
         }
 
         MapLoader loader = new MapLoader(mapFile);
+        int[][] worldMap = loader.getWorldMap();
         Trainer trainer = loader.getTrainer();
-        Player player = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
+        Point spawnPoint = resolveSpawnPoint(worldMap, data.x, data.y);
+        Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-            loader.getWorldMap(), trainer, loader.getTerrainObjects(), username, this, false, levelId);
+            worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId);
         gamePanel.setParty(team);
         mainContainer.add(gamePanel, "PLAY GAME");
 
@@ -104,23 +106,39 @@ public class Main {
         return 1;
     }
 
-    /** Called by TeamSelectPanel after team confirmed — launch game. */
-    public void startGame(String username, List<Pokemon> team) {
-        SaveManager.PlayerData data = SaveManager.loadGame(username);
+    private Point resolveSpawnPoint(int[][] map, int savedX, int savedY) {
+        if (isValidSpawn(map, savedX, savedY)) {
+            return new Point(savedX, savedY);
+        }
 
-        MapLoader loader  = new MapLoader("map.csv");
-        Trainer trainer   = loader.getTrainer();
-        Player player     = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
+                if (map[row][col] == 0) {
+                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
+                }
+            }
+        }
 
-        GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-                loader.getWorldMap(), trainer, loader.getTerrainObjects(), username, this);
-        gamePanel.setParty(team);
-        mainContainer.add(gamePanel, "PLAY GAME");
+        return new Point(0, 0);
+    }
 
-        System.out.println("Session started for user: " + username);
+    private boolean isValidSpawn(int[][] map, int x, int y) {
+        if (map == null || map.length == 0 || map[0].length == 0) return false;
+        if (x < 0 || y < 0) return false;
 
-        cardLayout.show(mainContainer, "PLAY GAME");
-        gamePanel.requestFocusInWindow();
+        int col = x / TILE_SIZE;
+        int row = y / TILE_SIZE;
+        if (row < 0 || row >= map.length || col < 0 || col >= map[row].length) return false;
+
+        return map[row][col] != 5;
+    }
+
+    private int sanitizeSpriteRow(int spriteRow) {
+        int[] validRows = {10, 76, 140, 200};
+        for (int validRow : validRows) {
+            if (spriteRow == validRow) return spriteRow;
+        }
+        return 10;
     }
 
     public void startTutorial() {
@@ -152,11 +170,5 @@ public class Main {
      */
     public void returnToMenu() {
         cardLayout.show(mainContainer, "MENU");
-    }
-
-    private static class TutorialMap {
-        int[][] worldMap;
-        Trainer trainer;
-        java.util.List<TerrainObjects> terrainObjects;
     }
 }
