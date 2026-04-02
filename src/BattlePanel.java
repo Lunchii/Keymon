@@ -482,7 +482,8 @@ public class BattlePanel extends JPanel {
         new Timer(1600, e -> {
             ((Timer) e.getSource()).stop();
             gamePanel.setInBattle(false);
-            cardLayout.show(container, "PLAY GAME");
+            String dest = gamePanel.isTutorialMode() ? "TUTORIAL_GAME" : "PLAY GAME";
+            cardLayout.show(container, dest);
             gamePanel.requestFocusInWindow();
         }).start();
     }
