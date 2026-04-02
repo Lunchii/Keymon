@@ -94,10 +94,10 @@ public class Trainer {
     }
 
     public int getX() {
-        return x;
+        return pixelX;
     }
 
     public int getY() {
-        return y;
+        return pixelY;
     }
 }

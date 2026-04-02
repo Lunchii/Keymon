@@ -13,6 +13,11 @@ public class SaveManager {
     // ── Save ────────────────────────────────────────────────────────────────
 
     public static void saveGame(String username, int x, int y, int row,
+                                int highScore, int currentLevel) {
+        saveGame(username, x, y, row, highScore, currentLevel, null);
+    }
+
+    public static void saveGame(String username, int x, int y, int row,
                                 int highScore, int currentLevel, List<Pokemon> party) {
         if (username == null || username.isEmpty()) return;
 

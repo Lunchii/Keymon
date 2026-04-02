@@ -97,6 +97,9 @@ public class Main {
         Player player = new Player(3 * TILE_SIZE, 3 * TILE_SIZE, 0, TILE_SIZE);
         tutorialGamePanel = new GamePanel(cardLayout, mainContainer, player, tutorialLoader.getWorldMap(),
                 trainer, tutorialLoader.getTerrainObjects(), "", this, true);
+        List<Pokemon> tutorialParty = new java.util.ArrayList<>();
+        tutorialParty.add(Pokemon.random());
+        tutorialGamePanel.setParty(tutorialParty);
 
         mainContainer.add(tutorialGamePanel, "TUTORIAL_GAME");
         mainContainer.revalidate();
