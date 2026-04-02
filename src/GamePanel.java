@@ -32,8 +32,12 @@ public class GamePanel extends JPanel {
     // Added for screen switching and saving
     private CardLayout cardLayout;
     private JPanel container;
-    private String currentUsername;
     private Main mainApp;
+    private String currentUsername; // Added to identify the user session
+    private boolean tutorialMode = false;
+    private boolean tutorialBattleExplained = false;
+    private boolean levelEnded = false;
+    private Point endTilePoint;
 
     private boolean isPaused = false;
     private int pauseOptionIndex = 0;
@@ -43,6 +47,11 @@ public class GamePanel extends JPanel {
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
+        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false);
+    }
+
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player;
@@ -51,7 +60,9 @@ public class GamePanel extends JPanel {
         this.terrainObjects = terrainObjects;
         this.currentUsername = username;
         this.mainApp = mainApp;
+        this.tutorialMode = tutorialMode;
         this.player.setTerrainObjects(terrainObjects);
+        this.endTilePoint = findEndTilePoint();
 
         try {
             tallGrassSprite = ImageIO.read(new File("tall_grass.png"));
@@ -95,23 +106,20 @@ public class GamePanel extends JPanel {
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (player != null) {
-                    if (isPaused) return;
-                    player.update();
-
-                    if (!player.isMoving) {
-                        int currentCol = player.x / TILE_SIZE;
-                        int currentRow = player.y / TILE_SIZE;
-
-                        if (currentRow >= 0 && currentRow < map.length &&
-                            currentCol >= 0 && currentCol < map[0].length) {
-                            if (currentRow != lastTileRow || currentCol != lastTileCol) {
-                                lastTileRow = currentRow;
-                                lastTileCol = currentCol;
-                                maybeStartBattle();
-                                GamePanel.this.checkTrainerLoS(currentCol, currentRow);
-                            }
+                    if (isPaused)
+                        return;
+                    player.update(); // Move the player
+                    int playerCol = player.x / TILE_SIZE;
+                    int playerRow = player.y / TILE_SIZE;
+                    if (playerRow != lastTileRow || playerCol != lastTileCol) {
+                        lastTileRow = playerRow;
+                        lastTileCol = playerCol;
+                        checkTrainerLoS(playerCol, playerRow);
+                        if (!inBattle) {
+                            maybeStartBattle();
                         }
                     }
+                    checkLevelEnd();
                 }
                 repaint();
             }
@@ -150,23 +158,10 @@ public class GamePanel extends JPanel {
     private void checkTrainerLoS(int playerCol, int playerRow) {
         if (trainer == null || inBattle) return;
         if (!trainer.canSeePlayer(playerCol, playerRow)) return;
+        if (party.isEmpty()) return;
 
         inBattle = true;
-        showSpottedMessage = true;
-        repaint();
-
-        // Show "spotted" message for 1.5s then start battle
-        new javax.swing.Timer(1500, e -> {
-            ((javax.swing.Timer) e.getSource()).stop();
-            showSpottedMessage = false;
-            List<Pokemon> trainerTeam = trainer.getTeam();
-            BattlePanel battle = new BattlePanel(cardLayout, container, this,
-                    trainerTeam.get(0), party);
-            battle.setTrainerBattle(trainerTeam);
-            container.add(battle, "BATTLE");
-            cardLayout.show(container, "BATTLE");
-            battle.requestFocusInWindow();
-        }).start();
+        launchBattle(Pokemon.random());
     }
 
     public void onTrainerDefeated() {
@@ -179,12 +174,89 @@ public class GamePanel extends JPanel {
         int col = player.x / TILE_SIZE;
         int row = player.y / TILE_SIZE;
         if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) return;
-        if (map[row][col] != 9) return;
-        if (random.nextDouble() > 0.2) return;
+        int tile = map[row][col];
+        if (tile != 9 && tile != 10) return;
+        if (tile == 9 && random.nextDouble() > 0.2) return;
         if (party.isEmpty()) return; // need a Pokemon to battle
 
         inBattle = true;
-        Pokemon wild = Pokemon.random();
+        launchBattle(Pokemon.random());
+    }
+
+    // ── Battle launcher (with tutorial popup) ──────────────────────────────
+
+    private void launchBattle(Pokemon wild) {
+        if (tutorialMode && !tutorialBattleExplained) {
+            tutorialBattleExplained = true;
+
+            JPanel overlay = new JPanel(new GridBagLayout());
+            overlay.setBackground(new Color(0, 0, 0, 200));
+            overlay.setOpaque(false);
+
+            JPanel box = new JPanel();
+            box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
+            box.setBackground(new Color(10, 10, 10));
+            box.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.WHITE, 3),
+                BorderFactory.createEmptyBorder(24, 32, 24, 32)
+            ));
+
+            JLabel title = new JLabel("\u2694  HOW TO BATTLE");
+            title.setFont(new Font("SansSerif", Font.BOLD, 22));
+            title.setForeground(Color.WHITE);
+            title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            String[] infoLines = {
+                "A wild Keymon appeared!",
+                "Press ATTACK to start your turn.",
+                "You have 10 seconds to type as many words as you can.",
+                "Each correct word deals damage based on your Keymon's attack.",
+                "The enemy will attack you back after your turn.",
+                "Win by reducing the enemy HP to 0.",
+                "You can also SWITCH your active Keymon or RUN away."
+            };
+
+            box.add(title);
+            box.add(Box.createVerticalStrut(16));
+            for (String text : infoLines) {
+                JLabel l = new JLabel(text);
+                l.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                l.setForeground(Color.WHITE);
+                l.setAlignmentX(Component.CENTER_ALIGNMENT);
+                box.add(l);
+                box.add(Box.createVerticalStrut(6));
+            }
+            box.add(Box.createVerticalStrut(10));
+
+            JButton acceptBtn = new JButton("GOT IT, START BATTLE");
+            acceptBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+            acceptBtn.setBackground(new Color(60, 150, 60));
+            acceptBtn.setForeground(Color.WHITE);
+            acceptBtn.setFocusPainted(false);
+            acceptBtn.setBorderPainted(false);
+            acceptBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            acceptBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            acceptBtn.addActionListener(e -> {
+                remove(overlay);
+                revalidate();
+                repaint();
+                startBattlePanel(wild);
+            });
+            box.add(acceptBtn);
+
+            overlay.add(box);
+            setLayout(null);
+            overlay.setBounds(0, 0, getWidth(), getHeight());
+            add(overlay);
+            setComponentZOrder(overlay, 0);
+            revalidate();
+            repaint();
+        } else {
+            startBattlePanel(wild);
+        }
+    }
+
+    private void startBattlePanel(Pokemon wild) {
         BattlePanel battle = new BattlePanel(cardLayout, container, this, wild, party);
         container.add(battle, "BATTLE");
         cardLayout.show(container, "BATTLE");
@@ -193,9 +265,10 @@ public class GamePanel extends JPanel {
 
     // ── State getters/setters ───────────────────────────────────────────────
 
-    public boolean isPaused()    { return isPaused; }
-    public boolean isInBattle()  { return inBattle; }
+    public boolean isPaused()      { return isPaused; }
+    public boolean isInBattle()    { return inBattle; }
     public void setInBattle(boolean b) { inBattle = b; }
+    public boolean isTutorialMode(){ return tutorialMode; }
     public boolean isStat()      { return isStat; }
     public Player getPlayer()    { return player; }
     public int getTileSize()     { return TILE_SIZE; }
@@ -232,11 +305,19 @@ public class GamePanel extends JPanel {
             isStat = true;
             repaint();
         } else if (pauseOptionIndex == 3) {
-            SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1, party);
+            if (!tutorialMode) {
+                SaveManager.saveGame(currentUsername, player.x, player.y, player.getSpriteRow(), 0, 1);
+            }
+
             isPaused = false;
             isStat = false;
             timeManager.pause();
-            mainApp.showPlayerScreen(currentUsername);
+
+            if (tutorialMode) {
+                mainApp.returnToMenu();
+            } else {
+                mainApp.showPlayerScreen(currentUsername);
+            }
         }
     }
 
@@ -257,28 +338,120 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private UIManager uiManager = new UIManager(this);
+    private void checkLevelEnd() {
+        if (levelEnded || player.isMoving)
+            return;
 
-    // ── Painting ─────────────────────────────────────────────────────────────
+        int col = player.x / TILE_SIZE;
+        int row = player.y / TILE_SIZE;
+        if (row < 0 || row >= map.length || col < 0 || col >= map[row].length)
+            return;
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (map[row][col] == 5) {
+            levelEnded = true;
+            timeManager.pause();
+            JOptionPane.showMessageDialog(this, "Level complete!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (tutorialMode) {
+                cardLayout.show(container, "TUTORIAL");
+            } else {
+                mainApp.showPlayerScreen(currentUsername);
+            }
+        }
+    }
 
-        // Draw map tiles
+    private void drawTutorialBubbles(Graphics2D g2d) {
+        if (trainer != null) {
+            int bubbleX = trainer.getX() + 50;
+            int bubbleY = trainer.getY() - 60;
+            drawBubble(g2d, bubbleX, bubbleY, "This is a trainer. Walking in front of him will start a battle.");
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new BasicStroke(2));
+            int arrowX = trainer.getX() + 16;
+            int arrowY = trainer.getY() - 8;
+            g2d.drawLine(bubbleX + 20, bubbleY + 45, arrowX, arrowY);
+            g2d.drawLine(arrowX, arrowY, arrowX - 6, arrowY - 6);
+            g2d.drawLine(arrowX, arrowY, arrowX + 6, arrowY - 6);
+        }
+
+        if (endTilePoint != null) {
+            int bubbleX = endTilePoint.x + 60;
+            int bubbleY = endTilePoint.y - 40;
+            drawBubble(g2d, bubbleX, bubbleY, "This is an end tile. It ends the level.");
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new BasicStroke(2));
+            int arrowX = endTilePoint.x + TILE_SIZE / 2;
+            int arrowY = endTilePoint.y + TILE_SIZE / 2;
+            g2d.drawLine(bubbleX + 20, bubbleY + 35, arrowX, arrowY);
+            g2d.drawLine(arrowX, arrowY, arrowX - 6, arrowY - 6);
+            g2d.drawLine(arrowX, arrowY, arrowX + 6, arrowY - 6);
+        }
+    }
+
+    private void drawBubble(Graphics2D g2d, int x, int y, String text) {
+        int width = 300;
+        int height = 60;
+        g2d.setColor(new Color(0, 0, 0, 200));
+        g2d.fillRoundRect(x, y, width, height, 16, 16);
+        g2d.setColor(Color.WHITE);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRoundRect(x, y, width, height, 16, 16);
+
+        g2d.setFont(new Font("Arial", Font.BOLD, 12));
+        drawStringWrapped(g2d, text, x + 12, y + 18, width - 24, 16);
+    }
+
+    private void drawStringWrapped(Graphics2D g2d, String text, int x, int y, int maxWidth, int lineHeight) {
+        FontMetrics fm = g2d.getFontMetrics();
+        String[] words = text.split(" ");
+        String line = "";
+        for (String word : words) {
+            String test = line.isEmpty() ? word : line + " " + word;
+            if (fm.stringWidth(test) > maxWidth) {
+                g2d.drawString(line, x, y);
+                line = word;
+                y += lineHeight;
+            } else {
+                line = test;
+            }
+        }
+        if (!line.isEmpty()) {
+            g2d.drawString(line, x, y);
+        }
+    }
+
+    private Point findEndTilePoint() {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
-                int tile = map[row][col];
+                if (map[row][col] == 5) {
+                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void drawMap(Graphics2D g2d) {
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
+                int tile = map[row][col];
 
                 g2d.setColor(new Color(60, 170, 60));
                 g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
+                if (tile == 5) {
+                    g2d.setColor(Color.BLACK);
+                    g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+
                 if (tile == 9 && tallGrassSprite != null) {
                     g2d.drawImage(tallGrassSprite, x, y, TILE_SIZE, TILE_SIZE, null);
+                }
+
+                if (tile == 10) {
+                    g2d.setColor(new Color(200, 35, 35));
+                    g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
                 }
 
                 g2d.setColor(new Color(0, 100, 0));
@@ -292,7 +465,7 @@ public class GamePanel extends JPanel {
         if (trainer != null)
             trainer.draw(g2d);
 
-        player.draw(g);
+        player.draw(g2d);
         uiManager.draw(g2d);
 
         // Draw party overlay if open
@@ -414,4 +587,22 @@ public class GamePanel extends JPanel {
             }
         }
     }
+
+    private UIManager uiManager = new UIManager(this);
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        drawMap(g2d);
+        player.draw(g);
+
+        if (tutorialMode) {
+            drawTutorialBubbles(g2d);
+        }
+
+        uiManager.draw(g2d);
+    }
+
 }

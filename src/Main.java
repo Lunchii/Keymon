@@ -11,6 +11,7 @@ public class Main {
 
     private PlayerScreen playerScreen;
     private StatsPage statsPage;
+    private GamePanel tutorialGamePanel;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().initGUI());
@@ -24,14 +25,20 @@ public class Main {
         MenuPanel menuPanel        = new MenuPanel(cardLayout, mainContainer);
         LoginPanel loginPanel      = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
-        playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
-        statsPage    = new StatsPage(this);
+        TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
 
-        mainContainer.add(menuPanel,       "MENU");
-        mainContainer.add(loginPanel,      "LOGIN");
-        mainContainer.add(playerScreen,    "PLAYER_SCREEN");
-        mainContainer.add(highscorePanel,  "HIGHSCORE");
-        mainContainer.add(statsPage,       "STATS_PAGE");
+        // Initialize PlayerScreen with references for navigation
+        playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
+        // Initialize StatsPage for standalone viewing (Isaac's request)
+        statsPage = new StatsPage(this);
+
+        // 2. Register panels in the CardLayout container
+        mainContainer.add(menuPanel, "MENU");
+        mainContainer.add(loginPanel, "LOGIN");
+        mainContainer.add(playerScreen, "PLAYER_SCREEN");
+        mainContainer.add(highscorePanel, "HIGHSCORE");
+        mainContainer.add(tutorialPanel, "TUTORIAL");
+        mainContainer.add(statsPage, "STATS_PAGE");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,6 +52,12 @@ public class Main {
     public void showPlayerScreen(String username) {
         playerScreen.setUserData(username);
         cardLayout.show(mainContainer, "PLAYER_SCREEN");
+    }
+
+    /** Called by PlayerScreen — show stats screen. */
+    public void showStatsPage(String username) {
+        statsPage.setUserData(username);
+        cardLayout.show(mainContainer, "STATS_PAGE");
     }
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
@@ -73,13 +86,40 @@ public class Main {
         gamePanel.requestFocusInWindow();
     }
 
-    /** Called by the "VIEW STATS" button in PlayerScreen. */
-    public void showStatsPage(String username) {
-        statsPage.setUserData(username);
-        cardLayout.show(mainContainer, "STATS_PAGE");
+    public void startTutorial() {
+        MapLoader tutorialLoader = new MapLoader("tutorial_map.csv");
+        Trainer trainer = tutorialLoader.getTrainer();
+
+        if (tutorialGamePanel != null) {
+            mainContainer.remove(tutorialGamePanel);
+        }
+
+        Player player = new Player(3 * TILE_SIZE, 3 * TILE_SIZE, 0, TILE_SIZE);
+        tutorialGamePanel = new GamePanel(cardLayout, mainContainer, player, tutorialLoader.getWorldMap(),
+                trainer, tutorialLoader.getTerrainObjects(), "", this, true);
+        List<Pokemon> tutorialParty = new java.util.ArrayList<>();
+        tutorialParty.add(Pokemon.random());
+        tutorialGamePanel.setParty(tutorialParty);
+
+        mainContainer.add(tutorialGamePanel, "TUTORIAL_GAME");
+        mainContainer.revalidate();
+        mainContainer.repaint();
+
+        System.out.println("Tutorial started.");
+        cardLayout.show(mainContainer, "TUTORIAL_GAME");
+        tutorialGamePanel.requestFocusInWindow();
     }
 
+    /**
+     * Utility method to return to the main menu.
+     */
     public void returnToMenu() {
         cardLayout.show(mainContainer, "MENU");
+    }
+
+    private static class TutorialMap {
+        int[][] worldMap;
+        Trainer trainer;
+        java.util.List<TerrainObjects> terrainObjects;
     }
 }

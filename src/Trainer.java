@@ -92,4 +92,12 @@ public class Trainer {
             g.drawImage(currentFrame, pixelX, drawY, null);
         }
     }
+
+    public int getX() {
+        return pixelX;
+    }
+
+    public int getY() {
+        return pixelY;
+    }
 }

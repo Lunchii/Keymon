@@ -26,8 +26,13 @@ public class MapLoader {
                     int value = Integer.parseInt(values[col].trim());
 
                     if (value == 8) {
-                        trainer = new Trainer(col * 32, row * 32, "trainerSprite.png");
+                        trainer = new Trainer(col, row, "trainerSprite.png");
                         worldMap[row][col] = 0; // still draw grass under trainer
+                    } else if (value == 5) {
+                        worldMap[row][col] = 5; // End tile, walkable finish
+                    } else if (value == 9) {
+                        // Encounter/tall grass tile
+                        worldMap[row][col] = 9;
                     } else if (value >= 1 && value <= 7) {
                         // Terrain objects (trees, rocks, etc.)
                         terrainObjects.add(new TerrainObjects(col, row, value));
@@ -39,16 +44,16 @@ public class MapLoader {
                 row++;
             }
 
-            // Simple diagnostic: count how many encounter tiles (value 1) we loaded
+            // Simple diagnostic: count how many encounter tiles (value 9) we loaded
             int tallGrassCount = 0;
             for (int r = 0; r < HEIGHT; r++) {
                 for (int c = 0; c < WIDTH; c++) {
-                    if (worldMap[r][c] == 1) {
+                    if (worldMap[r][c] == 9) {
                         tallGrassCount++;
                     }
                 }
             }
-            System.out.println("MapLoader: loaded " + tallGrassCount + " encounter tiles (value 1).");
+            System.out.println("MapLoader: loaded " + tallGrassCount + " encounter tiles (value 9).");
         } catch (FileNotFoundException e) {
             System.out.println("Error: Could not find map.csv in project folder!");
         }
