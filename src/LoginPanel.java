@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
  */
 public class LoginPanel extends JPanel {
     private JTextField usernameField;
+    private JPasswordField passwordField;
     private Main mainApp;
     private BufferedImage backgroundImage;
 
@@ -28,54 +29,110 @@ public class LoginPanel extends JPanel {
         setLayout(new GridBagLayout());
         setOpaque(false); // Required to see the custom painted background
 
-        // --- RPG Dialog Box Styling ---
         JPanel dialogBox = new JPanel(new GridBagLayout());
-        dialogBox.setBackground(new Color(245, 245, 245, 230)); // Semi-transparent off-white
+        dialogBox.setBackground(new Color(245, 245, 245, 235));
         dialogBox.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(Color.BLACK, 4), // Thick retro border
-                BorderFactory.createEmptyBorder(25, 50, 25, 50) // Internal padding
+                new LineBorder(Color.BLACK, 4),
+                BorderFactory.createEmptyBorder(25, 40, 25, 40)
         ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(12, 5, 12, 5);
+        gbc.insets = new Insets(8, 6, 8, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
 
-        // 2. Prompt Label
-        JLabel promptLabel = new JLabel("IDENTIFY YOURSELF, TRAINER", SwingConstants.CENTER);
-        promptLabel.setFont(new Font("Monospaced", Font.BOLD, 20));
-        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel promptLabel = new JLabel("TRAINER LOGIN", SwingConstants.CENTER);
+        promptLabel.setFont(new Font("Monospaced", Font.BOLD, 24));
+        gbc.gridy = 0;
         dialogBox.add(promptLabel, gbc);
 
-        // 3. Username Input Field
-        usernameField = new JTextField(12);
-        usernameField.setFont(new Font("Monospaced", Font.PLAIN, 18));
-        usernameField.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        JLabel helpLabel = new JLabel("<html><div style='text-align:center;'>Use your username and password.<br/>New trainers can create an account here.</div></html>", SwingConstants.CENTER);
+        helpLabel.setFont(new Font("Monospaced", Font.PLAIN, 13));
         gbc.gridy = 1;
+        dialogBox.add(helpLabel, gbc);
+
+        usernameField = new JTextField(14);
+        usernameField.setFont(new Font("Monospaced", Font.PLAIN, 18));
+        usernameField.setBorder(BorderFactory.createTitledBorder("Username"));
+        gbc.gridy = 2;
         dialogBox.add(usernameField, gbc);
 
-        // 4. Confirm Button
-        JButton loginBtn = new JButton("CONFIRM");
-        loginBtn.setFont(new Font("Monospaced", Font.BOLD, 16));
-        loginBtn.setBackground(Color.BLACK);
-        loginBtn.setForeground(Color.WHITE);
-        loginBtn.setFocusPainted(false);
-        loginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        loginBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        passwordField = new JPasswordField(14);
+        passwordField.setFont(new Font("Monospaced", Font.PLAIN, 18));
+        passwordField.setBorder(BorderFactory.createTitledBorder("Password"));
+        gbc.gridy = 3;
+        dialogBox.add(passwordField, gbc);
 
-        loginBtn.addActionListener(e -> {
-            String username = usernameField.getText().trim();
-            if (!username.isEmpty()) {
-                mainApp.showPlayerScreen(username);
-            } else {
-                JOptionPane.showMessageDialog(this, "A Trainer needs a name!");
-            }
-        });
+        JPanel buttonRow = new JPanel(new GridLayout(1, 2, 10, 0));
+        buttonRow.setOpaque(false);
 
-        gbc.gridy = 2;
-        dialogBox.add(loginBtn, gbc);
+        JButton loginBtn = createActionButton("LOGIN", Color.BLACK);
+        loginBtn.addActionListener(e -> handleLogin());
+        buttonRow.add(loginBtn);
 
-        // Add the styled dialog box to the center of the panel
+        JButton createBtn = createActionButton("CREATE ACCOUNT", new Color(40, 110, 70));
+        createBtn.addActionListener(e -> handleCreateAccount());
+        buttonRow.add(createBtn);
+
+        gbc.gridy = 4;
+        dialogBox.add(buttonRow, gbc);
+
+        JButton backBtn = createActionButton("BACK TO MENU", new Color(140, 45, 45));
+        backBtn.addActionListener(e -> mainApp.returnToMenu());
+        gbc.gridy = 5;
+        dialogBox.add(backBtn, gbc);
+
+        JLabel legacyHint = new JLabel("Legacy accounts can try their username as the password.", SwingConstants.CENTER);
+        legacyHint.setFont(new Font("Monospaced", Font.ITALIC, 11));
+        gbc.gridy = 6;
+        dialogBox.add(legacyHint, gbc);
+
         add(dialogBox);
+    }
+
+    private JButton createActionButton(String text, Color bg) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Monospaced", Font.BOLD, 15));
+        button.setBackground(bg);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
+        return button;
+    }
+
+    private void handleLogin() {
+        String username = ProfileStore.sanitizeUsername(usernameField.getText());
+        String password = new String(passwordField.getPassword());
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both a username and a password.");
+            return;
+        }
+
+        if (!ProfileStore.authenticate(username, password)) {
+            JOptionPane.showMessageDialog(this, "That username or password was not recognized.");
+            return;
+        }
+
+        mainApp.showPlayerScreen(username);
+    }
+
+    private void handleCreateAccount() {
+        String username = ProfileStore.sanitizeUsername(usernameField.getText());
+        String password = new String(passwordField.getPassword());
+        String validationMessage = ProfileStore.validateNewAccount(username, password);
+        if (validationMessage != null) {
+            JOptionPane.showMessageDialog(this, validationMessage);
+            return;
+        }
+
+        if (!ProfileStore.createAccount(username, password)) {
+            JOptionPane.showMessageDialog(this, "The account could not be created right now.");
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Account created. Welcome to Keymon, " + username + "!");
+        mainApp.showPlayerScreen(username);
     }
 
     /**

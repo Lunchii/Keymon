@@ -64,10 +64,10 @@ public class HighscorePanel extends JPanel {
      */
     public void refreshData() {
         tableModel.setRowCount(0); // Clear current rows
-        List<SaveManager.PlayerRecord> records = SaveManager.getAllHighScores();
+        List<ProfileStore.PlayerRecord> records = ProfileStore.getAllHighScores();
 
         int count = 0;
-        for (SaveManager.PlayerRecord record : records) {
+        for (ProfileStore.PlayerRecord record : records) {
             if (count >= 10) break; // Only show top 10
             tableModel.addRow(new Object[]{ (count + 1), record.name.toUpperCase(), record.score });
             count++;

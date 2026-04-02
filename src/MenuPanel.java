@@ -35,7 +35,7 @@ public class MenuPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
+        String[] labels = { "LOGIN", "HIGH SCORES", "TUTORIAL", "PARENTAL CONTROLS", "EXIT" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -84,7 +84,7 @@ public class MenuPanel extends JPanel {
         OutlinedLabel courseLabel = new OutlinedLabel("CS2212 | WINTER 2026");
         courseLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
 
-        OutlinedLabel schoolLabel = new OutlinedLabel("WESTERN UNIVERSITY");
+        OutlinedLabel schoolLabel = new OutlinedLabel("Created for CS2212 at Western University");
         schoolLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
 
         footerInfo.add(Box.createVerticalGlue());
@@ -102,13 +102,7 @@ public class MenuPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("EXIT")) {
             System.exit(0);
-        } else if (label.equals("PLAY GAME")) {
-            JOptionPane.showMessageDialog(container,
-                    "Identify yourself before starting the journey!",
-                    "Trainer Login",
-                    JOptionPane.INFORMATION_MESSAGE);
-            cardLayout.show(container, "LOGIN");
-        } else if (label.equals("HIGHSCORE")) {
+        } else if (label.equals("HIGH SCORES")) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof HighscorePanel) {
                     ((HighscorePanel) comp).refreshData();
@@ -116,6 +110,10 @@ public class MenuPanel extends JPanel {
                 }
             }
             cardLayout.show(container, "HIGHSCORE");
+        } else if (label.equals("PARENTAL CONTROLS")) {
+            cardLayout.show(container, "PARENTAL");
+        } else if (label.equals("LOGIN")) {
+            cardLayout.show(container, "LOGIN");
         } else {
             cardLayout.show(container, label);
         }
