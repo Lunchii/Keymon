@@ -3,6 +3,29 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
+/**
+ * Application entry point and top-level screen coordinator.
+ *
+ * <p>Creates the {@link JFrame} and a {@link CardLayout} container that holds
+ * every named screen. Screen transitions are initiated by calling the public
+ * {@code show*()} / {@code start*()} methods from child panels, keeping all
+ * navigation logic in one place.</p>
+ *
+ * <p>Card names:
+ * <ul>
+ *   <li>{@code "MENU"}          – {@link MenuPanel}</li>
+ *   <li>{@code "LOGIN"}         – {@link LoginPanel}</li>
+ *   <li>{@code "PLAYER_SCREEN"} – {@link PlayerScreen}</li>
+ *   <li>{@code "LEVEL_SELECT"}  – {@link LevelSelectPanel} (created on demand)</li>
+ *   <li>{@code "PLAY GAME"}     – {@link GamePanel} (created on demand)</li>
+ *   <li>{@code "TUTORIAL_GAME"} – {@link GamePanel} (tutorial, created on demand)</li>
+ *   <li>{@code "STATS_PAGE"}    – {@link StatsPage}</li>
+ *   <li>{@code "HIGHSCORE"}     – {@link HighscorePanel}</li>
+ *   <li>{@code "TUTORIAL"}      – {@link InstructionPanel}</li>
+ *   <li>{@code "PARENTAL"}      – {@link ParentalControlPanel}</li>
+ * </ul>
+ * </p>
+ */
 public class Main {
 
     private JFrame frame;
@@ -13,7 +36,10 @@ public class Main {
     private PlayerScreen playerScreen;
     private StatsPage statsPage;
     private GamePanel tutorialGamePanel;
+    private GamePanel activeGamePanel;
+    private LevelSelectPanel levelSelectPanel;
 
+    /** Application entry point — launches the GUI on the Swing event thread. */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().initGUI());
     }
@@ -23,22 +49,21 @@ public class Main {
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
 
-        MenuPanel menuPanel        = new MenuPanel(cardLayout, mainContainer);
-        LoginPanel loginPanel      = new LoginPanel(mainContainer, this);
+        MenuPanel menuPanel = new MenuPanel(cardLayout, mainContainer);
+        LoginPanel loginPanel = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
-        TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
+        InstructionPanel tutorialPanel = new InstructionPanel(cardLayout, mainContainer, this);
+        ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
 
-        // Initialize PlayerScreen with references for navigation
         playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
-        // Initialize StatsPage for standalone viewing (Isaac's request)
         statsPage = new StatsPage(this);
 
-        // 2. Register panels in the CardLayout container
         mainContainer.add(menuPanel, "MENU");
         mainContainer.add(loginPanel, "LOGIN");
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
         mainContainer.add(highscorePanel, "HIGHSCORE");
         mainContainer.add(tutorialPanel, "TUTORIAL");
+        mainContainer.add(parentalControlPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
 
         frame.add(mainContainer);
@@ -63,25 +88,30 @@ public class Main {
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
     public void startGame(String username) {
-        mainContainer.add(new LevelSelectPanel(mainContainer, this, username), "LEVEL_SELECT");
+        if (levelSelectPanel != null) {
+            mainContainer.remove(levelSelectPanel);
+        }
+        levelSelectPanel = new LevelSelectPanel(mainContainer, this, username);
+        mainContainer.add(levelSelectPanel, "LEVEL_SELECT");
         cardLayout.show(mainContainer, "LEVEL_SELECT");
+    }
+
+    public void continueGame(String username) {
+        ProfileStore.ProfileData profile = ProfileStore.loadProfile(username);
+        int targetLevel = Math.max(1, Math.min(profile.unlockedLevel, profile.currentLevel));
+        startGame(username, mapFileForLevel(targetLevel));
     }
 
     /** Called by LevelSelectPanel — launch selected map. */
     public void startGame(String username, String mapFile) {
         int levelId = getLevelIdFromMap(mapFile);
-        SaveManager.PlayerData data = SaveManager.loadGame(username, levelId);
-        List<Pokemon> team = SaveManager.loadParty(username);
+        ProfileStore.PlayerProgress data = ProfileStore.loadProgress(username, levelId);
+        List<Pokemon> team = ProfileStore.loadParty(username);
         if (team == null || team.isEmpty()) {
-            team = new ArrayList<>();
-            List<Pokemon> pool = Pokemon.getPool();
-            for (int i = 0; i < Math.min(3, pool.size()); i++) {
-                Pokemon t = pool.get(i);
-                Pokemon p = new Pokemon(t.name, t.maxHp, t.attack, t.spritePath);
-                p.loadSprite();
-                team.add(p);
-            }
+            team = buildStarterTeam();
         }
+        healParty(team);
+        ItemBag itemBag = ProfileStore.loadItemBag(username);
 
         MapLoader loader = new MapLoader(mapFile);
         int[][] worldMap = loader.getWorldMap();
@@ -89,12 +119,16 @@ public class Main {
         Point spawnPoint = resolveSpawnPoint(worldMap, data.x, data.y);
         Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
 
-        GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-            worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId);
-        gamePanel.setParty(team);
-        mainContainer.add(gamePanel, "PLAY GAME");
+        if (activeGamePanel != null) {
+            mainContainer.remove(activeGamePanel);
+        }
 
-        System.out.println("Session started for user: " + username + " on map " + mapFile);
+        GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
+            worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId, mapFile);
+        gamePanel.setParty(team);
+        gamePanel.setItemBag(itemBag);
+        activeGamePanel = gamePanel;
+        mainContainer.add(gamePanel, "PLAY GAME");
 
         cardLayout.show(mainContainer, "PLAY GAME");
         gamePanel.requestFocusInWindow();
@@ -104,6 +138,17 @@ public class Main {
         if ("level2_map.csv".equalsIgnoreCase(mapFile)) return 2;
         if ("level3_map.csv".equalsIgnoreCase(mapFile)) return 3;
         return 1;
+    }
+
+    private String mapFileForLevel(int levelId) {
+        switch (WordRepository.sanitizeLevel(levelId)) {
+            case 2:
+                return "level2_map.csv";
+            case 3:
+                return "level3_map.csv";
+            default:
+                return "level1_map.csv";
+        }
     }
 
     private Point resolveSpawnPoint(int[][] map, int savedX, int savedY) {
@@ -151,16 +196,16 @@ public class Main {
 
         Player player = new Player(3 * TILE_SIZE, 3 * TILE_SIZE, 0, TILE_SIZE);
         tutorialGamePanel = new GamePanel(cardLayout, mainContainer, player, tutorialLoader.getWorldMap(),
-                trainer, tutorialLoader.getTerrainObjects(), "", this, true);
+                trainer, tutorialLoader.getTerrainObjects(), "", this, true, 1, "tutorial_map.csv");
         List<Pokemon> tutorialParty = new java.util.ArrayList<>();
         tutorialParty.add(Pokemon.random());
         tutorialGamePanel.setParty(tutorialParty);
+        tutorialGamePanel.setItemBag(ItemBag.starterBag());
 
         mainContainer.add(tutorialGamePanel, "TUTORIAL_GAME");
         mainContainer.revalidate();
         mainContainer.repaint();
 
-        System.out.println("Tutorial started.");
         cardLayout.show(mainContainer, "TUTORIAL_GAME");
         tutorialGamePanel.requestFocusInWindow();
     }
@@ -170,5 +215,23 @@ public class Main {
      */
     public void returnToMenu() {
         cardLayout.show(mainContainer, "MENU");
+    }
+
+    private List<Pokemon> buildStarterTeam() {
+        List<Pokemon> team = new ArrayList<>();
+        List<Pokemon> pool = Pokemon.getPool();
+        for (int i = 0; i < Math.min(3, pool.size()); i++) {
+            Pokemon template = pool.get(i);
+            Pokemon pokemon = new Pokemon(template.name, template.maxHp, template.attack, template.spritePath);
+            pokemon.loadSprite();
+            team.add(pokemon);
+        }
+        return team;
+    }
+
+    private void healParty(List<Pokemon> party) {
+        for (Pokemon pokemon : party) {
+            pokemon.currentHp = pokemon.maxHp;
+        }
     }
 }

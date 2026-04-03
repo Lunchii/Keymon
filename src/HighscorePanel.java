@@ -5,6 +5,13 @@ import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Global leaderboard screen displaying the top 10 trainer scores.
+ *
+ * <p>Scores are loaded from {@link ProfileStore#getAllHighScores()} each time
+ * {@link #refreshData()} is called. The table is read-only and styled with a
+ * dark retro theme to match the rest of the game's aesthetic.</p>
+ */
 public class HighscorePanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel container;
@@ -64,10 +71,10 @@ public class HighscorePanel extends JPanel {
      */
     public void refreshData() {
         tableModel.setRowCount(0); // Clear current rows
-        List<SaveManager.PlayerRecord> records = SaveManager.getAllHighScores();
+        List<ProfileStore.PlayerRecord> records = ProfileStore.getAllHighScores();
 
         int count = 0;
-        for (SaveManager.PlayerRecord record : records) {
+        for (ProfileStore.PlayerRecord record : records) {
             if (count >= 10) break; // Only show top 10
             tableModel.addRow(new Object[]{ (count + 1), record.name.toUpperCase(), record.score });
             count++;

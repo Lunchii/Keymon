@@ -1,6 +1,13 @@
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Inventory container that tracks how many of each {@link Item} the player owns.
+ *
+ * <p>Items are indexed by their enum constant. {@link #starterBag()} returns a
+ * pre-populated bag with the default starting quantities. The bag is persisted
+ * through {@link ProfileStore} as part of the player's save data.</p>
+ */
 public class ItemBag {
     private Map<Item, Integer> counts = new LinkedHashMap<>();
 

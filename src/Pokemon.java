@@ -3,6 +3,14 @@ import java.io.File;
 import java.util.List;
 import javax.imageio.ImageIO;
 
+/**
+ * Data model for a Keymon creature.
+ *
+ * <p>Stores base stats (HP and attack), the current HP, and a lazy-loaded
+ * sprite image. The static pool ({@link #getPool()}) defines the six
+ * creatures available in the game. Gson skips the transient {@code sprite}
+ * field so it is re-loaded via {@link #loadSprite()} after deserialisation.</p>
+ */
 public class Pokemon {
     public String name;
     public int maxHp;
