@@ -2,6 +2,8 @@ import java.io.Serializable;
 
 /**
  * Tracks cumulative play time across sessions.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  *
  * <p>Combines a saved baseline ({@code totalTimeMillis}) with the elapsed time
  * of the current in-progress session. Call {@link #resume()} when the player
@@ -13,12 +15,17 @@ public class TimeManager implements Serializable {
     private long sessionStartTime; // When the current session started
     private boolean isRunning;
 
+    /**
+     * Creates a TimeManager seeded with previously saved time.
+     *
+     * @param savedTime cumulative milliseconds from prior sessions (0 for a new session)
+     */
     public TimeManager(long savedTime) {
         this.totalTimeMillis = savedTime;
         this.isRunning = false;
     }
 
-    // Start or Resume the clock (Call this when entering the GamePanel)
+    /** Starts or resumes the clock. Call this when the player enters or unpauses the game. */
     public void resume() {
         if (!isRunning) {
             sessionStartTime = System.currentTimeMillis();
@@ -26,7 +33,7 @@ public class TimeManager implements Serializable {
         }
     }
 
-    // Stop the clock (Call this when Pausing or opening Stats)
+    /** Stops the clock and accumulates the elapsed session time. Call this on pause or level exit. */
     public void pause() {
         if (isRunning) {
             totalTimeMillis += (System.currentTimeMillis() - sessionStartTime);
@@ -34,7 +41,11 @@ public class TimeManager implements Serializable {
         }
     }
 
-    // Returns the total time in milliseconds (for saving to file)
+    /**
+     * Returns the total elapsed time in milliseconds, including the current running session if active.
+     *
+     * @return cumulative play time in milliseconds
+     */
     public long getTotalMillis() {
         if (isRunning) {
             return totalTimeMillis + (System.currentTimeMillis() - sessionStartTime);
@@ -42,7 +53,11 @@ public class TimeManager implements Serializable {
         return totalTimeMillis;
     }
 
-    // Returns "XXh YYm" for your Stats UI
+    /**
+     * Returns the total play time formatted as {@code Xh YYm Zs} for display in the stats UI.
+     *
+     * @return human-readable duration string
+     */
     public String getFormattedTime() {
         long currentTotal = getTotalMillis();
 

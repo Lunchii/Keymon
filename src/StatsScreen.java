@@ -5,6 +5,8 @@ import java.awt.Graphics2D;
 
 /**
  * Lightweight in-game stats overlay shown from the pause menu.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class StatsScreen {
     private GamePanel gamePanel;

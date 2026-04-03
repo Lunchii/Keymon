@@ -8,6 +8,8 @@ import javax.swing.*;
  *
  * <p>Uses a {@code GlyphVector} rather than a {@code TextLayout} so custom
  * TTF fonts render fully solid without artefacts at display sizes above 80 pt.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 class OutlinedLabel extends JLabel {
 

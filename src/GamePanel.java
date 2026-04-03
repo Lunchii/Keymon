@@ -30,6 +30,8 @@ import javax.swing.Timer;
 /**
  * World gameplay panel that handles exploration, battle encounters, score tracking, and level
  * progression for the typing adventure.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class GamePanel extends JPanel {
     private static final int TILE_SIZE = 32;

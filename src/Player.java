@@ -11,6 +11,9 @@ import javax.imageio.ImageIO;
  * detection. Movement is initiated externally (via {@link InputHandler}) by
  * setting {@code targetX}/{@code targetY}; the {@code update()} method
  * interpolates toward the target each game tick.</p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class Player {
     // Sprite Data
@@ -38,6 +41,13 @@ public class Player {
     // Terrain collision
     private List<TerrainObjects> terrainObjects;
 
+    /**
+     * Creates a player positioned at a tile coordinate.
+     *
+     * @param startTileX tile column for the starting position
+     * @param startTileY tile row for the starting position
+     * @param tileSize   pixel size of one tile
+     */
     public Player(int startTileX, int startTileY, int tileSize) {
         this.x = startTileX * tileSize;
         this.y = startTileY * tileSize;
@@ -52,7 +62,14 @@ public class Player {
         }
     }
 
-    // Constructor for loading from a save file (Added for Issue #14)
+    /**
+     * Creates a player at an exact pixel position loaded from a save file.
+     *
+     * @param pixelX   saved pixel X position
+     * @param pixelY   saved pixel Y position
+     * @param row      sprite sheet row representing the facing direction
+     * @param tileSize pixel size of one tile (used for movement calculations)
+     */
     public Player(int pixelX, int pixelY, int row, int tileSize) {
         // Direct pixel assignment instead of tile-based calculation
         this.x = pixelX;
@@ -70,7 +87,15 @@ public class Player {
         }
     }
 
-    // New Helper Method to set the direction from GamePanel
+    /**
+     * Sets the sprite sheet parameters for the current facing direction.
+     *
+     * @param row     sprite sheet Y offset for the direction row
+     * @param width   frame width in pixels
+     * @param height  frame height in pixels
+     * @param xOffset X offset of the first frame within the sheet
+     * @param gap     pixel gap between consecutive frames
+     */
     public void setDirection(int row, int width, int height, int xOffset, int gap) {
         this.spriteRow = row;
         this.frameWidth = width;
@@ -86,12 +111,14 @@ public class Player {
         currentFrame = spriteSheet.getSubimage(startX, spriteRow, frameWidth, frameHeight);
     }
 
+    /** Resets the animation to the first walking frame, ready for a new move. */
     public void startAnimation() {
         this.frameIndex = 1; // Start on the first walking step
         this.animationTick = 0;
         updateSprite(); // Crop the "stepping" frame immediately
     }
 
+    /** Advances the player one game tick: moves toward the target tile and advances the animation frame. */
     public void update() {
         if (isMoving) {
             // 1. Move (8 frames total to finish)
@@ -153,6 +180,11 @@ public class Player {
         this.startAnimation();
     }
 
+    /**
+     * Draws the current animation frame at the player's world position.
+     *
+     * @param g graphics context supplied by the parent panel's paintComponent
+     */
     public void draw(Graphics g) {
         if (currentFrame != null) {
             int drawY = y - (frameHeight - TILE_SIZE);
@@ -160,16 +192,31 @@ public class Player {
         }
     }
 
-    // Getter for the current sprite row to save the player's facing direction
+    /**
+     * Returns the current sprite sheet row, used to persist the facing direction in save files.
+     *
+     * @return sprite row index
+     */
     public int getSpriteRow() {
         return this.spriteRow;
     }
 
+    /**
+     * Provides the terrain collision list used by {@link #isPositionWalkable(int, int)}.
+     *
+     * @param terrainObjects list of solid terrain tiles from the current map
+     */
     public void setTerrainObjects(List<TerrainObjects> terrainObjects) {
         this.terrainObjects = terrainObjects;
     }
 
-    // Check if a position is walkable (no terrain collision)
+    /**
+     * Returns {@code true} if the given pixel position does not collide with any terrain object.
+     *
+     * @param pixelX target X position in world pixels
+     * @param pixelY target Y position in world pixels
+     * @return true when the position is free of solid terrain
+     */
     public boolean isPositionWalkable(int pixelX, int pixelY) {
         if (terrainObjects == null) {
             return true;

@@ -10,6 +10,9 @@ import javax.imageio.ImageIO;
  * sprite image. The static pool ({@link #getPool()}) defines the six
  * creatures available in the game. Gson skips the transient {@code sprite}
  * field so it is re-loaded via {@link #loadSprite()} after deserialisation.</p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class Pokemon {
     public String name;
@@ -21,8 +24,17 @@ public class Pokemon {
     // transient = Gson skips this field; loaded lazily via loadSprite()
     public transient Image sprite;
 
-    public Pokemon() {} // required for Gson deserialization
+    /** No-arg constructor required for Gson deserialisation. */
+    public Pokemon() {}
 
+    /**
+     * Creates a Pokemon with full HP.
+     *
+     * @param name       display name shown in battle
+     * @param maxHp      maximum (and starting) hit points
+     * @param attack     base attack stat used for damage calculation
+     * @param spritePath relative path to the sprite image file
+     */
     public Pokemon(String name, int maxHp, int attack, String spritePath) {
         this.name      = name;
         this.maxHp     = maxHp;
@@ -31,13 +43,24 @@ public class Pokemon {
         this.spritePath = spritePath;
     }
 
+    /**
+     * Returns {@code true} if this Pokemon has no remaining HP.
+     *
+     * @return true when currentHp is zero or less
+     */
     public boolean isFainted() { return currentHp <= 0; }
 
+    /** Loads the sprite image from {@code spritePath}. Silently ignored if the file is missing. */
     public void loadSprite() {
         if (spritePath == null) return;
         try { sprite = ImageIO.read(new File(spritePath)); } catch (Exception ignored) {}
     }
 
+    /**
+     * Returns the sprite image, loading it lazily on first access.
+     *
+     * @return the sprite Image, or {@code null} if it could not be loaded
+     */
     public Image getSprite() {
         if (sprite == null) loadSprite();
         return sprite;

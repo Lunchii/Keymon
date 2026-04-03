@@ -2,6 +2,8 @@ import java.util.Random;
 
 /**
  * Central repository for stage-specific word lists and scoring rules.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public final class WordRepository {
     private static final String[] LEVEL_ONE_WORDS = {

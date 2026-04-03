@@ -10,6 +10,8 @@ import javax.swing.*;
  * <p>Level 2 and Level 3 buttons are disabled until the corresponding stage
  * has been unlocked. Unlock state is read from {@link ProfileStore#getHighestUnlockedLevel(String)}.
  * Tooltip text on each button shows the stage name and difficulty description.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class LevelSelectPanel extends JPanel {
     private final Main mainApp;

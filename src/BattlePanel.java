@@ -29,6 +29,8 @@ import javax.swing.event.DocumentListener;
 
 /**
  * Typing battle screen used for wild encounters and trainer fights.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class BattlePanel extends JPanel {
     private enum Phase { MENU, COUNTDOWN, PLAYER_TURN, ENEMY_TURN, SWITCH_SELECT, FINISHED }

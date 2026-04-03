@@ -3,6 +3,8 @@ import java.util.List;
 
 /**
  * Builds achievement badges and coaching suggestions from saved player data.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public final class ProfileInsights {
     private ProfileInsights() {

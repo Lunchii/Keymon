@@ -11,6 +11,8 @@ import java.util.List;
  * <p>Scores are loaded from {@link ProfileStore#getAllHighScores()} each time
  * {@link #refreshData()} is called. The table is read-only and styled with a
  * dark retro theme to match the rest of the game's aesthetic.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class HighscorePanel extends JPanel {
     private CardLayout cardLayout;

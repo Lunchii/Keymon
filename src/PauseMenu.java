@@ -7,6 +7,8 @@ import java.awt.*;
  * <p>The currently selected option is highlighted in yellow with a right-arrow
  * indicator. All layout is computed relative to the GamePanel size so it
  * remains correct at any window resolution.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class PauseMenu {
 

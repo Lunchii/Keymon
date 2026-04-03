@@ -10,6 +10,8 @@ import javax.swing.*;
  * <p>Buttons: LOGIN, HIGH SCORES, TUTORIAL, PARENTAL CONTROLS, EXIT.
  * Keyboard navigation uses W/S to change selection and ENTER to activate.
  * The custom KA1 font is loaded at startup; Arial is used as the fallback.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class MenuPanel extends JPanel {
     private Image backgroundGif;

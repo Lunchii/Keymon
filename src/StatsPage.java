@@ -8,6 +8,8 @@ import java.awt.*;
  * {@link #setUserData(String)} is called so the view is always up to date.
  * The screen is divided into two scrollable text panels: a typing snapshot
  * on the left and badges/tips on the right.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class StatsPage extends JPanel {
     private Main mainApp;

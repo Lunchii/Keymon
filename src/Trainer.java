@@ -11,6 +11,9 @@ import javax.imageio.ImageIO;
  * <p>Uses a simple vertical line-of-sight check ({@link #canSeePlayer}) to
  * detect when the player steps into its sight range and trigger a battle.
  * Once defeated, the trainer is flagged and will no longer initiate battles.</p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class Trainer {
     private final int TILE_SIZE = 32;

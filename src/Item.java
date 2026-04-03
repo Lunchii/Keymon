@@ -4,6 +4,8 @@
  * <p>Each constant carries a human-readable {@code displayName}, a short
  * {@code description} shown in the bag UI, and a {@code color} used to
  * tint the item's button.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public enum Item {
     POTION      ("Potion",       "Heals your Keymon for 30 HP.",          new java.awt.Color(80, 200, 120)),

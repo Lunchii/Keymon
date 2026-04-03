@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
  * image. Delegates authentication and account creation to {@link ProfileStore}.
  * On success the user is forwarded to {@link PlayerScreen} via
  * {@link Main#showPlayerScreen(String)}.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class LoginPanel extends JPanel {
     private JTextField usernameField;

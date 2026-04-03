@@ -11,6 +11,8 @@ import javax.imageio.ImageIO;
  * <p>Displays a brief stats summary (best score, stage, average WPM) and
  * coaching tips loaded from the player's saved profile. From here the player
  * can continue their last session, pick a stage, view full stats, or log out.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class PlayerScreen extends JPanel {
     private Main mainApp;

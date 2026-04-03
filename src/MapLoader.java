@@ -18,6 +18,9 @@ import java.util.Scanner;
  *   <li>5  – exit tile</li>
  * </ul>
  * </p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class MapLoader {
     private final int WIDTH = 64;
@@ -75,14 +78,29 @@ public class MapLoader {
         }
     }
 
+    /**
+     * Returns the parsed 2-D tile array for the loaded map.
+     *
+     * @return grid of tile values indexed by [row][col]
+     */
     public int[][] getWorldMap() {
         return worldMap;
     }
 
+    /**
+     * Returns the {@link Trainer} NPC parsed from tile value 8, or {@code null} if none was found.
+     *
+     * @return trainer instance, or null
+     */
     public Trainer getTrainer() {
         return trainer;
     }
 
+    /**
+     * Returns the list of solid {@link TerrainObjects} parsed from tiles 1–7.
+     *
+     * @return list of terrain collision objects
+     */
     public List<TerrainObjects> getTerrainObjects() {
         return terrainObjects;
     }

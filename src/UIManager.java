@@ -2,6 +2,8 @@ import java.awt.Graphics2D;
 
 /**
  * Draws pause-related overlays for the world gameplay screen.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class UIManager {
     private final GamePanel gp;

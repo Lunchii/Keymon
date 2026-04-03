@@ -25,6 +25,8 @@ import javax.swing.*;
  *   <li>{@code "PARENTAL"}      – {@link ParentalControlPanel}</li>
  * </ul>
  * </p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class Main {
 

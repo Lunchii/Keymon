@@ -12,6 +12,8 @@ import java.util.Map;
 
 /**
  * Handles local persistence for accounts, progress, statistics, inventory, and high scores.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public final class ProfileStore {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

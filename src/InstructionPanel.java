@@ -3,6 +3,8 @@ import javax.swing.*;
 
 /**
  * Multi-page instructions screen with keyboard and mouse navigation.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
  */
 public class InstructionPanel extends JPanel {
     private static final String[] PAGE_TITLES = {
