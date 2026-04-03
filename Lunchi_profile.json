@@ -1,23 +1,23 @@
 {
   "username": "Lunchi",
   "password": "123123",
-  "highScore": 250,
-  "currentLevel": 2,
-  "unlockedLevel": 2,
+  "highScore": 7733,
+  "currentLevel": 3,
+  "unlockedLevel": 3,
   "levelX": [
-    1472,
-    508,
-    320
+    1440,
+    64,
+    384
   ],
   "levelY": [
-    800,
-    544,
-    320
+    640,
+    64,
+    608
   ],
   "levelSpriteRow": [
-    10,
+    200,
     140,
-    10
+    76
   ],
   "party": [
     {
@@ -43,26 +43,28 @@
     }
   ],
   "itemCounts": {
-    "SLOW_TIME": 13,
-    "POTION": 6,
-    "FULL_HEAL": 7,
-    "ATTACK_BOOST": 11
+    "SLOW_TIME": 15,
+    "POTION": 8,
+    "FULL_HEAL": 8,
+    "ATTACK_BOOST": 12
   },
   "collectedPokeballs": [
     "2:13:13",
     "2:12:13",
-    "2:14:17"
+    "2:14:17",
+    "1:44:12",
+    "3:12:22"
   ],
-  "totalTimePlayedSeconds": 175,
-  "wordsTyped": 0,
-  "correctChars": 0,
-  "totalTypedChars": 0,
-  "errorCount": 0,
-  "peakWpm": 0.0,
-  "cumulativeAverageWpm": 0.0,
-  "averageWpmSamples": 0,
-  "longestStreak": 0,
+  "totalTimePlayedSeconds": 617,
+  "wordsTyped": 57,
+  "correctChars": 453,
+  "totalTypedChars": 497,
+  "errorCount": 44,
+  "peakWpm": 13.974409362854274,
+  "cumulativeAverageWpm": 12.778120271254833,
+  "averageWpmSamples": 1,
+  "longestStreak": 7,
   "powerupsUsed": 0,
-  "gamesPlayed": 19,
-  "levelWins": 1
+  "gamesPlayed": 26,
+  "levelWins": 2
 }
