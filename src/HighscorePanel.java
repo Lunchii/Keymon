@@ -68,7 +68,7 @@ public class HighscorePanel extends JPanel {
 
         backBtn.setFont(new Font("Monospaced", Font.BOLD, 24));
         backBtn.setBackground(Color.BLACK);
-        backBtn.setForeground(Color.BLACK);
+        backBtn.setForeground(Color.WHITE);
         backBtn.setFocusPainted(false);
         backBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
 

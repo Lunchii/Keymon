@@ -76,7 +76,7 @@ public class LoginPanel extends JPanel {
         JPanel buttonRow = new JPanel(new GridLayout(1, 2, 10, 0));
         buttonRow.setOpaque(false);
 
-        JButton loginBtn = createActionButton("LOGIN", Color.BLACK);
+        JButton loginBtn = createActionButton("LOGIN", Color.WHITE);
         loginBtn.addActionListener(e -> handleLogin());
         buttonRow.add(loginBtn);
 
@@ -104,9 +104,9 @@ public class LoginPanel extends JPanel {
     private JButton createActionButton(String text, Color bg) {
         JButton button = new JButton(text);
         button.setFont(new Font("Monospaced", Font.BOLD, 15));
-        button.setBackground(Color.BLACK);
+        button.setBackground(Color.WHITE);
         double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
-        button.setForeground(luminance < 128 ? Color.BLACK : Color.BLACK);
+        button.setForeground(luminance < 128 ? Color.WHITE : Color.BLACK);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
