@@ -5,6 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 
+/**
+ * NPC trainer that patrols a fixed tile position in the world map.
+ *
+ * <p>Uses a simple vertical line-of-sight check ({@link #canSeePlayer}) to
+ * detect when the player steps into its sight range and trigger a battle.
+ * Once defeated, the trainer is flagged and will no longer initiate battles.</p>
+ */
 public class Trainer {
     private final int TILE_SIZE = 32;
 

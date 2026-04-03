@@ -1,11 +1,22 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
+/**
+ * Stage selection screen that lets the player choose which level to play.
+ *
+ * <p>Level 2 and Level 3 buttons are disabled until the corresponding stage
+ * has been unlocked. Unlock state is read from {@link ProfileStore#getHighestUnlockedLevel(String)}.
+ * Tooltip text on each button shows the stage name and difficulty description.</p>
+ */
 public class LevelSelectPanel extends JPanel {
     private final Main mainApp;
     private final String username;
     private final CardLayout cardLayout;
     private final JPanel mainContainer;
+    private BufferedImage backgroundImage;
 
     public LevelSelectPanel(JPanel mainContainer, Main mainApp, String username) {
         this.mainApp = mainApp;
@@ -13,7 +24,14 @@ public class LevelSelectPanel extends JPanel {
         this.mainContainer = mainContainer;
         this.cardLayout = (CardLayout) mainContainer.getLayout();
 
+        try {
+            backgroundImage = ImageIO.read(new File("LoginBackground.png"));
+        } catch (Exception e) {
+            // fallback to solid colour below
+        }
+
         setLayout(new GridBagLayout());
+        setOpaque(backgroundImage == null);
         setBackground(new Color(34, 139, 34));
 
         JPanel dialogBox = new JPanel(new GridBagLayout());
@@ -83,5 +101,20 @@ public class LevelSelectPanel extends JPanel {
         btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            int pw = getWidth(), ph = getHeight();
+            double scale = Math.max((double) pw / backgroundImage.getWidth(),
+                                    (double) ph / backgroundImage.getHeight());
+            int dw = (int) (backgroundImage.getWidth()  * scale);
+            int dh = (int) (backgroundImage.getHeight() * scale);
+            g2.drawImage(backgroundImage, (pw - dw) / 2, (ph - dh) / 2, dw, dh, this);
+        }
     }
 }

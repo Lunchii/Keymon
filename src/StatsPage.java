@@ -1,6 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Full player-statistics screen showing typing metrics, achievement badges, and coaching tips.
+ *
+ * <p>Data is loaded fresh from {@link ProfileStore} each time
+ * {@link #setUserData(String)} is called so the view is always up to date.
+ * The screen is divided into two scrollable text panels: a typing snapshot
+ * on the left and badges/tips on the right.</p>
+ */
 public class StatsPage extends JPanel {
     private Main mainApp;
     private String username;

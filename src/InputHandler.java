@@ -1,6 +1,20 @@
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 
+/**
+ * Registers all keyboard bindings for the world-map game panel.
+ *
+ * <p>Key mappings:
+ * <ul>
+ *   <li>{@code W / S}  – move up/down (or navigate the pause menu)</li>
+ *   <li>{@code A / D}  – move left/right</li>
+ *   <li>{@code ESC}    – toggle pause</li>
+ *   <li>{@code P}      – toggle party overlay</li>
+ *   <li>{@code B}      – toggle bag overlay</li>
+ *   <li>{@code ENTER}  – confirm pause-menu selection</li>
+ * </ul>
+ * </p>
+ */
 public class InputHandler {
     private GamePanel gp; // Reference to your game panel
 

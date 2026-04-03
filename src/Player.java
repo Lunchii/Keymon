@@ -4,6 +4,14 @@ import java.io.File;
 import java.util.List;
 import javax.imageio.ImageIO;
 
+/**
+ * Represents the player character in the world map.
+ *
+ * <p>Handles sprite animation, tile-based grid movement, and terrain collision
+ * detection. Movement is initiated externally (via {@link InputHandler}) by
+ * setting {@code targetX}/{@code targetY}; the {@code update()} method
+ * interpolates toward the target each game tick.</p>
+ */
 public class Player {
     // Sprite Data
     private BufferedImage spriteSheet;

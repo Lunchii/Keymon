@@ -1,6 +1,14 @@
 import java.awt.*;
 import javax.swing.*;
 
+/**
+ * Custom JLabel that draws its text with an 8 px white stroke outline and a
+ * black fill, suitable for overlaying large stylised text on the animated
+ * menu background.
+ *
+ * <p>Uses a {@code GlyphVector} rather than a {@code TextLayout} so custom
+ * TTF fonts render fully solid without artefacts at display sizes above 80 pt.</p>
+ */
 class OutlinedLabel extends JLabel {
 
     public OutlinedLabel(String text) {

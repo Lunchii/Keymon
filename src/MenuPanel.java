@@ -4,6 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ * Main menu screen with an animated background and keyboard/mouse navigable buttons.
+ *
+ * <p>Buttons: LOGIN, HIGH SCORES, TUTORIAL, PARENTAL CONTROLS, EXIT.
+ * Keyboard navigation uses W/S to change selection and ENTER to activate.
+ * The custom KA1 font is loaded at startup; Arial is used as the fallback.</p>
+ */
 public class MenuPanel extends JPanel {
     private Image backgroundGif;
     private ArrayList<JButton> buttons = new ArrayList<>();
@@ -77,21 +84,16 @@ public class MenuPanel extends JPanel {
         OutlinedLabel teamLabel = new OutlinedLabel("TEAM 72");
         teamLabel.setFont(customFont.deriveFont(Font.BOLD, 24f));
 
-        // Add all team members' names here
-        OutlinedLabel devLabel = new OutlinedLabel("DEVS: ISAAC, MIGUEL, Ryan, Nathaniel, Dehou");
+        OutlinedLabel devLabel = new OutlinedLabel("Isaac, Miguel, Ryan, Nathaniel, Dehou");
         devLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
 
-        OutlinedLabel courseLabel = new OutlinedLabel("CS2212 | WINTER 2026");
+        OutlinedLabel courseLabel = new OutlinedLabel("CS2212 \u2022 Winter 2026 \u2022 Western University");
         courseLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
-
-        OutlinedLabel schoolLabel = new OutlinedLabel("Created for CS2212 at Western University");
-        schoolLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
 
         footerInfo.add(Box.createVerticalGlue());
         footerInfo.add(teamLabel);
         footerInfo.add(devLabel);
         footerInfo.add(courseLabel);
-        footerInfo.add(schoolLabel);
 
         this.add(footerInfo, BorderLayout.WEST);
 
@@ -111,7 +113,7 @@ public class MenuPanel extends JPanel {
             }
             cardLayout.show(container, "HIGHSCORE");
         } else if (label.equals("PARENTAL CONTROLS")) {
-            cardLayout.show(container, "PARENTAL");
+            // handled by teammate — no action
         } else if (label.equals("LOGIN")) {
             cardLayout.show(container, "LOGIN");
         } else {

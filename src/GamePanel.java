@@ -547,7 +547,6 @@ public class GamePanel extends JPanel {
                 if (!inBattle) {
                     checkLevelEnd();
                 }
-                updateLiveWpm();
             }
 
             if (!statusBanner.isEmpty() && System.currentTimeMillis() > statusBannerUntil) {

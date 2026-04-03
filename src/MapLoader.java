@@ -3,6 +3,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Parses a CSV map file into a 2-D tile array, a {@link Trainer}, and a
+ * list of {@link TerrainObjects}.
+ *
+ * <p>Tile values in the CSV:
+ * <ul>
+ *   <li>0  – walkable grass</li>
+ *   <li>1  – tree (solid)</li>
+ *   <li>2  – rock (solid)</li>
+ *   <li>3–7 – additional terrain objects</li>
+ *   <li>8  – trainer spawn (replaced with 0 in the tile array)</li>
+ *   <li>9  – tall grass (wild encounter trigger)</li>
+ *   <li>5  – exit tile</li>
+ * </ul>
+ * </p>
+ */
 public class MapLoader {
     private final int WIDTH = 64;
     private final int HEIGHT = 64;

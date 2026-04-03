@@ -1,5 +1,13 @@
 import java.io.Serializable;
 
+/**
+ * Tracks cumulative play time across sessions.
+ *
+ * <p>Combines a saved baseline ({@code totalTimeMillis}) with the elapsed time
+ * of the current in-progress session. Call {@link #resume()} when the player
+ * enters the game world and {@link #pause()} on every pause, stat screen visit,
+ * and level exit so no dead time is counted.</p>
+ */
 public class TimeManager implements Serializable {
     private long totalTimeMillis; // Cumulative time from all previous sessions
     private long sessionStartTime; // When the current session started

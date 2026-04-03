@@ -6,8 +6,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 /**
- * Step 3: LoginPanel with Tiled Retro Background and Styled Dialog.
- * Fixes the incomplete background filling issue by using tiling logic.
+ * Login and account-creation screen.
+ *
+ * <p>Displays a centred dialog box over a scaled {@code LoginBackground.png}
+ * image. Delegates authentication and account creation to {@link ProfileStore}.
+ * On success the user is forwarded to {@link PlayerScreen} via
+ * {@link Main#showPlayerScreen(String)}.</p>
  */
 public class LoginPanel extends JPanel {
     private JTextField usernameField;
