@@ -64,6 +64,7 @@ public class GamePanel extends JPanel {
     private boolean showingPartyMenu;
     private boolean showingBagMenu;
     private boolean showSpottedMessage;
+    private boolean showWildEncounterMessage;
     private boolean tutorialBattleExplained;
     private boolean levelEnded;
     private boolean levelFailed;
@@ -92,6 +93,7 @@ public class GamePanel extends JPanel {
     private long levelStartMillis;
 
     private Point endTilePoint;
+    private Point tutorialTallGrassPoint;
     private String statusBanner = "";
     private long statusBannerUntil;
 
@@ -131,6 +133,7 @@ public class GamePanel extends JPanel {
         this.bestScore = tutorialMode ? 0 : ProfileStore.loadProfile(this.currentUsername).highScore;
         this.levelStartMillis = System.currentTimeMillis();
         this.endTilePoint = findEndTilePoint();
+        this.tutorialTallGrassPoint = findFirstTallGrassPoint();
 
         this.player.setTerrainObjects(terrainObjects);
         this.player.setTrainers(this.trainers);
@@ -616,13 +619,20 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        double encounterChance = tile == 10 ? 0.45 : 0.20;
+        double encounterChance = tile == 10 ? 0.0 : 0.20;
         if (random.nextDouble() > encounterChance) {
             return;
         }
 
         inBattle = true;
-        startBattleSequence(null, false);
+        showWildEncounterMessage = true;
+        Timer timer = new Timer(850, event -> {
+            ((Timer) event.getSource()).stop();
+            showWildEncounterMessage = false;
+            startBattleSequence(null, false);
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     private void startBattleSequence(List<Pokemon> trainerTeam, boolean trainerBattle) {
@@ -882,6 +892,15 @@ public class GamePanel extends JPanel {
     }
 
     private void drawTutorialBubbles(Graphics2D graphics) {
+        if (tutorialTallGrassPoint != null) {
+            int bubbleX = tutorialTallGrassPoint.x + 54;
+            int bubbleY = tutorialTallGrassPoint.y - 72;
+            drawBubble(graphics, bubbleX, bubbleY,
+                "these are tall grass, stepping on them has a chance for an encounter");
+            drawBubbleArrow(graphics, bubbleX + 18, bubbleY + 52,
+                tutorialTallGrassPoint.x + TILE_SIZE / 2, tutorialTallGrassPoint.y + TILE_SIZE / 2);
+        }
+
         if (trainers != null && !trainers.isEmpty()) {
             Trainer t = trainers.get(0);
             int bubbleX = t.getX() + 52;
@@ -945,6 +964,17 @@ public class GamePanel extends JPanel {
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
                 if (map[row][col] == 5) {
+                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
+                }
+            }
+        }
+        return null;
+    }
+
+    private Point findFirstTallGrassPoint() {
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
+                if (map[row][col] == 9 || map[row][col] == 10) {
                     return new Point(col * TILE_SIZE, row * TILE_SIZE);
                 }
             }
@@ -1062,6 +1092,9 @@ public class GamePanel extends JPanel {
         if (showSpottedMessage) {
             drawSpottedOverlay(graphics);
         }
+        if (showWildEncounterMessage) {
+            drawWildEncounterOverlay(graphics);
+        }
     }
 
     private void drawHud(Graphics2D graphics) {
@@ -1139,6 +1172,34 @@ public class GamePanel extends JPanel {
         metrics = graphics.getFontMetrics();
         String line2 = "Get ready for a tougher typing battle.";
         graphics.setColor(new Color(255, 230, 230));
+        graphics.drawString(line2, boxX + (boxW - metrics.stringWidth(line2)) / 2, boxY + boxH + 24);
+    }
+
+    private void drawWildEncounterOverlay(Graphics2D graphics) {
+        int width = getWidth();
+        int height = getHeight();
+        graphics.setColor(new Color(0, 0, 0, 165));
+        graphics.fillRect(0, 0, width, height);
+
+        int boxW = 360;
+        int boxH = 88;
+        int boxX = (width - boxW) / 2;
+        int boxY = height / 2 - 60;
+        graphics.setColor(new Color(64, 108, 46));
+        graphics.fillRoundRect(boxX, boxY, boxW, boxH, 16, 16);
+        graphics.setColor(Color.WHITE);
+        graphics.setStroke(new BasicStroke(3f));
+        graphics.drawRoundRect(boxX, boxY, boxW, boxH, 16, 16);
+
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 28));
+        FontMetrics metrics = graphics.getFontMetrics();
+        String line1 = "A Wild Keymon Appeared!";
+        graphics.drawString(line1, boxX + (boxW - metrics.stringWidth(line1)) / 2, boxY + 52);
+
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        metrics = graphics.getFontMetrics();
+        String line2 = "Steady hands - get ready to type.";
+        graphics.setColor(new Color(235, 255, 225));
         graphics.drawString(line2, boxX + (boxW - metrics.stringWidth(line2)) / 2, boxY + boxH + 24);
     }
 
