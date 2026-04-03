@@ -171,7 +171,7 @@ The following accounts are included for testing and can be used immediately with
 
 The parental controls screen is accessible from the main menu via the **PARENTAL CONTROLS** button.
 
-**Teacher PIN:** `1234`
+**Teacher PIN:** `2212`
 
 From the parental controls dashboard a teacher can:
 - View all registered player accounts and their statistics
