@@ -560,6 +560,10 @@ public class GamePanel extends JPanel {
 
                 statusBanner = "Picked up " + earned.displayName + "!";
                 statusBannerUntil = System.currentTimeMillis() + 2000;
+                
+                int pickedCol = obj.getX() / TILE_SIZE;
+                int pickedRow = obj.getY() / TILE_SIZE;
+                ProfileStore.recordPokeballPickup(currentUsername, currentLevelId, pickedCol, pickedRow);
 
                 terrainObjects.remove(i);
             }
