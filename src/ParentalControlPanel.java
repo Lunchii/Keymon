@@ -4,6 +4,22 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ * Admin settings panel for parental controls and maintenance operations.
+ *
+ * <p>
+ * Provides navigation for the admin dashboard and exposes controls for:
+ * <ul>
+ * <li>Viewing player stats</li>
+ * <li>Viewing high score table</li>
+ * <li>Performing a full reset of user and highscore data</li>
+ * <li>Returning to the main menu</li>
+ * </ul>
+ * </p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class ParentalControlPanel extends JPanel {
     private Image backgroundGif;
     private ArrayList<JButton> buttons = new ArrayList<>();
