@@ -4,17 +4,20 @@ import java.awt.*;
  * Renders the in-game pause overlay with a centered dark panel,
  * "PAUSED" header, and navigable menu options.
  *
- * <p>The currently selected option is highlighted in yellow with a right-arrow
+ * <p>
+ * The currently selected option is highlighted in yellow with a right-arrow
  * indicator. All layout is computed relative to the GamePanel size so it
- * remains correct at any window resolution.</p>
+ * remains correct at any window resolution.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
 public class PauseMenu {
 
-    private static final int PANEL_W   = 340;
-    private static final int OPTION_H  = 52;
-    private static final int CORNER_R  = 18;
+    private static final int PANEL_W = 340;
+    private static final int OPTION_H = 52;
+    private static final int CORNER_R = 18;
 
     private final GamePanel gp;
 
@@ -25,6 +28,41 @@ public class PauseMenu {
      */
     public PauseMenu(GamePanel gp) {
         this.gp = gp;
+    }
+
+    /**
+     * Calculates which menu option index is located at the given mouse point.
+     * * @param p The current mouse coordinates relative to the GamePanel
+     * 
+     * @return The index of the hovered option, or -1 if the mouse is not over an
+     *         option
+     */
+    /**
+     * Calculates which menu option index is located at the given mouse point.
+     * Reuses drawing logic to ensure "hitboxes" match the visual UI.
+     */
+    public int getOptionIndexAt(Point p) {
+        int sw = gp.getWidth();
+        int sh = gp.getHeight();
+
+        String[] options = gp.getPauseOptions();
+        int panelH = 100 + options.length * OPTION_H + 24;
+        int panelX = (sw - PANEL_W) / 2;
+        int panelY = (sh - panelH) / 2;
+
+        // Check if mouse is within the horizontal bounds of the panel (with padding)
+        if (p.x >= panelX + 12 && p.x <= panelX + PANEL_W - 12) {
+            for (int i = 0; i < options.length; i++) {
+                // Calculate the Y position of this specific option row
+                int optY = panelY + 82 + i * OPTION_H;
+
+                // Check if mouse Y is within this option's row height
+                if (p.y >= optY + 4 && p.y <= optY + OPTION_H - 4) {
+                    return i;
+                }
+            }
+        }
+        return -1; // Mouse is not over any option
     }
 
     /**
