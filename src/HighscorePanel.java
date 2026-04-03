@@ -22,6 +22,8 @@ public class HighscorePanel extends JPanel {
     private JPanel container;
     private DefaultTableModel tableModel;
 
+    private String previousCard = "MENU";
+
     public HighscorePanel(CardLayout layout, JPanel container) {
         this.cardLayout = layout;
         this.container = container;
@@ -59,7 +61,11 @@ public class HighscorePanel extends JPanel {
         footer.setOpaque(false);
         footer.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
 
-        JButton backBtn = new JButton("BACK TO MENU");
+        JButton backBtn = new JButton("BACK");
+        backBtn.addActionListener(e -> {
+            cardLayout.show(container, previousCard);
+        });
+
         backBtn.setFont(new Font("Monospaced", Font.BOLD, 24));
         backBtn.setBackground(Color.BLACK);
         backBtn.setForeground(Color.BLACK);
@@ -68,6 +74,10 @@ public class HighscorePanel extends JPanel {
 
         footer.add(backBtn);
         add(footer, BorderLayout.SOUTH);
+    }
+
+    public void setPreviousCard(String cardName) {
+        this.previousCard = cardName;
     }
 
     /**
