@@ -55,7 +55,7 @@ public class Player {
         this.targetY = y;
 
         try {
-            spriteSheet = ImageIO.read(new File("playerSprite.png"));
+            spriteSheet = ImageIO.read(new File("images/playerSprite.png"));
             setDirection(10, 35, 50, 14, 29);
         } catch (Exception e) {
             System.err.println("Error: Could not load playerSprite.png");
@@ -79,7 +79,7 @@ public class Player {
         this.spriteRow = row;
 
         try {
-            spriteSheet = ImageIO.read(new File("playerSprite.png"));
+            spriteSheet = ImageIO.read(new File("images/playerSprite.png"));
             // Re-initialize with Isaac's animation parameters
             setDirection(row, 35, 50, 14, 29);
         } catch (Exception e) {

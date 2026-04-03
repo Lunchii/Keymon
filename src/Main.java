@@ -146,9 +146,9 @@ public class Main {
     }
 
     private int getLevelIdFromMap(String mapFile) {
-        if ("level2_map.csv".equalsIgnoreCase(mapFile))
+        if ("maps/level2_map.csv".equalsIgnoreCase(mapFile))
             return 2;
-        if ("level3_map.csv".equalsIgnoreCase(mapFile))
+        if ("maps/level3_map.csv".equalsIgnoreCase(mapFile))
             return 3;
         return 1;
     }
@@ -156,11 +156,11 @@ public class Main {
     private String mapFileForLevel(int levelId) {
         switch (WordRepository.sanitizeLevel(levelId)) {
             case 2:
-                return "level2_map.csv";
+                return "maps/level2_map.csv";
             case 3:
-                return "level3_map.csv";
+                return "maps/level3_map.csv";
             default:
-                return "level1_map.csv";
+                return "maps/level1_map.csv";
         }
     }
 
@@ -204,7 +204,7 @@ public class Main {
     }
 
     public void startTutorial() {
-        MapLoader tutorialLoader = new MapLoader("tutorial_map.csv");
+        MapLoader tutorialLoader = new MapLoader("maps/tutorial_map.csv");
         Trainer trainer = tutorialLoader.getTrainer();
 
         if (tutorialGamePanel != null) {
@@ -213,7 +213,7 @@ public class Main {
 
         Player player = new Player(3 * TILE_SIZE, 3 * TILE_SIZE, 0, TILE_SIZE);
         tutorialGamePanel = new GamePanel(cardLayout, mainContainer, player, tutorialLoader.getWorldMap(),
-                trainer, tutorialLoader.getTerrainObjects(), "", this, true, 1, "tutorial_map.csv");
+                trainer, tutorialLoader.getTerrainObjects(), "", this, true, 1, "maps/tutorial_map.csv");
         List<Pokemon> tutorialParty = new java.util.ArrayList<>();
         tutorialParty.add(Pokemon.random());
         tutorialGamePanel.setParty(tutorialParty);

@@ -33,7 +33,7 @@ public class PlayerScreen extends JPanel {
         this.mainApp = mainApp;
 
         try {
-            backgroundImage = ImageIO.read(new File("LoginBackground.png"));
+            backgroundImage = ImageIO.read(new File("images/LoginBackground.png"));
         } catch (Exception e) {
             // fallback to solid colour below
         }

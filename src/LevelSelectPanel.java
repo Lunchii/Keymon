@@ -31,7 +31,7 @@ public class LevelSelectPanel extends JPanel {
         this.cardLayout = (CardLayout) mainContainer.getLayout();
 
         try {
-            backgroundImage = ImageIO.read(new File("LoginBackground.png"));
+            backgroundImage = ImageIO.read(new File("images/LoginBackground.png"));
         } catch (Exception e) {
             // fallback to solid colour below
         }
@@ -64,13 +64,13 @@ public class LevelSelectPanel extends JPanel {
         int unlockedLevel = ProfileStore.getHighestUnlockedLevel(username);
 
         JButton level1Btn = createStyledButton("LEVEL 1", Color.BLACK, Color.BLACK);
-        level1Btn.addActionListener(e -> mainApp.startGame(username, "level1_map.csv"));
+        level1Btn.addActionListener(e -> mainApp.startGame(username, "maps/level1_map.csv"));
         level1Btn.setToolTipText(WordRepository.getStageName(1) + " - " + WordRepository.getStageDescription(1));
         gbc.gridy = 2;
         dialogBox.add(level1Btn, gbc);
 
         JButton level2Btn = createStyledButton("LEVEL 2", Color.BLACK, Color.BLACK);
-        level2Btn.addActionListener(e -> mainApp.startGame(username, "level2_map.csv"));
+        level2Btn.addActionListener(e -> mainApp.startGame(username, "maps/level2_map.csv"));
         level2Btn.setToolTipText(WordRepository.getStageName(2) + " - " + WordRepository.getStageDescription(2));
         if (unlockedLevel < 2) {
             level2Btn.setEnabled(false);
@@ -80,7 +80,7 @@ public class LevelSelectPanel extends JPanel {
         dialogBox.add(level2Btn, gbc);
 
         JButton level3Btn = createStyledButton("LEVEL 3", Color.BLACK, Color.BLACK);
-        level3Btn.addActionListener(e -> mainApp.startGame(username, "level3_map.csv"));
+        level3Btn.addActionListener(e -> mainApp.startGame(username, "maps/level3_map.csv"));
         level3Btn.setToolTipText(WordRepository.getStageName(3) + " - " + WordRepository.getStageDescription(3));
         if (unlockedLevel < 3) {
             level3Btn.setEnabled(false);

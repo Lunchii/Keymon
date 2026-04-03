@@ -22,8 +22,8 @@ public class TerrainObjects {
     private static final Map<Integer, String> SPRITE_MAP = new HashMap<>();
 
     static {
-        SPRITE_MAP.put(1, "tree.png");
-        SPRITE_MAP.put(2, "rock.png");
+        SPRITE_MAP.put(1, "images/tree.png");
+        SPRITE_MAP.put(2, "images/rock.png");
         // Add more mappings as needed
     }
 
@@ -37,7 +37,7 @@ public class TerrainObjects {
         this.y = row * TILE_SIZE;
 
         // Load sprite based on tile value
-        String spritePath = SPRITE_MAP.getOrDefault(tileValue, "tree.png");
+        String spritePath = SPRITE_MAP.getOrDefault(tileValue, "images/tree.png");
         try {
             sprite = ImageIO.read(new File(spritePath));
         } catch (Exception e) {

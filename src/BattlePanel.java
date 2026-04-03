@@ -413,6 +413,7 @@ public class BattlePanel extends JPanel {
 
         String typed = inputField.getText().trim();
         if (typed.equalsIgnoreCase(currentWord)) {
+            MusicPlayer.playEffect("attack");
             typedWordsThisTurn++;
             int score = WordRepository.scoreWord(gamePanel.getCurrentLevelId(), currentWord,
                 Math.max(1, gamePanel.getComboStreak() + 1));

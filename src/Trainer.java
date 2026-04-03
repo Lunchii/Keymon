@@ -46,7 +46,7 @@ public class Trainer {
         this.pixelY = row * TILE_SIZE;
 
         try {
-            spriteSheet = ImageIO.read(new File("playerSprite.png"));
+            spriteSheet = ImageIO.read(new File("images/playerSprite.png"));
             currentFrame = spriteSheet.getSubimage(X_OFFSET, SPRITE_ROW, FRAME_WIDTH, FRAME_HEIGHT);
         } catch (Exception e) {
             System.err.println("Trainer: could not load playerSprite.png");

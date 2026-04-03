@@ -96,20 +96,20 @@ public class GamePanel extends JPanel {
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
-        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false, 1, "level1_map.csv");
+        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false, 1, "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
         this(layout, container, player, map, trainer, terrainObjects, username, mainApp, tutorialMode, 1,
-            tutorialMode ? "tutorial_map.csv" : "level1_map.csv");
+            tutorialMode ? "maps/tutorial_map.csv" : "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
                      int levelId) {
         this(layout, container, player, map, trainer, terrainObjects, username, mainApp, tutorialMode, levelId,
-            levelId == 2 ? "level2_map.csv" : levelId == 3 ? "level3_map.csv" : "level1_map.csv");
+            levelId == 2 ? "maps/level2_map.csv" : levelId == 3 ? "maps/level3_map.csv" : "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
@@ -547,7 +547,7 @@ public class GamePanel extends JPanel {
 
     private void loadTallGrassSprite() {
         try {
-            tallGrassSprite = ImageIO.read(new File("tall_grass.png"));
+            tallGrassSprite = ImageIO.read(new File("images/tall_grass.png"));
         } catch (Exception exception) {
             System.err.println("Warning: Could not load tall_grass.png");
         }
@@ -919,11 +919,11 @@ public class GamePanel extends JPanel {
     private String defaultMapFile(int levelId) {
         switch (WordRepository.sanitizeLevel(levelId)) {
             case 2:
-                return "level2_map.csv";
+                return "maps/level2_map.csv";
             case 3:
-                return "level3_map.csv";
+                return "maps/level3_map.csv";
             default:
-                return "level1_map.csv";
+                return "maps/level1_map.csv";
         }
     }
 
