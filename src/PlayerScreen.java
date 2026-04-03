@@ -75,7 +75,7 @@ public class PlayerScreen extends JPanel {
         gbc.gridy = 2;
         dialogBox.add(new JScrollPane(detailArea), gbc);
 
-        JButton continueBtn = createStyledButton("CONTINUE JOURNEY", Color.BLACK, Color.WHITE);
+        JButton continueBtn = createStyledButton("CONTINUE JOURNEY", Color.BLACK, Color.BLACK);
         continueBtn.addActionListener(e -> mainApp.continueGame(username));
         gbc.gridy = 3;
         dialogBox.add(continueBtn, gbc);
