@@ -1,13 +1,17 @@
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 /**
- * Full player-statistics screen showing typing metrics, achievement badges, and coaching tips.
+ * Full player-statistics screen showing typing metrics, achievement badges, and
+ * coaching tips.
  *
- * <p>Data is loaded fresh from {@link ProfileStore} each time
+ * <p>
+ * Data is loaded fresh from {@link ProfileStore} each time
  * {@link #setUserData(String)} is called so the view is always up to date.
  * The screen is divided into two scrollable text panels: a typing snapshot
- * on the left and badges/tips on the right.</p>
+ * on the left and badges/tips on the right.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -75,8 +79,7 @@ public class StatsPage extends JPanel {
         panel.setBackground(new Color(245, 245, 245, 230));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 3),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         JLabel label = new JLabel(heading, SwingConstants.CENTER);
         label.setFont(new Font("Monospaced", Font.BOLD, 18));
