@@ -19,6 +19,10 @@ import java.util.Map;
  */
 public final class ProfileStore {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final File DATA_DIR = new File("data");
+    private static final File PROFILE_DIR = new File(DATA_DIR, "profiles");
+    private static final File SYSTEM_DIR = new File(DATA_DIR, "system");
+    private static final String LEGACY_ROOT = ".";
     private static final String SAVE_SUFFIX = "_profile.json";
     private static final String HIGHSCORE_FILE = "highscores.json";
     private static final String PARENT_PIN = "2212";
@@ -90,7 +94,8 @@ public final class ProfileStore {
      * @return true if the save file exists
      */
     public static boolean accountExists(String username) {
-        return getSaveFile(sanitizeUsername(username)).exists();
+        String cleanUsername = sanitizeUsername(username);
+        return getSaveFile(cleanUsername).exists() || getLegacySaveFile(cleanUsername).exists();
     }
 
     /**
@@ -165,6 +170,10 @@ public final class ProfileStore {
         String cleanUsername = sanitizeUsername(username);
         File file = getSaveFile(cleanUsername);
         boolean deleted = file.exists() && file.delete();
+        File legacyFile = getLegacySaveFile(cleanUsername);
+        if (legacyFile.exists() && legacyFile.delete()) {
+            deleted = true;
+        }
         if (deleted) {
             removeFromHighScoreTable(cleanUsername);
         }
@@ -212,8 +221,9 @@ public final class ProfileStore {
      * @return stored usernames
      */
     public static List<String> getAllUsernames() {
+        ensureDataDirectories();
         List<String> usernames = new ArrayList<>();
-        File[] files = new File(".").listFiles((dir, name) -> name.endsWith(SAVE_SUFFIX));
+        File[] files = PROFILE_DIR.listFiles((dir, name) -> name.endsWith(SAVE_SUFFIX));
         if (files == null) {
             return usernames;
         }
@@ -483,7 +493,29 @@ public final class ProfileStore {
     }
 
     private static File getSaveFile(String username) {
-        return new File(username + SAVE_SUFFIX);
+        ensureDataDirectories();
+        return new File(PROFILE_DIR, username + SAVE_SUFFIX);
+    }
+
+    private static File getLegacySaveFile(String username) {
+        return new File(LEGACY_ROOT, username + SAVE_SUFFIX);
+    }
+
+    private static File getHighScoreFile() {
+        ensureDataDirectories();
+        return new File(SYSTEM_DIR, HIGHSCORE_FILE);
+    }
+
+    private static void ensureDataDirectories() {
+        if (!DATA_DIR.exists()) {
+            DATA_DIR.mkdirs();
+        }
+        if (!PROFILE_DIR.exists()) {
+            PROFILE_DIR.mkdirs();
+        }
+        if (!SYSTEM_DIR.exists()) {
+            SYSTEM_DIR.mkdirs();
+        }
     }
 
     private static SaveData loadData(String username) {
@@ -493,6 +525,12 @@ public final class ProfileStore {
         }
 
         File file = getSaveFile(cleanUsername);
+        if (!file.exists()) {
+            File legacyFile = getLegacySaveFile(cleanUsername);
+            if (legacyFile.exists()) {
+                file = legacyFile;
+            }
+        }
         if (!file.exists()) {
             return null;
         }
@@ -511,6 +549,7 @@ public final class ProfileStore {
     }
 
     private static boolean writeData(String username, SaveData data) {
+        ensureDataDirectories();
         try (FileWriter writer = new FileWriter(getSaveFile(username))) {
             GSON.toJson(data, writer);
             return true;
@@ -620,7 +659,7 @@ public final class ProfileStore {
     }
 
     private static HighScoreTable loadHighScoreTable() {
-        File file = new File(HIGHSCORE_FILE);
+        File file = getHighScoreFile();
         if (!file.exists()) {
             HighScoreTable table = new HighScoreTable();
             table.records = defaultHighScores();
@@ -644,7 +683,8 @@ public final class ProfileStore {
     }
 
     private static void writeHighScoreTable(HighScoreTable table) {
-        try (FileWriter writer = new FileWriter(HIGHSCORE_FILE)) {
+        ensureDataDirectories();
+        try (FileWriter writer = new FileWriter(getHighScoreFile())) {
             GSON.toJson(table, writer);
         } catch (IOException exception) {
             System.err.println("ProfileStore: failed to write high scores: " + exception.getMessage());

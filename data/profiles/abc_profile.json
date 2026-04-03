@@ -1,0 +1,66 @@
+{
+  "username": "abc",
+  "password": "anbs",
+  "highScore": 0,
+  "currentLevel": 1,
+  "unlockedLevel": 1,
+  "levelX": [
+    320,
+    320,
+    320
+  ],
+  "levelY": [
+    320,
+    320,
+    320
+  ],
+  "levelSpriteRow": [
+    10,
+    10,
+    10
+  ],
+  "party": [
+    {
+      "name": "Flamezard",
+      "maxHp": 95,
+      "currentHp": 95,
+      "attack": 26,
+      "spritePath": "keymonsters/flamezard.png"
+    },
+    {
+      "name": "Puffypuff",
+      "maxHp": 130,
+      "currentHp": 130,
+      "attack": 11,
+      "spritePath": "keymonsters/puffypuff.png"
+    },
+    {
+      "name": "Wukong",
+      "maxHp": 60,
+      "currentHp": 60,
+      "attack": 35,
+      "spritePath": "keymonsters/wukong.png"
+    }
+  ],
+  "itemCounts": {
+    "SLOW_TIME": 2,
+    "POTION": 3,
+    "FULL_HEAL": 1,
+    "ATTACK_BOOST": 2
+  },
+  "collectedPokeballs": [
+    "1:44:12"
+  ],
+  "totalTimePlayedSeconds": 49,
+  "wordsTyped": 0,
+  "correctChars": 0,
+  "totalTypedChars": 0,
+  "errorCount": 0,
+  "peakWpm": 0.0,
+  "cumulativeAverageWpm": 0.0,
+  "averageWpmSamples": 0,
+  "longestStreak": 0,
+  "powerupsUsed": 0,
+  "gamesPlayed": 1,
+  "levelWins": 0
+}

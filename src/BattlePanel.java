@@ -3,11 +3,13 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.util.List;
 import java.util.Random;
@@ -33,6 +35,9 @@ import javax.swing.event.DocumentListener;
  * @version 1.0
  */
 public class BattlePanel extends JPanel {
+    private static final int PARTY_CIRCLE_RADIUS = 12;
+    private static final int PARTY_CIRCLE_GAP = 8;
+
     private enum Phase {
         MENU, COUNTDOWN, PLAYER_TURN, ENEMY_TURN, SWITCH_SELECT, FINISHED
     }
@@ -79,6 +84,8 @@ public class BattlePanel extends JPanel {
     private JPanel switchOverlay;
     private final JButton[] switchSlots = new JButton[6];
     private JPanel bagOverlay;
+    private JLabel bagTitleLabel;
+    private JLabel bagHintLabel;
     private final JButton[] itemButtons = new JButton[Item.values().length];
 
     public BattlePanel(CardLayout layout, JPanel container, GamePanel gamePanel,
@@ -112,7 +119,7 @@ public class BattlePanel extends JPanel {
         add(statusLabel);
 
         timerLabel = createLabel(" ", Font.BOLD, 18);
-        timerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(timerLabel);
 
         wordLabel = createLabel(" ", Font.BOLD, 24);
@@ -188,14 +195,12 @@ public class BattlePanel extends JPanel {
         bagOverlay.setVisible(false);
         add(bagOverlay);
 
-        JLabel bagTitle = createLabel("Use an item (costs your turn)", Font.BOLD, 15);
-        bagTitle.setBounds(18, 12, 320, 22);
-        bagOverlay.add(bagTitle);
+        bagTitleLabel = createLabel("Use an item (costs your turn)", Font.BOLD, 15);
+        bagOverlay.add(bagTitleLabel);
 
-        JLabel bagHint = createLabel("Powerups help you survive harder stages.", Font.PLAIN, 12);
-        bagHint.setForeground(new Color(220, 210, 245));
-        bagHint.setBounds(18, 34, 280, 18);
-        bagOverlay.add(bagHint);
+        bagHintLabel = createLabel("Powerups help you survive harder stages.", Font.PLAIN, 12);
+        bagHintLabel.setForeground(new Color(220, 210, 245));
+        bagOverlay.add(bagHintLabel);
 
         for (int i = 0; i < Item.values().length; i++) {
             final Item item = Item.values()[i];
@@ -207,7 +212,8 @@ public class BattlePanel extends JPanel {
             button.setBorderPainted(false);
             button.setHorizontalAlignment(SwingConstants.CENTER);
             button.setVerticalTextPosition(SwingConstants.BOTTOM);
-            button.setMargin(new Insets(6, 14, 6, 14));
+            button.setVerticalAlignment(SwingConstants.TOP);
+            button.setMargin(new Insets(10, 12, 10, 12));
             button.addActionListener(event -> useItem(item));
             itemButtons[i] = button;
             bagOverlay.add(button);
@@ -303,6 +309,7 @@ public class BattlePanel extends JPanel {
         feedbackLabel.setForeground(new Color(220, 230, 255));
         feedbackLabel.setText("Build words quickly, but protect your focus.");
         statusLabel.setText("Get ready...");
+        wordLabel.setText(wrapWordHtml("Get ready to type!", 34, true));
         timerLabel.setText(String.valueOf(preCountdown));
         statsLabel.setText(buildStatsLine());
 
@@ -398,7 +405,7 @@ public class BattlePanel extends JPanel {
             rest = escapeHtml(currentWord.substring(Math.min(currentWord.length(), matched + 1)));
         }
 
-        StringBuilder builder = new StringBuilder("<html><div style='font-size:28px;'>");
+        StringBuilder builder = new StringBuilder("<html><div style='text-align:center; font-size:46px; font-weight:bold;'>");
         builder.append("<span style='color:#80ff9c;'>").append(good).append("</span>");
         if (!bad.isEmpty()) {
             builder.append("<span style='color:#ff8a80;'>").append(bad).append("</span>");
@@ -609,8 +616,11 @@ public class BattlePanel extends JPanel {
         for (int i = 0; i < Item.values().length; i++) {
             Item item = Item.values()[i];
             int count = gamePanel.getItemBag().getCount(item);
-            String label = "<html><div style='text-align:center; padding:6px 10px;'><b>" + item.displayName
-                    + " x" + count + "</b><br/>" + item.description + "</div></html>";
+            String label = "<html><div style='text-align:center; padding:8px 10px; line-height:1.25;'>"
+                    + "<div style='font-size:14px; font-weight:bold;'>" + escapeHtml(item.displayName)
+                    + " x" + count + "</div>"
+                    + "<div style='margin-top:6px; font-size:11px;'>" + escapeHtml(item.description)
+                    + "</div></div></html>";
             itemButtons[i].setText(label);
             itemButtons[i].setEnabled(count > 0);
             itemButtons[i].setBackground(count > 0 ? item.color.darker() : new Color(50, 50, 50));
@@ -767,7 +777,127 @@ public class BattlePanel extends JPanel {
     }
 
     private String wrapWordHtml(String text) {
-        return "<html><div style='font-size:22px; color:#ffffff;'>" + escapeHtml(text) + "</div></html>";
+        return wrapWordHtml(text, 22, false);
+    }
+
+    private String wrapWordHtml(String text, int fontSize, boolean centered) {
+        return "<html><div style='font-size:" + fontSize + "px; color:#ffffff;"
+                + (centered ? " text-align:center;" : "") + "'>" + escapeHtml(text) + "</div></html>";
+    }
+
+    private boolean isTypingFocusPhase() {
+        return phase == Phase.COUNTDOWN || phase == Phase.PLAYER_TURN;
+    }
+
+    private int partyCircleSpan(int count) {
+        if (count <= 0) {
+            return 0;
+        }
+        int diameter = PARTY_CIRCLE_RADIUS * 2;
+        return count * diameter + Math.max(0, count - 1) * PARTY_CIRCLE_GAP;
+    }
+
+    private void drawPanelFrame(Graphics2D graphics, int x, int y, int width, int height, int arc,
+            Color fill, Color border) {
+        Graphics2D panelGraphics = (Graphics2D) graphics.create();
+        panelGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        panelGraphics.setColor(new Color(0, 0, 0, 28));
+        panelGraphics.fillRoundRect(x + 2, y + 3, width - 1, height - 1, arc, arc);
+
+        panelGraphics.setColor(fill);
+        panelGraphics.fillRoundRect(x, y, width, height, arc, arc);
+
+        panelGraphics.setColor(border);
+        panelGraphics.setStroke(new BasicStroke(2.2f));
+        panelGraphics.drawRoundRect(x + 1, y + 1, width - 3, height - 3, arc - 2, arc - 2);
+        panelGraphics.drawLine(x + 18, y + 2, x + width - 18, y + 2);
+
+        panelGraphics.dispose();
+    }
+
+    private void drawRectPanelFrame(Graphics2D graphics, int x, int y, int width, int height,
+            Color fill, Color border) {
+        Graphics2D panelGraphics = (Graphics2D) graphics.create();
+        panelGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        panelGraphics.setColor(new Color(0, 0, 0, 22));
+        panelGraphics.fillRect(x + 2, y + 3, width, height);
+
+        panelGraphics.setColor(fill);
+        panelGraphics.fillRect(x, y, width, height);
+
+        panelGraphics.setColor(border);
+        panelGraphics.setStroke(new BasicStroke(2.0f));
+        panelGraphics.drawRect(x + 1, y + 1, width - 3, height - 3);
+
+        panelGraphics.dispose();
+    }
+
+    private Rectangle calculateFocusPanelBounds(int width, int height, int boxY) {
+        int focusPanelW = Math.min(width - 240, 680);
+        int focusPanelH = phase == Phase.PLAYER_TURN ? 248 : 196;
+        int focusPanelX = (width - focusPanelW) / 2;
+        int preferredFocusPanelY = Math.max(76, height / 2 - focusPanelH / 2 - 58);
+        int maxFocusPanelY = Math.max(36, boxY - focusPanelH - 34);
+        int focusPanelY = Math.min(preferredFocusPanelY, maxFocusPanelY);
+        return new Rectangle(focusPanelX, focusPanelY, focusPanelW, focusPanelH);
+    }
+
+    private void drawFocusPanelTopBorder(Graphics2D graphics, Rectangle bounds, Color border) {
+        Graphics2D borderGraphics = (Graphics2D) graphics.create();
+        borderGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        borderGraphics.setColor(border);
+        borderGraphics.setStroke(new BasicStroke(2.4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        borderGraphics.drawLine(bounds.x + 20, bounds.y + 2, bounds.x + bounds.width - 20, bounds.y + 2);
+        borderGraphics.dispose();
+    }
+
+    private void drawTypingStatsPanel(Graphics2D graphics, int x, int y, int width, int height) {
+        String[][] metrics = {
+                { "SCORE", String.valueOf(gamePanel.getLevelScore()) },
+                { "ACCURACY", String.format("%.1f%%", gamePanel.getAccuracyPercent()) },
+                { "WPM", String.format("%.1f", gamePanel.getCurrentWpm()) },
+                { "COMBO", "x" + Math.max(1, gamePanel.getComboStreak()) },
+                { "WORDS", String.valueOf(gamePanel.getWordsTyped()) },
+                { "MISTAKES", String.valueOf(gamePanel.getErrorCount()) }
+        };
+
+        int columns = 3;
+        int cardGap = 16;
+        int rowGap = 10;
+        int verticalPadding = 8;
+        int cardWidth = (width - cardGap * (columns - 1)) / columns;
+        int cardHeight = (height - rowGap - verticalPadding * 2) / 2;
+
+        for (int i = 0; i < metrics.length; i++) {
+            int col = i % columns;
+            int row = i / columns;
+            int cardX = x + col * (cardWidth + cardGap);
+            int cardY = y + verticalPadding + row * (cardHeight + rowGap);
+            drawTypingStatCard(graphics, cardX, cardY, cardWidth, cardHeight, metrics[i][0], metrics[i][1]);
+        }
+    }
+
+    private void drawTypingStatCard(Graphics2D graphics, int x, int y, int width, int height, String label, String value) {
+        graphics.setColor(new Color(7, 26, 17, 195));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(new Color(182, 222, 196, 95));
+        graphics.setStroke(new BasicStroke(1.7f));
+        graphics.drawRoundRect(x + 1, y + 1, width - 3, height - 3, 16, 16);
+
+        Font labelFont = new Font("SansSerif", Font.BOLD, Math.max(11, Math.min(13, height / 5)));
+        Font valueFont = new Font("SansSerif", Font.BOLD, Math.max(22, Math.min(30, height / 2)));
+
+        graphics.setFont(labelFont);
+        graphics.setColor(new Color(182, 222, 196));
+        graphics.drawString(label, x + 14, y + 20);
+
+        graphics.setFont(valueFont);
+        graphics.setColor(Color.WHITE);
+        FontMetrics valueMetrics = graphics.getFontMetrics(valueFont);
+        int valueBaseline = y + height - Math.max(12, valueMetrics.getDescent() + 8);
+        graphics.drawString(value, x + 14, valueBaseline);
     }
 
     private String escapeHtml(String text) {
@@ -809,80 +939,153 @@ public class BattlePanel extends JPanel {
             }
         }
 
-        drawPartyCircles(g2, 20, 120, party, gamePanel.getActivePartyIndex());
+        drawPartyCircles(g2, 42, 120, party, gamePanel.getActivePartyIndex());
         if (isTrainerBattle && trainerTeam != null) {
-            drawPartyCircles(g2, width - 80, 120, trainerTeam, trainerIndex);
+            drawPartyCircles(g2, width - 42 - partyCircleSpan(trainerTeam.size()), 120, trainerTeam, trainerIndex);
         }
 
         Pokemon active = activePokemon();
         drawHpCard(g2, width - 230, height - 355, active.name, active.currentHp, active.maxHp);
         drawHpCard(g2, 20, 50, wildPokemon.name, wildPokemon.currentHp, wildPokemon.maxHp);
 
-        int boxY = height - 220;
-        int boxH = 200;
-        g2.setColor(new Color(15, 50, 35, 236));
-        g2.fillRoundRect(18, boxY, width - 36, boxH, 18, 18);
-        g2.setColor(new Color(180, 220, 180, 160));
-        g2.setStroke(new BasicStroke(2f));
-        g2.drawRoundRect(18, boxY, width - 36, boxH, 18, 18);
+        boolean focusMode = isTypingFocusPhase();
 
-        int buttonX = width - 210;
-        int textWidth = buttonX - 80;
-        statusLabel.setBounds(45, boxY + 14, textWidth, 30);
-        timerLabel.setBounds(buttonX - 60, boxY + 14, 110, 28);
-        wordLabel.setBounds(45, boxY + 48, textWidth, 44);
-        feedbackLabel.setBounds(45, boxY + 96, textWidth, 28);
-        statsLabel.setBounds(45, boxY + 124, textWidth, 24);
-        inputField.setBounds(45, boxY + 154, textWidth, 36);
+        int boxX = 24;
+        int boxW = width - 48;
+        int boxH = 224;
+        int boxY = height - boxH - 34;
+        Rectangle focusPanelBounds = null;
+
+        if (focusMode) {
+            focusPanelBounds = calculateFocusPanelBounds(width, height, boxY);
+        }
+
+        drawRectPanelFrame(g2, boxX, boxY, boxW, boxH, new Color(15, 50, 35, 242), new Color(165, 214, 178));
+        if (focusPanelBounds != null) {
+            drawPanelFrame(g2, focusPanelBounds.x, focusPanelBounds.y, focusPanelBounds.width, focusPanelBounds.height, 28,
+                    new Color(10, 26, 20, 222), new Color(170, 222, 186));
+            drawFocusPanelTopBorder(g2, focusPanelBounds, new Color(170, 222, 186));
+        }
+        // Inset the border so the stroke is entirely inside the fill — no clipping at edges.
+        int buttonW = 176;
+        int buttonX = boxX + boxW - buttonW - 28;
+        int textX = boxX + 28;
+        int textWidth = buttonX - textX - 24;
+        statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        if (focusMode) {
+            statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+            statusLabel.setBounds(textX, boxY + 12, boxW - 56, 28);
+
+            feedbackLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            feedbackLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            feedbackLabel.setBounds(textX, boxY + 42, boxW - 56, 24);
+
+            statsLabel.setVisible(false);
+
+            int statsPanelX = textX;
+            int statsPanelY = boxY + 62;
+            int statsPanelW = boxW - 56;
+            int statsPanelH = boxH - 98;
+            drawTypingStatsPanel(g2, statsPanelX, statsPanelY, statsPanelW, statsPanelH);
+
+            timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            timerLabel.setFont(new Font("SansSerif", Font.BOLD, phase == Phase.COUNTDOWN ? 54 : 32));
+            timerLabel.setBounds(focusPanelBounds.x + 20, focusPanelBounds.y + 18, focusPanelBounds.width - 40,
+                    phase == Phase.COUNTDOWN ? 62 : 38);
+
+            wordLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            wordLabel.setBounds(focusPanelBounds.x + 28, focusPanelBounds.y + (phase == Phase.COUNTDOWN ? 76 : 64),
+                    focusPanelBounds.width - 56, phase == Phase.COUNTDOWN ? 50 : 66);
+
+            if (phase == Phase.PLAYER_TURN) {
+                inputField.setBounds(focusPanelBounds.x + 106, focusPanelBounds.y + 156, focusPanelBounds.width - 212, 42);
+            } else {
+                inputField.setBounds(textX, boxY + 168, textWidth, 36);
+            }
+        } else {
+            statusLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            statusLabel.setBounds(textX, boxY + 18, textWidth, 30);
+
+            timerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            timerLabel.setBounds(0, 0, 0, 0);
+
+            wordLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            wordLabel.setBounds(textX, boxY + 54, textWidth, 48);
+
+            feedbackLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            feedbackLabel.setFont(new Font("SansSerif", Font.PLAIN, 15));
+            feedbackLabel.setBounds(textX, boxY + 110, textWidth, 28);
+
+            statsLabel.setVisible(true);
+            statsLabel.setBounds(textX, boxY + 148, textWidth, 24);
+            inputField.setBounds(textX, boxY + 176, textWidth, 36);
+        }
 
         int buttonHeight = 34;
         int buttonGap = 8;
-        attackButton.setBounds(buttonX, boxY + 16, 170, buttonHeight);
-        bagButton.setBounds(buttonX, boxY + 16 + (buttonHeight + buttonGap), 170, buttonHeight);
-        switchButton.setBounds(buttonX, boxY + 16 + 2 * (buttonHeight + buttonGap), 170, buttonHeight);
-        runButton.setBounds(buttonX, boxY + 16 + 3 * (buttonHeight + buttonGap), 170, buttonHeight);
+        attackButton.setBounds(buttonX, boxY + 18, buttonW, buttonHeight);
+        bagButton.setBounds(buttonX, boxY + 18 + (buttonHeight + buttonGap), buttonW, buttonHeight);
+        switchButton.setBounds(buttonX, boxY + 18 + 2 * (buttonHeight + buttonGap), buttonW, buttonHeight);
+        runButton.setBounds(buttonX, boxY + 18 + 3 * (buttonHeight + buttonGap), buttonW, buttonHeight);
 
-        int overlayW = buttonX - 50;
-        switchOverlay.setBounds(30, boxY + 10, overlayW, boxH - 20);
-        int slotW = (overlayW - 20) / 2;
-        int slotH = 24;
-        int slotGap = 4;
+        int overlayX = boxX + 10;
+        int overlayW = boxW - 20;
+        int overlayH = boxH - 20;
+        switchOverlay.setBounds(overlayX, boxY + 10, overlayW, overlayH);
+        int slotW = (overlayW - 64) / 2;
+        int slotH = 34;
+        int slotGap = 10;
         for (int i = 0; i < switchSlots.length; i++) {
             int col = i % 2;
             int row = i / 2;
-            switchSlots[i].setBounds(8 + col * (slotW + 8), 42 + row * (slotH + slotGap), slotW, slotH);
+            switchSlots[i].setBounds(18 + col * (slotW + 24), 54 + row * (slotH + slotGap), slotW, slotH);
         }
 
-        bagOverlay.setBounds(30, boxY + 10, overlayW, boxH - 20);
-        int itemButtonW = (overlayW - 44) / 2;
-        int itemButtonH = 44;
+        bagOverlay.setBounds(overlayX, boxY + 10, overlayW, overlayH);
+        bagTitleLabel.setBounds(24, 14, overlayW - 48, 22);
+        bagHintLabel.setBounds(24, 38, overlayW - 48, 18);
+
+        int itemButtonW = (overlayW - 92) / itemButtons.length;
+        int itemButtonH = 80;
         for (int i = 0; i < itemButtons.length; i++) {
-            int col = i % 2;
-            int row = i / 2;
-            itemButtons[i].setBounds(14 + col * (itemButtonW + 16), 58 + row * (itemButtonH + 12), itemButtonW,
-                    itemButtonH);
+            itemButtons[i].setBounds(18 + i * (itemButtonW + 14), 68, itemButtonW, itemButtonH);
         }
-        closeBagButton.setBounds(overlayW - 118, boxH - 62, 108, 30);
+        closeBagButton.setBounds((overlayW - 128) / 2, overlayH - 46, 128, 30);
+    }
+
+    @Override
+    public void paint(Graphics graphics) {
+        super.paint(graphics);
+
+        if (!isTypingFocusPhase()) {
+            return;
+        }
+
+        Graphics2D g2 = (Graphics2D) graphics.create();
+        int boxH = 224;
+        int boxY = getHeight() - boxH - 34;
+        Rectangle focusPanelBounds = calculateFocusPanelBounds(getWidth(), getHeight(), boxY);
+        drawFocusPanelTopBorder(g2, focusPanelBounds, new Color(170, 222, 186));
+        g2.dispose();
     }
 
     private void drawPartyCircles(Graphics2D graphics, int x, int y, List<Pokemon> team, int activeIndex) {
-        int radius = 12;
-        int gap = 8;
         for (int i = 0; i < team.size(); i++) {
             boolean alive = !team.get(i).isFainted();
             boolean active = i == activeIndex;
-            int cx = x + i * (radius * 2 + gap);
+            int cx = x + i * (PARTY_CIRCLE_RADIUS * 2 + PARTY_CIRCLE_GAP);
 
             if (alive) {
                 graphics.setColor(active ? new Color(80, 220, 130) : new Color(60, 180, 100));
             } else {
                 graphics.setColor(new Color(80, 50, 50));
             }
-            graphics.fillOval(cx, y, radius * 2, radius * 2);
+            graphics.fillOval(cx, y, PARTY_CIRCLE_RADIUS * 2, PARTY_CIRCLE_RADIUS * 2);
 
             graphics.setColor(active ? Color.WHITE : new Color(30, 100, 60));
             graphics.setStroke(new BasicStroke(active ? 2.5f : 1.5f));
-            graphics.drawOval(cx, y, radius * 2, radius * 2);
+            graphics.drawOval(cx, y, PARTY_CIRCLE_RADIUS * 2, PARTY_CIRCLE_RADIUS * 2);
         }
     }
 
