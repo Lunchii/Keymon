@@ -20,6 +20,8 @@ public class Trainer {
 
     private BufferedImage spriteSheet;
     private BufferedImage currentFrame;
+    private final int encounterTier;
+    private final int trainerIndex;
 
     public final int tileX, tileY; // grid position
     private final int pixelX, pixelY;
@@ -36,20 +38,29 @@ public class Trainer {
 
     private boolean defeated = false;
 
-    // Trainer's own team of 3
+    // Trainer's own team
     private List<Pokemon> team;
 
     public Trainer(int col, int row, String spritePath) {
+        this(col, row, spritePath, 1, 0);
+    }
+
+    public Trainer(int col, int row, String spritePath, int encounterTier, int trainerIndex) {
         this.tileX  = col;
         this.tileY  = row;
         this.pixelX = col * TILE_SIZE;
         this.pixelY = row * TILE_SIZE;
+        this.encounterTier = Math.max(0, Math.min(3, encounterTier));
+        this.trainerIndex = Math.max(0, trainerIndex);
 
         try {
-            spriteSheet = ImageIO.read(new File("images/playerSprite.png"));
+            String resolvedSpritePath = spritePath == null || spritePath.isBlank()
+                ? "images/trainerSprite.png"
+                : spritePath;
+            spriteSheet = ImageIO.read(new File(resolvedSpritePath));
             currentFrame = spriteSheet.getSubimage(X_OFFSET, SPRITE_ROW, FRAME_WIDTH, FRAME_HEIGHT);
         } catch (Exception e) {
-            System.err.println("Trainer: could not load playerSprite.png");
+            System.err.println("Trainer: could not load trainer sprite");
         }
 
         buildTeam();
@@ -57,9 +68,95 @@ public class Trainer {
 
     private void buildTeam() {
         team = new ArrayList<>();
-        team.add(freshPokemon("Flamezard",  95, 26, "keymonsters/flamezard.png"));
-        team.add(freshPokemon("Starcap",    75, 29, "keymonsters/starcap.png"));
-        team.add(freshPokemon("Daxblade",   85, 31, "keymonsters/daxblade.png"));
+        switch (encounterTier) {
+            case 0:
+                buildTutorialTeam();
+                break;
+            case 1:
+                buildLevelOneTeam();
+                break;
+            case 2:
+                buildLevelTwoTeam();
+                break;
+            default:
+                buildLevelThreeTeam();
+                break;
+        }
+    }
+
+    private void buildTutorialTeam() {
+        team.add(createPokemon("Puffypuff", -15, -1));
+    }
+
+    private void buildLevelOneTeam() {
+        switch (trainerIndex % 3) {
+            case 0:
+                team.add(createPokemon("Puffypuff", -10, 0));
+                break;
+            case 1:
+                team.add(createPokemon("Flamezard", 0, 0));
+                team.add(createPokemon("Mimi", -5, 0));
+                break;
+            default:
+                team.add(createPokemon("Starcap", 0, 0));
+                team.add(createPokemon("Daxblade", -5, 0));
+                break;
+        }
+    }
+
+    private void buildLevelTwoTeam() {
+        switch (trainerIndex % 3) {
+            case 0:
+                team.add(createPokemon("Flamezard", 8, 2));
+                team.add(createPokemon("Daxblade", 6, 2));
+                break;
+            case 1:
+                team.add(createPokemon("Starcap", 10, 2));
+                team.add(createPokemon("Mimi", 8, 1));
+                team.add(createPokemon("Puffypuff", 0, 2));
+                break;
+            default:
+                team.add(createPokemon("Wukong", 6, 3));
+                team.add(createPokemon("Flamezard", 4, 2));
+                break;
+        }
+    }
+
+    private void buildLevelThreeTeam() {
+        switch (trainerIndex % 3) {
+            case 0:
+                team.add(createPokemon("Daxblade", 14, 4));
+                team.add(createPokemon("Wukong", 10, 4));
+                team.add(createPokemon("Starcap", 12, 4));
+                break;
+            case 1:
+                team.add(createPokemon("Mimi", 18, 3));
+                team.add(createPokemon("Flamezard", 12, 4));
+                team.add(createPokemon("Daxblade", 10, 5));
+                break;
+            default:
+                team.add(createPokemon("Starcap", 14, 5));
+                team.add(createPokemon("Puffypuff", 12, 3));
+                team.add(createPokemon("Wukong", 12, 5));
+                break;
+        }
+    }
+
+    private Pokemon createPokemon(String name, int hpDelta, int attackDelta) {
+        switch (name) {
+            case "Flamezard":
+                return freshPokemon("Flamezard", 95 + hpDelta, 26 + attackDelta, "keymonsters/flamezard.png");
+            case "Puffypuff":
+                return freshPokemon("Puffypuff", 130 + hpDelta, 11 + attackDelta, "keymonsters/puffypuff.png");
+            case "Wukong":
+                return freshPokemon("Wukong", 60 + hpDelta, 35 + attackDelta, "keymonsters/wukong.png");
+            case "Mimi":
+                return freshPokemon("Mimi", 110 + hpDelta, 17 + attackDelta, "keymonsters/mimi.png");
+            case "Starcap":
+                return freshPokemon("Starcap", 75 + hpDelta, 29 + attackDelta, "keymonsters/starcap.png");
+            default:
+                return freshPokemon("Daxblade", 85 + hpDelta, 31 + attackDelta, "keymonsters/daxblade.png");
+        }
     }
 
     private Pokemon freshPokemon(String name, int hp, int atk, String path) {
@@ -86,6 +183,11 @@ public class Trainer {
         if (playerTileX != tileX) return false;
         int dy = playerTileY - tileY;
         return dy > 0 && dy <= SIGHT_RANGE;
+    }
+
+    public boolean occupies(int targetPixelX, int targetPixelY) {
+        return targetPixelX >= pixelX && targetPixelX < pixelX + TILE_SIZE
+            && targetPixelY >= pixelY && targetPixelY < pixelY + TILE_SIZE;
     }
 
     public void draw(Graphics g) {

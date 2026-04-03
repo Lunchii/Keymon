@@ -40,6 +40,7 @@ public class Player {
 
     // Terrain collision
     private List<TerrainObjects> terrainObjects;
+    private List<Trainer> trainers;
 
     /**
      * Creates a player positioned at a tile coordinate.
@@ -210,6 +211,10 @@ public class Player {
         this.terrainObjects = terrainObjects;
     }
 
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
     /**
      * Returns {@code true} if the given pixel position does not collide with any terrain object.
      *
@@ -228,6 +233,14 @@ public class Player {
             }
             if (terrain.collidesWith(pixelX, pixelY)) {
                 return false;
+            }
+        }
+
+        if (trainers != null) {
+            for (Trainer trainer : trainers) {
+                if (trainer.occupies(pixelX, pixelY)) {
+                    return false;
+                }
             }
         }
         return true;

@@ -38,7 +38,8 @@ public class GamePanel extends JPanel {
 
     private final int[][] map;
     private final Player player;
-    private final Trainer trainer;
+    private final List<Trainer> trainers;
+    private Trainer activeBattleTrainer;
     private final List<TerrainObjects> terrainObjects;
     private final Random random = new Random();
 
@@ -94,32 +95,32 @@ public class GamePanel extends JPanel {
     private String statusBanner = "";
     private long statusBannerUntil;
 
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp) {
-        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, false, 1, "maps/level1_map.csv");
+        this(layout, container, player, map, trainers, terrainObjects, username, mainApp, false, 1, "maps/level1_map.csv");
     }
 
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
-        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, tutorialMode, 1,
+        this(layout, container, player, map, trainers, terrainObjects, username, mainApp, tutorialMode, 1,
             tutorialMode ? "maps/tutorial_map.csv" : "maps/level1_map.csv");
     }
 
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
                      int levelId) {
-        this(layout, container, player, map, trainer, terrainObjects, username, mainApp, tutorialMode, levelId,
+        this(layout, container, player, map, trainers, terrainObjects, username, mainApp, tutorialMode, levelId,
             levelId == 2 ? "maps/level2_map.csv" : levelId == 3 ? "maps/level3_map.csv" : "maps/level1_map.csv");
     }
 
-    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, Trainer trainer,
+    public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
                      List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
                      int levelId, String mapFile) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player;
         this.map = map;
-        this.trainer = trainer;
+        this.trainers = trainers != null ? trainers : new ArrayList<>();
         this.terrainObjects = terrainObjects;
         this.currentUsername = username == null ? "" : username;
         this.mainApp = mainApp;
@@ -132,6 +133,7 @@ public class GamePanel extends JPanel {
         this.endTilePoint = findEndTilePoint();
 
         this.player.setTerrainObjects(terrainObjects);
+        this.player.setTrainers(this.trainers);
         loadTallGrassSprite();
         if (!tutorialMode) {
             MusicPlayer.play("level" + this.currentLevelId);
@@ -366,8 +368,9 @@ public class GamePanel extends JPanel {
     }
 
     public void onTrainerDefeated() {
-        if (trainer != null) {
-            trainer.setDefeated(true);
+        if (activeBattleTrainer != null) {
+            activeBattleTrainer.setDefeated(true);
+            activeBattleTrainer = null;
         }
     }
 
@@ -582,19 +585,23 @@ public class GamePanel extends JPanel {
     }
 
     private void checkTrainerLineOfSight(int playerCol, int playerRow) {
-        if (trainer == null || inBattle || party.isEmpty() || !trainer.canSeePlayer(playerCol, playerRow)) {
-            return;
+        if (inBattle || party.isEmpty() || trainers == null) return;
+        for (Trainer t : trainers) {
+            if (t.canSeePlayer(playerCol, playerRow)) {
+                activeBattleTrainer = t;
+                inBattle = true;
+                showSpottedMessage = true;
+                List<Pokemon> team = copyTeam(t.getTeam());
+                Timer timer = new Timer(900, event -> {
+                    ((Timer) event.getSource()).stop();
+                    showSpottedMessage = false;
+                    startBattleSequence(team, true);
+                });
+                timer.setRepeats(false);
+                timer.start();
+                return;
+            }
         }
-
-        inBattle = true;
-        showSpottedMessage = true;
-        Timer timer = new Timer(900, event -> {
-            ((Timer) event.getSource()).stop();
-            showSpottedMessage = false;
-            startBattleSequence(copyTeam(trainer.getTeam()), true);
-        });
-        timer.setRepeats(false);
-        timer.start();
     }
 
     private void maybeStartWildBattle() {
@@ -875,12 +882,13 @@ public class GamePanel extends JPanel {
     }
 
     private void drawTutorialBubbles(Graphics2D graphics) {
-        if (trainer != null) {
-            int bubbleX = trainer.getX() + 52;
-            int bubbleY = trainer.getY() - 70;
+        if (trainers != null && !trainers.isEmpty()) {
+            Trainer t = trainers.get(0);
+            int bubbleX = t.getX() + 52;
+            int bubbleY = t.getY() - 70;
             drawBubble(graphics, bubbleX, bubbleY,
                 "Trainer battles are tougher. Beat the trainer team to clear the lane.");
-            drawBubbleArrow(graphics, bubbleX + 22, bubbleY + 50, trainer.getX() + 16, trainer.getY() - 8);
+            drawBubbleArrow(graphics, bubbleX + 22, bubbleY + 50, t.getX() + 16, t.getY() - 8);
         }
 
         if (endTilePoint != null) {
@@ -955,6 +963,22 @@ public class GamePanel extends JPanel {
         }
     }
 
+    private int getCameraX() {
+        int mapPixelWidth = map.length > 0 ? map[0].length * TILE_SIZE : 0;
+        int screenWidth = getWidth();
+        if (mapPixelWidth <= screenWidth) return 0;
+        int camX = player.x + TILE_SIZE / 2 - screenWidth / 2;
+        return Math.max(0, Math.min(camX, mapPixelWidth - screenWidth));
+    }
+
+    private int getCameraY() {
+        int mapPixelHeight = map.length * TILE_SIZE;
+        int screenHeight = getHeight();
+        if (mapPixelHeight <= screenHeight) return 0;
+        int camY = player.y + TILE_SIZE / 2 - screenHeight / 2;
+        return Math.max(0, Math.min(camY, mapPixelHeight - screenHeight));
+    }
+
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -962,9 +986,6 @@ public class GamePanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         try {
             drawMap(g2);
-            if (tutorialMode) {
-                drawTutorialBubbles(g2);
-            }
         } finally {
             g2.dispose();
         }
@@ -976,8 +997,14 @@ public class GamePanel extends JPanel {
         Color exitColor = stageExitColor();
         Color battlePatchColor = stageBattlePatchColor();
 
+        // Fill screen background first (screen space)
         graphics.setPaint(new GradientPaint(0, 0, baseGround.brighter(), getWidth(), getHeight(), baseGround.darker()));
         graphics.fillRect(0, 0, getWidth(), getHeight());
+
+        // Apply camera translation for world-space rendering
+        int camX = getCameraX();
+        int camY = getCameraY();
+        graphics.translate(-camX, -camY);
 
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
@@ -1008,11 +1035,21 @@ public class GamePanel extends JPanel {
             }
         }
 
-        if (trainer != null) {
-            trainer.draw(graphics);
+        if (trainers != null) {
+            for (Trainer t : trainers) {
+                t.draw(graphics);
+            }
         }
 
         player.draw(graphics);
+
+        if (tutorialMode) {
+            drawTutorialBubbles(graphics);
+        }
+
+        // Reset to screen space for HUD and overlays
+        graphics.translate(camX, camY);
+
         drawHud(graphics);
         uiManager.draw(graphics);
 
