@@ -1,6 +1,22 @@
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 
+/**
+ * Registers all keyboard bindings for the world-map game panel.
+ *
+ * <p>Key mappings:
+ * <ul>
+ *   <li>{@code W / S}  – move up/down (or navigate the pause menu)</li>
+ *   <li>{@code A / D}  – move left/right</li>
+ *   <li>{@code ESC}    – toggle pause</li>
+ *   <li>{@code P}      – toggle party overlay</li>
+ *   <li>{@code B}      – toggle bag overlay</li>
+ *   <li>{@code ENTER}  – confirm pause-menu selection</li>
+ * </ul>
+ * </p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class InputHandler {
     private GamePanel gp; // Reference to your game panel
 
@@ -29,7 +45,7 @@ public class InputHandler {
             public void actionPerformed(ActionEvent e) {
                 if (gp.isPaused() && !gp.isStat()) {
                     gp.navigateMenuUp();
-                } else if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                } else if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
                     int newY = gp.getPlayer().targetY - gp.getTileSize(); // change to getTileSize()
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
@@ -46,7 +62,7 @@ public class InputHandler {
             public void actionPerformed(ActionEvent e) {
                 if (gp.isPaused() && !gp.isStat()) {
                     gp.navigateMenuDown();
-                } else if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                } else if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
                     int newY = gp.getPlayer().targetY + gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
                         gp.getPlayer().targetY = newY;
@@ -61,7 +77,7 @@ public class InputHandler {
         im.put(KeyStroke.getKeyStroke("A"), "move_left");
         am.put("move_left", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
                     int newX = gp.getPlayer().targetX - gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
                         gp.getPlayer().targetX = newX;
@@ -76,7 +92,7 @@ public class InputHandler {
         im.put(KeyStroke.getKeyStroke("D"), "move_right");
         am.put("move_right", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.getPlayer().isMoving) {
+                if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
                     int newX = gp.getPlayer().targetX + gp.getTileSize();
                     if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
                         gp.getPlayer().targetX = newX;
@@ -84,6 +100,29 @@ public class InputHandler {
                         gp.getPlayer().setDirection(140, 33, 48, 15, 32);
                         gp.getPlayer().startAnimation();
                     }
+                }
+            }
+        });
+
+        // P — toggle party menu
+        im.put(KeyStroke.getKeyStroke("P"), "party_menu");
+        am.put("party_menu", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (!gp.isPaused() && !gp.isInBattle() && !gp.isShowingPartyMenu()) {
+                    gp.togglePartyMenu();
+                } else if (gp.isShowingPartyMenu()) {
+                    gp.togglePartyMenu();
+                }
+            }
+        });
+
+        im.put(KeyStroke.getKeyStroke("B"), "bag_menu");
+        am.put("bag_menu", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (!gp.isPaused() && !gp.isInBattle() && !gp.isShowingBagMenu()) {
+                    gp.toggleBagMenu();
+                } else if (gp.isShowingBagMenu()) {
+                    gp.toggleBagMenu();
                 }
             }
         });

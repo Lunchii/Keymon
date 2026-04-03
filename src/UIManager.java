@@ -1,25 +1,31 @@
 import java.awt.Graphics2D;
 
+/**
+ * Draws pause-related overlays for the world gameplay screen.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class UIManager {
-    private GamePanel gp;
-    private StatsScreen statsScreen;
-    private PauseMenu pauseMenu;
+    private final GamePanel gp;
+    private final StatsScreen statsScreen;
+    private final PauseMenu pauseMenu;
 
     public UIManager(GamePanel gp) {
         this.gp = gp;
-        this.statsScreen = new StatsScreen(gp);
+        this.statsScreen = new StatsScreen();
         this.pauseMenu = new PauseMenu(gp);
     }
 
-    public void draw(Graphics2D g2d) {
+    public void draw(Graphics2D graphics) {
+        if (!gp.isPaused()) {
+            return;
+        }
 
-        // 2. Check game states
-        if (gp.isPaused()) {
-            if (gp.isStat()) {
-                statsScreen.drawPlayerStat(g2d);
-            } else {
-                pauseMenu.draw(g2d);
-            }
+        if (gp.isStat()) {
+            statsScreen.updateData(gp);
+            statsScreen.drawPlayerStat(graphics, gp.getWidth(), gp.getHeight());
+        } else {
+            pauseMenu.draw(graphics);
         }
     }
 }

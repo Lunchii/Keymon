@@ -5,6 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
+/**
+ * Collidable terrain tile placed in the world map.
+ *
+ * <p>Each instance maps a CSV tile value to a sprite file and a pixel
+ * bounding box used for collision detection. The static {@link #SPRITE_MAP}
+ * associates tile values (1 = tree, 2 = rock, ...) to their image files.</p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class TerrainObjects {
     private static final int TILE_SIZE = 32;
 

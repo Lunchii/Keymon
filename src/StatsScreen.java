@@ -1,93 +1,97 @@
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 
+/**
+ * Lightweight in-game stats overlay shown from the pause menu.
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class StatsScreen {
-    private GamePanel gp;
+    private GamePanel gamePanel;
 
-    public StatsScreen(GamePanel gp) {
-        this.gp = gp;
+    public void updateData(GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
     }
 
-    public void drawPlayerStat(Graphics2D g2d) {
+    public void drawPlayerStat(Graphics2D graphics, int screenWidth, int screenHeight) {
+        if (gamePanel == null) {
+            return;
+        }
 
-        g2d.setColor(new Color(0, 0, 0, 220));
-        g2d.fillRect(0, 0, gp.getWidth(), gp.getHeight());
+        graphics.setColor(new Color(0, 0, 0, 225));
+        graphics.fillRect(0, 0, screenWidth, screenHeight);
 
-        int x = 200;
-        int y = 200;
-        int w = gp.getWidth() / 3;
-        int h = gp.getHeight() / 3;
+        int panelX = 120;
+        int panelY = 100;
+        int panelW = screenWidth - 240;
+        int panelH = screenHeight - 180;
 
-        // 1. Draw player box
-        g2d.setColor(new Color(45, 52, 71)); // Dark blue-grey
-        g2d.fillRoundRect(x, y, w, h, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.setStroke(new BasicStroke(3));
-        g2d.drawRoundRect(x, y, w, h, 20, 20);
+        graphics.setColor(new Color(18, 28, 42, 240));
+        graphics.fillRoundRect(panelX, panelY, panelW, panelH, 24, 24);
+        graphics.setColor(Color.WHITE);
+        graphics.setStroke(new BasicStroke(3f));
+        graphics.drawRoundRect(panelX, panelY, panelW, panelH, 24, 24);
 
-        // 2. Draw Header
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 35));
-        g2d.drawString("PLAYER STATS:", x + 30, y + 50);
-        g2d.drawLine(x + 30, y + 60, x + 350, y + 60);
+        graphics.setColor(Color.WHITE);
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 30));
+        graphics.drawString("LIVE STAGE STATS", panelX + 28, panelY + 44);
 
-        // 3. Stats Data
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 25));
-        g2d.drawString("NAME: ASH", x + 30, y + 110);
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        graphics.drawString("Press ESC or Enter to return to the pause menu.", panelX + 28, panelY + 72);
 
-        // HP Bar
-        g2d.drawString("HP: ", x + 30, y + 160);
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(x + 100, y + 140, 200, 25);
-        g2d.setColor(new Color(114, 186, 158)); // Greenish
-        g2d.fillRect(x + 100, y + 140, 200, 25); // Set width to (currentHP/maxHP * 200)
+        int leftX = panelX + 28;
+        int leftY = panelY + 118;
+        int rightX = panelX + panelW / 2 + 10;
 
-        // MP Bar
-        g2d.setColor(Color.WHITE);
-        g2d.drawString("MP: ", x + 30, y + 210);
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(x + 100, y + 190, 200, 25);
-        g2d.setColor(new Color(103, 146, 219)); // Blue
-        g2d.fillRect(x + 100, y + 190, 100, 25); // Example 50% fill
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 20));
+        graphics.drawString("Session Snapshot", leftX, leftY);
+        graphics.drawString("Current Goals", rightX, leftY);
 
-        // -- Top right -- //
-        int rx = x + 700; // Horizontal offset for right column
-        int rw = 400;
-        int rh = 200;
+        graphics.setFont(new Font("Monospaced", Font.PLAIN, 18));
+        int lineY = leftY + 40;
+        drawLine(graphics, leftX, lineY, "Stage", gamePanel.getStageName() + " (" + gamePanel.getCurrentLevelId() + "/3)");
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Score", String.valueOf(gamePanel.getLevelScore()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Best", String.valueOf(gamePanel.getBestScore()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "WPM", String.format("%.1f", gamePanel.getCurrentWpm()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Peak", String.format("%.1f", gamePanel.getPeakWpm()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Accuracy", String.format("%.1f%%", gamePanel.getAccuracyPercent()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Words", String.valueOf(gamePanel.getWordsTyped()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Errors", String.valueOf(gamePanel.getErrorCount()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Combo", "x" + Math.max(1, gamePanel.getComboStreak()));
+        lineY += 34;
+        drawLine(graphics, leftX, lineY, "Powerups", String.valueOf(gamePanel.getPowerupsUsed()));
 
-        g2d.setColor(new Color(45, 52, 71, 230));
-        g2d.fillRoundRect(rx, y, rw, rh, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.drawRoundRect(rx, y, rw, rh, 20, 20);
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        int goalY = leftY + 42;
+        graphics.drawString("Reach the exit tile to clear the stage.", rightX, goalY);
+        goalY += 36;
+        graphics.drawString("Accuracy matters — mistakes reset your combo.", rightX, goalY);
+        goalY += 36;
+        graphics.drawString("Win battles to earn extra score and item drops.", rightX, goalY);
+        goalY += 36;
+        graphics.drawString("Use BAG items for healing, extra time, and boosts.", rightX, goalY);
+        goalY += 36;
+        graphics.drawString("Longer streaks increase your scoring pace.", rightX, goalY);
 
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g2d.drawString("GAME PROGRESS", rx + 30, y + 45);
-        g2d.drawLine(rx + 30, y + 55, rx + 250, y + 55);
+        String banner = gamePanel.getStatusBanner();
+        if (banner != null && !banner.isBlank()) {
+            graphics.setFont(new Font("SansSerif", Font.BOLD, 18));
+            graphics.setColor(new Color(255, 230, 150));
+            graphics.drawString("Latest Update: " + banner, rightX, panelY + panelH - 48);
+        }
+    }
 
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("🕒 WPM:         75 WPM", rx + 30, y + 100);
-        g2d.drawString("🕒 TIME PLAYED: " + gp.getTimeManager().getFormattedTime(), rx + 30, y + 150);
-
-        // -- Bottom Right -- //
-        int ry_bottom = y + 250;
-        int rh_bottom = 250;
-
-        g2d.setColor(new Color(45, 52, 71, 230));
-        g2d.fillRoundRect(rx, ry_bottom, rw, rh_bottom, 20, 20);
-        g2d.setColor(Color.WHITE);
-        g2d.drawRoundRect(rx, ry_bottom, rw, rh_bottom, 20, 20);
-
-        // Trainers Content
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g2d.drawString("TRAINERS BEAT:", rx + 30, ry_bottom + 45);
-
-        // Big Centered Counter
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 50));
-        g2d.drawString("32 / 50", rx + 80, ry_bottom + 130);
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2d.drawString("TOTAL", rx + 160, ry_bottom + 160);
-
-        // -- Press Enter to go back label -- //
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Monospaced", Font.ITALIC, 20));
-        g2d.drawString("PRESS ENTER TO GO BACK", gp.getWidth() / 2 - 150, gp.getHeight() - 50);
+    private void drawLine(Graphics2D graphics, int x, int y, String label, String value) {
+        graphics.drawString(String.format("%-10s %s", label + ":", value), x, y);
     }
 }

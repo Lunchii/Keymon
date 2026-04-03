@@ -4,6 +4,15 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ * Main menu screen with an animated background and keyboard/mouse navigable buttons.
+ *
+ * <p>Buttons: LOGIN, HIGH SCORES, TUTORIAL, PARENTAL CONTROLS, EXIT.
+ * Keyboard navigation uses W/S to change selection and ENTER to activate.
+ * The custom KA1 font is loaded at startup; Arial is used as the fallback.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class MenuPanel extends JPanel {
     private Image backgroundGif;
     private ArrayList<JButton> buttons = new ArrayList<>();
@@ -22,11 +31,11 @@ public class MenuPanel extends JPanel {
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150));
 
+        // --- RIGHT SIDE: MENU BUTTONS ---
         JPanel menuContent = new JPanel();
         menuContent.setOpaque(false);
         menuContent.setLayout(new BoxLayout(menuContent, BoxLayout.Y_AXIS));
 
-        // --- TITLES ---
         OutlinedLabel title = createTitle("Keymon");
         OutlinedLabel title2 = createTitle("Journey");
 
@@ -35,29 +44,27 @@ public class MenuPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // --- BUTTON LOOP ---
-        String[] labels = { "PLAY GAME", "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
+        String[] labels = { "LOGIN", "HIGH SCORES", "TUTORIAL", "PARENTAL CONTROLS", "EXIT" };
         for (int i = 0; i < labels.length; i++) {
-            final int index = i; // Critical for the listeners
+            final int index = i;
             final String label = labels[i];
 
             OutlinedButton btn = new OutlinedButton(label);
             btn.setFont(customFont.deriveFont(Font.PLAIN, 28f));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             btn.setMaximumSize(new Dimension(400, 60));
-            btn.setFocusable(false); // We handle focus manually
+            btn.setFocusable(false);
 
-            // MOUSE LOGIC
             btn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    focusedIndex = index; // Move highlight to mouse
+                    focusedIndex = index;
                     updateButtonStyles();
                 }
 
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    handleSelection(label); // Mouse Click
+                    handleSelection(label);
                 }
             });
 
@@ -69,6 +76,29 @@ public class MenuPanel extends JPanel {
         menuContent.add(Box.createVerticalGlue());
         this.add(menuContent, BorderLayout.EAST);
 
+        JPanel footerInfo = new JPanel();
+        footerInfo.setOpaque(false);
+        footerInfo.setLayout(new BoxLayout(footerInfo, BoxLayout.Y_AXIS));
+        footerInfo.setBorder(BorderFactory.createEmptyBorder(0, 50, 50, 0));
+
+        float infoSize = 18f;
+
+        OutlinedLabel teamLabel = new OutlinedLabel("TEAM 72");
+        teamLabel.setFont(customFont.deriveFont(Font.BOLD, 24f));
+
+        OutlinedLabel devLabel = new OutlinedLabel("Isaac, Miguel, Ryan, Nathaniel, Dehou");
+        devLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
+
+        OutlinedLabel courseLabel = new OutlinedLabel("CS2212 \u2022 Winter 2026 \u2022 Western University");
+        courseLabel.setFont(customFont.deriveFont(Font.PLAIN, infoSize));
+
+        footerInfo.add(Box.createVerticalGlue());
+        footerInfo.add(teamLabel);
+        footerInfo.add(devLabel);
+        footerInfo.add(courseLabel);
+
+        this.add(footerInfo, BorderLayout.WEST);
+
         updateButtonStyles();
         setupKeyboardNavigation();
     }
@@ -76,12 +106,17 @@ public class MenuPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("EXIT")) {
             System.exit(0);
-        } else if (label.equals("PLAY GAME")) {
-            // Show a quick message to guide the user
-            JOptionPane.showMessageDialog(container,
-                    "Identify yourself before starting the journey!",
-                    "Trainer Login",
-                    JOptionPane.INFORMATION_MESSAGE);
+        } else if (label.equals("HIGH SCORES")) {
+            for (Component comp : container.getComponents()) {
+                if (comp instanceof HighscorePanel) {
+                    ((HighscorePanel) comp).refreshData();
+                    break;
+                }
+            }
+            cardLayout.show(container, "HIGHSCORE");
+        } else if (label.equals("PARENTAL CONTROLS")) {
+            // handled by teammate — no action
+        } else if (label.equals("LOGIN")) {
             cardLayout.show(container, "LOGIN");
         } else {
             cardLayout.show(container, label);
@@ -111,7 +146,6 @@ public class MenuPanel extends JPanel {
         im.put(KeyStroke.getKeyStroke("ENTER"), "select");
         am.put("select", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                // Keyboard Click
                 handleSelection(buttons.get(focusedIndex).getText());
             }
         });
@@ -120,11 +154,10 @@ public class MenuPanel extends JPanel {
     private void updateButtonStyles() {
         for (int i = 0; i < buttons.size(); i++) {
             JButton btn = buttons.get(i);
-
             btn.setBackground(new Color(0, 0, 0, 0));
 
             if (i == focusedIndex) {
-                btn.setForeground(Color.BLACK); // Only the label turns Yellow
+                btn.setForeground(Color.BLACK);
                 btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             } else {
                 btn.setForeground(Color.LIGHT_GRAY);

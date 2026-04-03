@@ -1,6 +1,16 @@
 import java.awt.*;
 import javax.swing.*;
 
+/**
+ * Custom JButton that renders its label with a white stroke outline and a
+ * solid coloured fill, giving a retro game-menu appearance.
+ *
+ * <p>The background colour of the button is used as the fill colour; the
+ * foreground colour is used for the text fill. The white outline width is
+ * 5 px with rounded caps and joins so it looks clean at large font sizes.</p>
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 class OutlinedButton extends JButton {
     public OutlinedButton(String text) {
         super(text);
