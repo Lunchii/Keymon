@@ -29,7 +29,7 @@ public class LoginPanel extends JPanel {
 
         // 1. Load the tileable grass background image (Ensure it's in project root)
         try {
-            backgroundImage = ImageIO.read(new File("LoginBackground.png"));
+            backgroundImage = ImageIO.read(new File("images/LoginBackground.png"));
         } catch (Exception e) {
             System.err.println("LoginPanel: Could not load grass.png. Using fallback color.");
         }

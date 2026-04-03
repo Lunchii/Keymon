@@ -45,7 +45,7 @@ public class MapLoader {
                     int value = Integer.parseInt(values[col].trim());
 
                     if (value == 8) {
-                        trainer = new Trainer(col, row, "trainerSprite.png");
+                        trainer = new Trainer(col, row, "images/trainerSprite.png");
                         worldMap[row][col] = 0; // still draw grass under trainer
                     } else if (value == 5) {
                         worldMap[row][col] = 5; // End tile, walkable finish

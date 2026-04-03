@@ -36,11 +36,45 @@ public class MusicPlayer {
             AudioInputStream stream = AudioSystem.getAudioInputStream(file);
             currentClip = AudioSystem.getClip();
             currentClip.open(stream);
+            if (currentClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl gain = (FloatControl) currentClip.getControl(FloatControl.Type.MASTER_GAIN);
+                gain.setValue(trackName.equals("battle") ? -15.0f : -12.0f);
+            }
             currentClip.loop(Clip.LOOP_CONTINUOUSLY);
             currentClip.start();
             currentTrack = trackName;
         } catch (Exception e) {
             System.err.println("MusicPlayer: could not play " + trackName + " — " + e.getMessage());
+        }
+    }
+
+    /**
+     * Plays a one-shot sound effect from the {@code music/} folder without
+     * interrupting the background music track.
+     *
+     * @param effectName filename without extension (e.g. "attack")
+     */
+    public static void playEffect(String effectName) {
+        try {
+            File file = new File("music/" + effectName + ".wav");
+            if (!file.exists()) {
+                return;
+            }
+            AudioInputStream stream = AudioSystem.getAudioInputStream(file);
+            Clip clip = AudioSystem.getClip();
+            clip.open(stream);
+            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl gain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                gain.setValue(-9.0f);
+            }
+            clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    clip.close();
+                }
+            });
+            clip.start();
+        } catch (Exception e) {
+            System.err.println("MusicPlayer: could not play effect " + effectName + " — " + e.getMessage());
         }
     }
 

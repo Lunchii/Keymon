@@ -22,10 +22,10 @@ public class TerrainObjects {
     private static final Map<Integer, String> SPRITE_MAP = new HashMap<>();
 
     static {
-        SPRITE_MAP.put(1, "tree.png");
-        SPRITE_MAP.put(2, "rock.png");
-        SPRITE_MAP.put(3, "pokeball.png");
-        // You can add more objects as needed
+        SPRITE_MAP.put(1, "images/tree.png");
+        SPRITE_MAP.put(2, "images/rock.png");
+        SPRITE_MAP.put(3, "images/pokeball.png");
+        // Add more mappings as needed
     }
 
     private BufferedImage sprite;
@@ -44,7 +44,7 @@ public class TerrainObjects {
         this.solid = solid;
 
         // Load sprite based on tile value
-        String spritePath = SPRITE_MAP.getOrDefault(tileValue, "tree.png");
+        String spritePath = SPRITE_MAP.getOrDefault(tileValue, "images/tree.png");
         try {
             sprite = ImageIO.read(new File(spritePath));
         } catch (Exception e) {

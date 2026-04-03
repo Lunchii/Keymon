@@ -29,7 +29,7 @@ public class MenuPanel extends JPanel {
         this.cardLayout = layout;
         this.container = container;
 
-        backgroundGif = new ImageIcon("menuBackground.gif").getImage();
+        backgroundGif = new ImageIcon("images/menuBackground.gif").getImage();
         loadCustomFont();
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -210,7 +210,7 @@ public class MenuPanel extends JPanel {
 
     private void loadCustomFont() {
         try {
-            File fontFile = new File("ka1.ttf");
+            File fontFile = new File("fonts/ka1.ttf");
             customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(customFont);
         } catch (Exception e) {

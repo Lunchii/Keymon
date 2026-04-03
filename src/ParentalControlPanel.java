@@ -18,7 +18,7 @@ public class ParentalControlPanel extends JPanel {
         this.container = container;
         this.mainApp = mainApp;
 
-        backgroundGif = new ImageIcon("menuBackground.gif").getImage();
+        backgroundGif = new ImageIcon("images/menuBackground.gif").getImage();
         loadCustomFont();
 
         this.setLayout(new BorderLayout());
@@ -174,7 +174,7 @@ public class ParentalControlPanel extends JPanel {
 
     private void loadCustomFont() {
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("ka1.ttf"));
+            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/ka1.ttf"));
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(customFont);
         } catch (Exception e) {
             customFont = new Font("Arial", Font.BOLD, 24);
