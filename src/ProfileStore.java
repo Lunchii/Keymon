@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Handles local persistence for accounts, progress, statistics, inventory, and high scores.
+ * Handles local persistence for accounts, progress, statistics, inventory, and
+ * high scores.
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -39,7 +41,8 @@ public final class ProfileStore {
     }
 
     /**
-     * Validates account creation input and returns a user-facing message on failure.
+     * Validates account creation input and returns a user-facing message on
+     * failure.
      *
      * @param username chosen username
      * @param password chosen password
@@ -116,7 +119,7 @@ public final class ProfileStore {
     /**
      * Resets the password for an existing account.
      *
-     * @param username target username
+     * @param username    target username
      * @param newPassword replacement password
      * @return true if the password was updated
      */
@@ -134,7 +137,8 @@ public final class ProfileStore {
     }
 
     /**
-     * Resets stored gameplay statistics and progress for an account while keeping the login.
+     * Resets stored gameplay statistics and progress for an account while keeping
+     * the login.
      *
      * @param username target username
      * @return true if the reset completed
@@ -181,23 +185,22 @@ public final class ProfileStore {
         }
 
         ProfileData profile = new ProfileData(
-            cleanUsername,
-            data.highScore,
-            data.currentLevel,
-            data.unlockedLevel,
-            data.getAverageWpm(),
-            data.peakWpm,
-            data.getAccuracyPercent(),
-            data.errorCount,
-            data.totalTimePlayedSeconds,
-            data.wordsTyped,
-            data.correctChars,
-            data.totalTypedChars,
-            data.longestStreak,
-            data.powerupsUsed,
-            data.gamesPlayed,
-            data.levelWins
-        );
+                cleanUsername,
+                data.highScore,
+                data.currentLevel,
+                data.unlockedLevel,
+                data.getAverageWpm(),
+                data.peakWpm,
+                data.getAccuracyPercent(),
+                data.errorCount,
+                data.totalTimePlayedSeconds,
+                data.wordsTyped,
+                data.correctChars,
+                data.totalTypedChars,
+                data.longestStreak,
+                data.powerupsUsed,
+                data.gamesPlayed,
+                data.levelWins);
         profile.achievements = ProfileInsights.buildAchievements(profile);
         profile.recommendations = ProfileInsights.buildRecommendations(profile);
         return profile;
@@ -225,11 +228,11 @@ public final class ProfileStore {
     /**
      * Saves an in-progress game using default inventory handling.
      *
-     * @param username active username
-     * @param x saved x position
-     * @param y saved y position
-     * @param row saved facing row
-     * @param highScore best score so far
+     * @param username     active username
+     * @param x            saved x position
+     * @param y            saved y position
+     * @param row          saved facing row
+     * @param highScore    best score so far
      * @param currentLevel current level identifier
      */
     public static void saveProgress(String username, int x, int y, int row, int highScore, int currentLevel) {
@@ -239,51 +242,51 @@ public final class ProfileStore {
     /**
      * Saves an in-progress game using the default level slot.
      *
-     * @param username active username
-     * @param x saved x position
-     * @param y saved y position
-     * @param row saved facing row
-     * @param highScore best score so far
+     * @param username     active username
+     * @param x            saved x position
+     * @param y            saved y position
+     * @param row          saved facing row
+     * @param highScore    best score so far
      * @param currentLevel current level identifier
-     * @param party active party snapshot
+     * @param party        active party snapshot
      */
     public static void saveProgress(String username, int x, int y, int row, int highScore,
-                                    int currentLevel, List<Pokemon> party) {
+            int currentLevel, List<Pokemon> party) {
         saveProgress(username, 1, x, y, row, highScore, currentLevel, party, null);
     }
 
     /**
      * Saves an in-progress game.
      *
-     * @param username active username
-     * @param levelId level identifier being played
-     * @param x saved x position
-     * @param y saved y position
-     * @param row saved facing row
-     * @param highScore best score so far
+     * @param username     active username
+     * @param levelId      level identifier being played
+     * @param x            saved x position
+     * @param y            saved y position
+     * @param row          saved facing row
+     * @param highScore    best score so far
      * @param currentLevel current level identifier
-     * @param party active party snapshot
+     * @param party        active party snapshot
      */
     public static void saveProgress(String username, int levelId, int x, int y, int row,
-                                    int highScore, int currentLevel, List<Pokemon> party) {
+            int highScore, int currentLevel, List<Pokemon> party) {
         saveProgress(username, levelId, x, y, row, highScore, currentLevel, party, null);
     }
 
     /**
      * Saves an in-progress game together with the current inventory.
      *
-     * @param username active username
-     * @param levelId level identifier being played
-     * @param x saved x position
-     * @param y saved y position
-     * @param row saved facing row
-     * @param highScore best score so far
+     * @param username     active username
+     * @param levelId      level identifier being played
+     * @param x            saved x position
+     * @param y            saved y position
+     * @param row          saved facing row
+     * @param highScore    best score so far
      * @param currentLevel current level identifier
-     * @param party active party snapshot
-     * @param itemBag current inventory snapshot
+     * @param party        active party snapshot
+     * @param itemBag      current inventory snapshot
      */
     public static void saveProgress(String username, int levelId, int x, int y, int row,
-                                    int highScore, int currentLevel, List<Pokemon> party, ItemBag itemBag) {
+            int highScore, int currentLevel, List<Pokemon> party, ItemBag itemBag) {
         String cleanUsername = sanitizeUsername(username);
         if (cleanUsername.isEmpty()) {
             return;
@@ -325,7 +328,7 @@ public final class ProfileStore {
      * Loads a player position snapshot for the requested level.
      *
      * @param username active username
-     * @param levelId requested level identifier
+     * @param levelId  requested level identifier
      * @return lightweight position snapshot
      */
     public static PlayerProgress loadProgress(String username, int levelId) {
@@ -336,12 +339,11 @@ public final class ProfileStore {
 
         int levelIndex = clampLevelIndex(levelId);
         return new PlayerProgress(
-            data.levelX[levelIndex],
-            data.levelY[levelIndex],
-            data.levelSpriteRow[levelIndex],
-            data.highScore,
-            data.currentLevel
-        );
+                data.levelX[levelIndex],
+                data.levelY[levelIndex],
+                data.levelSpriteRow[levelIndex],
+                data.highScore,
+                data.currentLevel);
     }
 
     /**
@@ -397,7 +399,7 @@ public final class ProfileStore {
     /**
      * Unlocks the next level after a successful completion.
      *
-     * @param username active username
+     * @param username       active username
      * @param completedLevel completed stage identifier
      */
     public static void markLevelCompleted(String username, int completedLevel) {
@@ -417,7 +419,7 @@ public final class ProfileStore {
      * Records score and typing statistics after a level attempt.
      *
      * @param username active username
-     * @param session session summary to persist
+     * @param session  session summary to persist
      */
     public static void recordLevelSummary(String username, SessionStats session) {
         String cleanUsername = sanitizeUsername(username);
@@ -442,10 +444,6 @@ public final class ProfileStore {
         data.errorCount += Math.max(0, session.errorCount);
         data.totalTimePlayedSeconds += Math.max(0L, session.timePlayedSeconds);
         data.peakWpm = Math.max(data.peakWpm, session.peakWpm);
-        if (session.averageWpm > 0.0) {
-            data.cumulativeAverageWpm += session.averageWpm;
-            data.averageWpmSamples++;
-        }
         data.longestStreak = Math.max(data.longestStreak, session.longestStreak);
         data.powerupsUsed += Math.max(0, session.powerupsUsed);
 
@@ -529,9 +527,9 @@ public final class ProfileStore {
         data.highScore = 0;
         data.currentLevel = 1;
         data.unlockedLevel = 1;
-        data.levelX = new int[] {DEFAULT_X, DEFAULT_X, DEFAULT_X};
-        data.levelY = new int[] {DEFAULT_Y, DEFAULT_Y, DEFAULT_Y};
-        data.levelSpriteRow = new int[] {DEFAULT_ROW, DEFAULT_ROW, DEFAULT_ROW};
+        data.levelX = new int[] { DEFAULT_X, DEFAULT_X, DEFAULT_X };
+        data.levelY = new int[] { DEFAULT_Y, DEFAULT_Y, DEFAULT_Y };
+        data.levelSpriteRow = new int[] { DEFAULT_ROW, DEFAULT_ROW, DEFAULT_ROW };
         data.party = new ArrayList<>();
         data.itemCounts = serializeItemBag(ItemBag.starterBag());
         data.collectedPokeballs = new ArrayList<>();
@@ -543,12 +541,11 @@ public final class ProfileStore {
         List<PokemonData> result = new ArrayList<>();
         for (Pokemon pokemon : party) {
             result.add(new PokemonData(
-                pokemon.name,
-                pokemon.maxHp,
-                pokemon.currentHp,
-                pokemon.attack,
-                pokemon.spritePath
-            ));
+                    pokemon.name,
+                    pokemon.maxHp,
+                    pokemon.currentHp,
+                    pokemon.attack,
+                    pokemon.spritePath));
         }
         return result;
     }
@@ -557,11 +554,10 @@ public final class ProfileStore {
         List<Pokemon> result = new ArrayList<>();
         for (PokemonData pokemonData : partyData) {
             Pokemon pokemon = new Pokemon(
-                pokemonData.name,
-                pokemonData.maxHp,
-                pokemonData.attack,
-                pokemonData.spritePath
-            );
+                    pokemonData.name,
+                    pokemonData.maxHp,
+                    pokemonData.attack,
+                    pokemonData.spritePath);
             pokemon.currentHp = pokemonData.currentHp;
             pokemon.loadSprite();
             result.add(pokemon);
@@ -743,10 +739,10 @@ public final class ProfileStore {
         public List<String> recommendations = new ArrayList<>();
 
         public ProfileData(String username, int highScore, int currentLevel, int unlockedLevel,
-                           double averageWpm, double peakWpm, double accuracyPercent,
-                           int errorCount, long totalTimePlayedSeconds, int wordsTyped,
-                           int correctChars, int totalTypedChars, int longestStreak,
-                           int powerupsUsed, int gamesPlayed, int levelWins) {
+                double averageWpm, double peakWpm, double accuracyPercent,
+                int errorCount, long totalTimePlayedSeconds, int wordsTyped,
+                int correctChars, int totalTypedChars, int longestStreak,
+                int powerupsUsed, int gamesPlayed, int levelWins) {
             this.username = username;
             this.highScore = highScore;
             this.currentLevel = currentLevel;
@@ -784,9 +780,9 @@ public final class ProfileStore {
         public final boolean wonLevel;
 
         public SessionStats(int levelId, int scoreEarned, double averageWpm, double peakWpm,
-                            int correctChars, int totalTypedChars, int errorCount, int wordsTyped,
-                            long timePlayedSeconds, int longestStreak, int powerupsUsed,
-                            boolean wonLevel) {
+                int correctChars, int totalTypedChars, int errorCount, int wordsTyped,
+                long timePlayedSeconds, int longestStreak, int powerupsUsed,
+                boolean wonLevel) {
             this.levelId = levelId;
             this.scoreEarned = scoreEarned;
             this.averageWpm = averageWpm;
@@ -864,13 +860,13 @@ public final class ProfileStore {
                 unlockedLevel = 1;
             }
             if (levelX == null || levelX.length < MAX_LEVELS) {
-                levelX = new int[] {DEFAULT_X, DEFAULT_X, DEFAULT_X};
+                levelX = new int[] { DEFAULT_X, DEFAULT_X, DEFAULT_X };
             }
             if (levelY == null || levelY.length < MAX_LEVELS) {
-                levelY = new int[] {DEFAULT_Y, DEFAULT_Y, DEFAULT_Y};
+                levelY = new int[] { DEFAULT_Y, DEFAULT_Y, DEFAULT_Y };
             }
             if (levelSpriteRow == null || levelSpriteRow.length < MAX_LEVELS) {
-                levelSpriteRow = new int[] {DEFAULT_ROW, DEFAULT_ROW, DEFAULT_ROW};
+                levelSpriteRow = new int[] { DEFAULT_ROW, DEFAULT_ROW, DEFAULT_ROW };
             }
             if (party == null) {
                 party = new ArrayList<>();
@@ -884,10 +880,13 @@ public final class ProfileStore {
         }
 
         double getAverageWpm() {
-            if (averageWpmSamples <= 0) {
+            if (totalTimePlayedSeconds <= 0 || totalTypedChars <= 0) {
                 return 0.0;
             }
-            return cumulativeAverageWpm / averageWpmSamples;
+            double standardWords = (double) correctChars / 5.0;
+            double minutes = (double) totalTimePlayedSeconds / 60.0;
+
+            return standardWords / minutes;
         }
 
         double getAccuracyPercent() {

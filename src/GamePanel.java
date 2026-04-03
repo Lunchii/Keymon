@@ -130,17 +130,17 @@ public class GamePanel extends JPanel {
         this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
             public void mouseMoved(java.awt.event.MouseEvent e) {
+                // Only process if paused and NOT showing the full-screen stats overlay
                 if (isPaused && !isStat) {
-                    // Translate mouse position to menu index
                     int hoverIndex = pauseMenu.getOptionIndexAt(e.getPoint());
 
-                    if (hoverIndex != -1 && hoverIndex != pauseOptionIndex) {
+                    if (hoverIndex != -1) {
                         pauseOptionIndex = hoverIndex;
                         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                        repaint();
-                    } else if (hoverIndex == -1) {
+                    } else {
                         setCursor(Cursor.getDefaultCursor());
                     }
+                    repaint();
                 }
             }
         });
@@ -148,9 +148,16 @@ public class GamePanel extends JPanel {
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
-                if (isPaused && !isStat) {
-                    if (pauseMenu.getOptionIndexAt(e.getPoint()) != -1) {
-                        handlePauseSelection();
+                if (isPaused) {
+                    if (isStat) {
+                        // If the stats overlay is open, click anywhere to go back to Pause Menu
+                        isStat = false;
+                        repaint();
+                    } else {
+                        // Check the hitbox from PauseMenu
+                        if (pauseMenu.getOptionIndexAt(e.getPoint()) != -1) {
+                            handlePauseSelection();
+                        }
                     }
                 }
             }
@@ -163,7 +170,6 @@ public class GamePanel extends JPanel {
 
         new InputHandler(this);
         timeManager.resume();
-        installMouseSupport();
         startGameLoop();
     }
 
@@ -518,26 +524,6 @@ public class GamePanel extends JPanel {
         add(button);
     }
 
-    private void installMouseSupport() {
-        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(java.awt.event.MouseEvent event) {
-                if (isPaused && !isStat) {
-                    handleMouseHover(event.getX(), event.getY());
-                }
-            }
-        });
-
-        addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent event) {
-                if (isPaused) {
-                    handlePauseSelection();
-                }
-            }
-        });
-    }
-
     private void startGameLoop() {
         Timer timer = new Timer(16, (ActionEvent event) -> {
             if (!isPaused && !levelEnded && !levelFailed && player != null) {
@@ -742,26 +728,6 @@ public class GamePanel extends JPanel {
         battlePanel.requestFocusInWindow();
     }
 
-    private void handleMouseHover(int mouseX, int mouseY) {
-        int menuX = getWidth() / 2 - 120;
-        int menuWidth = 240;
-        int startY = 220;
-        int optionHeight = 52;
-        if (mouseX >= menuX && mouseX <= menuX + menuWidth) {
-            for (int i = 0; i < pauseOptions.length; i++) {
-                int top = startY + (i * optionHeight);
-                int bottom = top + optionHeight;
-                if (mouseY >= top && mouseY <= bottom) {
-                    if (pauseOptionIndex != i) {
-                        pauseOptionIndex = i;
-                        repaint();
-                    }
-                    return;
-                }
-            }
-        }
-    }
-
     private void restartStage() {
         isPaused = false;
         isStat = false;
@@ -792,9 +758,15 @@ public class GamePanel extends JPanel {
     }
 
     private void updateLiveWpm() {
-        long elapsedMillis = Math.max(1L, System.currentTimeMillis() - levelStartMillis);
-        double elapsedMinutes = elapsedMillis / 60000.0;
-        currentWpm = elapsedMinutes <= 0.0 ? 0.0 : wordsTyped / elapsedMinutes;
+        double activeSeconds = timeManager.getTotalMillis() / 1000.0;
+        double minutes = activeSeconds / 60.0;
+
+        if (minutes > 0 && correctChars > 0) {
+            currentWpm = (correctChars / 5.0) / minutes;
+        } else {
+            currentWpm = 0.0;
+        }
+
         peakWpm = Math.max(peakWpm, currentWpm);
     }
 
@@ -909,9 +881,9 @@ public class GamePanel extends JPanel {
             int bubbleX = tutorialTallGrassPoint.x + 54;
             int bubbleY = tutorialTallGrassPoint.y - 72;
             drawBubble(graphics, bubbleX, bubbleY,
-                "these are tall grass, stepping on them has a chance for an encounter");
+                    "these are tall grass, stepping on them has a chance for an encounter");
             drawBubbleArrow(graphics, bubbleX + 18, bubbleY + 52,
-                tutorialTallGrassPoint.x + TILE_SIZE / 2, tutorialTallGrassPoint.y + TILE_SIZE / 2);
+                    tutorialTallGrassPoint.x + TILE_SIZE / 2, tutorialTallGrassPoint.y + TILE_SIZE / 2);
         }
 
         if (trainers != null && !trainers.isEmpty()) {

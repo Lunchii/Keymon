@@ -1,18 +1,18 @@
 {
   "username": "isaac",
   "password": "tran",
-  "highScore": 1044,
-  "currentLevel": 3,
+  "highScore": 2942,
+  "currentLevel": 1,
   "unlockedLevel": 3,
   "levelX": [
     320,
     320,
-    1728
+    32
   ],
   "levelY": [
     320,
     320,
-    192
+    32
   ],
   "levelSpriteRow": [
     10,
@@ -45,7 +45,7 @@
   "itemCounts": {
     "SLOW_TIME": 4,
     "POTION": 3,
-    "FULL_HEAL": 2,
+    "FULL_HEAL": 3,
     "ATTACK_BOOST": 3
   },
   "collectedPokeballs": [
@@ -53,16 +53,16 @@
     "3:54:6",
     "3:54:13"
   ],
-  "totalTimePlayedSeconds": 118,
-  "wordsTyped": 4,
-  "correctChars": 47,
-  "totalTypedChars": 52,
-  "errorCount": 5,
+  "totalTimePlayedSeconds": 298,
+  "wordsTyped": 15,
+  "correctChars": 170,
+  "totalTypedChars": 185,
+  "errorCount": 15,
   "peakWpm": 7.755946225439503,
-  "cumulativeAverageWpm": 7.584855571708489,
-  "averageWpmSamples": 1,
-  "longestStreak": 3,
+  "cumulativeAverageWpm": 12.932405826527361,
+  "averageWpmSamples": 2,
+  "longestStreak": 5,
   "powerupsUsed": 0,
-  "gamesPlayed": 2,
-  "levelWins": 0
+  "gamesPlayed": 6,
+  "levelWins": 1
 }
