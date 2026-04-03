@@ -127,6 +127,11 @@ public class Main {
         MapLoader loader = new MapLoader(mapFile);
         int[][] worldMap = loader.getWorldMap();
         Trainer trainer = loader.getTrainer();
+
+        List<TerrainObjects> terrainObjects = loader.getTerrainObjects();
+        terrainObjects.removeIf(obj -> obj.getTileValue() == 3 &&
+            ProfileStore.hasCollectedPokeball(username, levelId, obj.getX() / TILE_SIZE, obj.getY() / TILE_SIZE));
+
         Point spawnPoint = resolveSpawnPoint(worldMap, data.x, data.y);
         Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
 
@@ -135,7 +140,7 @@ public class Main {
         }
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-                worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId, mapFile);
+            worldMap, trainer, terrainObjects, username, this, false, levelId, mapFile);
         gamePanel.setParty(team);
         gamePanel.setItemBag(itemBag);
         activeGamePanel = gamePanel;

@@ -223,6 +223,9 @@ public class Player {
         }
 
         for (TerrainObjects terrain : terrainObjects) {
+            if (!terrain.isSolid()) {
+                continue;
+            }
             if (terrain.collidesWith(pixelX, pixelY)) {
                 return false;
             }

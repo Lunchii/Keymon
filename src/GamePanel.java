@@ -531,6 +531,7 @@ public class GamePanel extends JPanel {
                     if (!inBattle) {
                         maybeStartWildBattle();
                     }
+                    checkPokeballPickup();
                 }
                 if (!inBattle) {
                     checkLevelEnd();
@@ -543,6 +544,33 @@ public class GamePanel extends JPanel {
             repaint();
         });
         timer.start();
+    }
+
+    private void checkPokeballPickup() {
+        if (terrainObjects == null || player == null) {
+            return;
+        }
+
+        int playerX = player.x;
+        int playerY = player.y;
+
+        for (int i = terrainObjects.size() - 1; i >= 0; i--) {
+            TerrainObjects obj = terrainObjects.get(i);
+            if (obj.getTileValue() == 3 && obj.collidesWith(playerX, playerY)) {
+                Item[] items = Item.values();
+                Item earned = items[random.nextInt(items.length)];
+                itemBag.add(earned, 1);
+
+                statusBanner = "Picked up " + earned.displayName + "!";
+                statusBannerUntil = System.currentTimeMillis() + 2000;
+                
+                int pickedCol = obj.getX() / TILE_SIZE;
+                int pickedRow = obj.getY() / TILE_SIZE;
+                ProfileStore.recordPokeballPickup(currentUsername, currentLevelId, pickedCol, pickedRow);
+
+                terrainObjects.remove(i);
+            }
+        }
     }
 
     private void loadTallGrassSprite() {

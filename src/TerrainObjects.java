@@ -24,17 +24,24 @@ public class TerrainObjects {
     static {
         SPRITE_MAP.put(1, "images/tree.png");
         SPRITE_MAP.put(2, "images/rock.png");
+        SPRITE_MAP.put(3, "images/pokeball.png");
         // Add more mappings as needed
     }
 
     private BufferedImage sprite;
     private int x, y;
     private int tileValue;
+    private boolean solid;
 
     public TerrainObjects(int col, int row, int tileValue) {
+        this(col, row, tileValue, true);
+    }
+
+    public TerrainObjects(int col, int row, int tileValue, boolean solid) {
         this.tileValue = tileValue;
         this.x = col * TILE_SIZE;
         this.y = row * TILE_SIZE;
+        this.solid = solid;
 
         // Load sprite based on tile value
         String spritePath = SPRITE_MAP.getOrDefault(tileValue, "images/tree.png");
@@ -63,9 +70,17 @@ public class TerrainObjects {
         return TILE_SIZE;
     }
 
+    public boolean isSolid() {
+        return solid;
+    }
+
     // Check if a pixel position collides with this terrain object
     public boolean collidesWith(int pixelX, int pixelY) {
         return pixelX >= x && pixelX < x + TILE_SIZE &&
                 pixelY >= y && pixelY < y + TILE_SIZE;
+    }
+
+    public int getTileValue() {
+        return tileValue;
     }
 }

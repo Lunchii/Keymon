@@ -534,6 +534,7 @@ public final class ProfileStore {
         data.levelSpriteRow = new int[] {DEFAULT_ROW, DEFAULT_ROW, DEFAULT_ROW};
         data.party = new ArrayList<>();
         data.itemCounts = serializeItemBag(ItemBag.starterBag());
+        data.collectedPokeballs = new ArrayList<>();
         data.ensureDefaults(username);
         return data;
     }
@@ -578,6 +579,48 @@ public final class ProfileStore {
 
     private static int clampLevelIndex(int levelId) {
         return WordRepository.sanitizeLevel(levelId) - 1;
+    }
+
+    private static String pokeballKey(int levelId, int col, int row) {
+        return levelId + ":" + col + ":" + row;
+    }
+
+    public static List<String> loadCollectedPokeballs(String username) {
+        SaveData data = loadData(sanitizeUsername(username));
+        if (data == null || data.collectedPokeballs == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(data.collectedPokeballs);
+    }
+
+    public static boolean hasCollectedPokeball(String username, int levelId, int col, int row) {
+        SaveData data = loadData(sanitizeUsername(username));
+        if (data == null || data.collectedPokeballs == null) {
+            return false;
+        }
+        return data.collectedPokeballs.contains(pokeballKey(levelId, col, row));
+    }
+
+    public static void recordPokeballPickup(String username, int levelId, int col, int row) {
+        String cleanUsername = sanitizeUsername(username);
+        if (cleanUsername.isEmpty()) {
+            return;
+        }
+
+        SaveData data = loadData(cleanUsername);
+        if (data == null) {
+            data = createDefaultData(cleanUsername, cleanUsername);
+        }
+
+        String key = pokeballKey(levelId, col, row);
+        if (data.collectedPokeballs == null) {
+            data.collectedPokeballs = new ArrayList<>();
+        }
+        if (!data.collectedPokeballs.contains(key)) {
+            data.collectedPokeballs.add(key);
+        }
+
+        writeData(cleanUsername, data);
     }
 
     private static HighScoreTable loadHighScoreTable() {
@@ -793,6 +836,7 @@ public final class ProfileStore {
         int[] levelSpriteRow;
         List<PokemonData> party;
         Map<String, Integer> itemCounts;
+        List<String> collectedPokeballs;
         long totalTimePlayedSeconds;
         int wordsTyped;
         int correctChars;
@@ -833,6 +877,9 @@ public final class ProfileStore {
             }
             if (itemCounts == null || itemCounts.isEmpty()) {
                 itemCounts = serializeItemBag(ItemBag.starterBag());
+            }
+            if (collectedPokeballs == null) {
+                collectedPokeballs = new ArrayList<>();
             }
         }
 
