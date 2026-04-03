@@ -31,6 +31,12 @@ public class MenuPanel extends JPanel {
 
         backgroundGif = new ImageIcon("menuBackground.gif").getImage();
         loadCustomFont();
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                MusicPlayer.play("menu");
+            }
+        });
 
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150));

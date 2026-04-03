@@ -105,7 +105,8 @@ public class LoginPanel extends JPanel {
         JButton button = new JButton(text);
         button.setFont(new Font("Monospaced", Font.BOLD, 15));
         button.setBackground(bg);
-        button.setForeground(Color.BLACK);
+        double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
+        button.setForeground(luminance < 128 ? Color.WHITE : Color.BLACK);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));

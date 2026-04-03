@@ -133,6 +133,9 @@ public class GamePanel extends JPanel {
 
         this.player.setTerrainObjects(terrainObjects);
         loadTallGrassSprite();
+        if (!tutorialMode) {
+            MusicPlayer.play("level" + this.currentLevelId);
+        }
 
         setBackground(Color.BLACK);
         setFocusable(true);

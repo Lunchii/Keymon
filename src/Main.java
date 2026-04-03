@@ -82,6 +82,7 @@ public class Main {
         frame.setVisible(true);
 
         cardLayout.show(mainContainer, "MENU");
+        MusicPlayer.play("menu");
     }
 
     /** Called by LoginPanel — show player screen (stats + start button). */
