@@ -6,25 +6,31 @@ import javax.swing.*;
 /**
  * Application entry point and top-level screen coordinator.
  *
- * <p>Creates the {@link JFrame} and a {@link CardLayout} container that holds
+ * <p>
+ * Creates the {@link JFrame} and a {@link CardLayout} container that holds
  * every named screen. Screen transitions are initiated by calling the public
  * {@code show*()} / {@code start*()} methods from child panels, keeping all
- * navigation logic in one place.</p>
+ * navigation logic in one place.
+ * </p>
  *
- * <p>Card names:
+ * <p>
+ * Card names:
  * <ul>
- *   <li>{@code "MENU"}          – {@link MenuPanel}</li>
- *   <li>{@code "LOGIN"}         – {@link LoginPanel}</li>
- *   <li>{@code "PLAYER_SCREEN"} – {@link PlayerScreen}</li>
- *   <li>{@code "LEVEL_SELECT"}  – {@link LevelSelectPanel} (created on demand)</li>
- *   <li>{@code "PLAY GAME"}     – {@link GamePanel} (created on demand)</li>
- *   <li>{@code "TUTORIAL_GAME"} – {@link GamePanel} (tutorial, created on demand)</li>
- *   <li>{@code "STATS_PAGE"}    – {@link StatsPage}</li>
- *   <li>{@code "HIGHSCORE"}     – {@link HighscorePanel}</li>
- *   <li>{@code "TUTORIAL"}      – {@link InstructionPanel}</li>
- *   <li>{@code "PARENTAL"}      – {@link ParentalControlPanel}</li>
+ * <li>{@code "MENU"} – {@link MenuPanel}</li>
+ * <li>{@code "LOGIN"} – {@link LoginPanel}</li>
+ * <li>{@code "PLAYER_SCREEN"} – {@link PlayerScreen}</li>
+ * <li>{@code "LEVEL_SELECT"} – {@link LevelSelectPanel} (created on
+ * demand)</li>
+ * <li>{@code "PLAY GAME"} – {@link GamePanel} (created on demand)</li>
+ * <li>{@code "TUTORIAL_GAME"} – {@link GamePanel} (tutorial, created on
+ * demand)</li>
+ * <li>{@code "STATS_PAGE"} – {@link StatsPage}</li>
+ * <li>{@code "HIGHSCORE"} – {@link HighscorePanel}</li>
+ * <li>{@code "TUTORIAL"} – {@link InstructionPanel}</li>
+ * <li>{@code "PARENTAL"} – {@link ParentalControlPanel}</li>
  * </ul>
  * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -56,6 +62,7 @@ public class Main {
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
         InstructionPanel tutorialPanel = new InstructionPanel(cardLayout, mainContainer, this);
         ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
+        ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
 
         playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
         statsPage = new StatsPage(this);
@@ -67,6 +74,7 @@ public class Main {
         mainContainer.add(tutorialPanel, "TUTORIAL");
         mainContainer.add(parentalControlPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
+        mainContainer.add(adminStatsPanel, "ADMIN_STATS");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,6 +82,7 @@ public class Main {
         frame.setVisible(true);
 
         cardLayout.show(mainContainer, "MENU");
+        MusicPlayer.play("menu");
     }
 
     /** Called by LoginPanel — show player screen (stats + start button). */
@@ -126,7 +135,7 @@ public class Main {
         }
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-            worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId, mapFile);
+                worldMap, trainer, loader.getTerrainObjects(), username, this, false, levelId, mapFile);
         gamePanel.setParty(team);
         gamePanel.setItemBag(itemBag);
         activeGamePanel = gamePanel;
@@ -137,8 +146,10 @@ public class Main {
     }
 
     private int getLevelIdFromMap(String mapFile) {
-        if ("level2_map.csv".equalsIgnoreCase(mapFile)) return 2;
-        if ("level3_map.csv".equalsIgnoreCase(mapFile)) return 3;
+        if ("level2_map.csv".equalsIgnoreCase(mapFile))
+            return 2;
+        if ("level3_map.csv".equalsIgnoreCase(mapFile))
+            return 3;
         return 1;
     }
 
@@ -170,20 +181,24 @@ public class Main {
     }
 
     private boolean isValidSpawn(int[][] map, int x, int y) {
-        if (map == null || map.length == 0 || map[0].length == 0) return false;
-        if (x < 0 || y < 0) return false;
+        if (map == null || map.length == 0 || map[0].length == 0)
+            return false;
+        if (x < 0 || y < 0)
+            return false;
 
         int col = x / TILE_SIZE;
         int row = y / TILE_SIZE;
-        if (row < 0 || row >= map.length || col < 0 || col >= map[row].length) return false;
+        if (row < 0 || row >= map.length || col < 0 || col >= map[row].length)
+            return false;
 
         return map[row][col] != 5;
     }
 
     private int sanitizeSpriteRow(int spriteRow) {
-        int[] validRows = {10, 76, 140, 200};
+        int[] validRows = { 10, 76, 140, 200 };
         for (int validRow : validRows) {
-            if (spriteRow == validRow) return spriteRow;
+            if (spriteRow == validRow)
+                return spriteRow;
         }
         return 10;
     }
@@ -235,5 +250,15 @@ public class Main {
         for (Pokemon pokemon : party) {
             pokemon.currentHp = pokemon.maxHp;
         }
+    }
+
+    public void showAdminStats() {
+        for (Component comp : mainContainer.getComponents()) {
+            if (comp instanceof ParentStatsPanel) {
+                ((ParentStatsPanel) comp).refreshData();
+                break;
+            }
+        }
+        cardLayout.show(mainContainer, "ADMIN_STATS");
     }
 }

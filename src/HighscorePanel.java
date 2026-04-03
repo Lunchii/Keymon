@@ -1,16 +1,19 @@
+import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import java.awt.*;
-import java.util.List;
 
 /**
  * Global leaderboard screen displaying the top 10 trainer scores.
  *
- * <p>Scores are loaded from {@link ProfileStore#getAllHighScores()} each time
+ * <p>
+ * Scores are loaded from {@link ProfileStore#getAllHighScores()} each time
  * {@link #refreshData()} is called. The table is read-only and styled with a
- * dark retro theme to match the rest of the game's aesthetic.</p>
+ * dark retro theme to match the rest of the game's aesthetic.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -34,7 +37,7 @@ public class HighscorePanel extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
 
         // 2. Table Section
-        String[] columnNames = {"RANK", "TRAINER NAME", "SCORE"};
+        String[] columnNames = { "RANK", "TRAINER NAME", "SCORE" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -59,7 +62,7 @@ public class HighscorePanel extends JPanel {
         JButton backBtn = new JButton("BACK TO MENU");
         backBtn.setFont(new Font("Monospaced", Font.BOLD, 24));
         backBtn.setBackground(Color.BLACK);
-        backBtn.setForeground(Color.WHITE);
+        backBtn.setForeground(Color.BLACK);
         backBtn.setFocusPainted(false);
         backBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
 
@@ -77,8 +80,9 @@ public class HighscorePanel extends JPanel {
 
         int count = 0;
         for (ProfileStore.PlayerRecord record : records) {
-            if (count >= 10) break; // Only show top 10
-            tableModel.addRow(new Object[]{ (count + 1), record.name.toUpperCase(), record.score });
+            if (count >= 10)
+                break; // Only show top 10
+            tableModel.addRow(new Object[] { (count + 1), record.name.toUpperCase(), record.score });
             count++;
         }
     }

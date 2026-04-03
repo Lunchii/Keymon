@@ -93,6 +93,7 @@ public class BattlePanel extends JPanel {
         setupUI();
         setupKeyBindings();
         showMenu();
+        MusicPlayer.play("battle");
     }
 
     public void setTrainerBattle(List<Pokemon> trainerTeam) {
@@ -665,6 +666,7 @@ public class BattlePanel extends JPanel {
         switchOverlay.setVisible(false);
         bagOverlay.setVisible(false);
         gamePanel.setInBattle(false);
+        MusicPlayer.play("level" + gamePanel.getCurrentLevelId());
         String destination = gamePanel.isTutorialMode() ? "TUTORIAL_GAME" : "PLAY GAME";
         cardLayout.show(container, destination);
         gamePanel.requestFocusInWindow();
@@ -694,6 +696,7 @@ public class BattlePanel extends JPanel {
         new Timer(1400, event -> {
             ((Timer) event.getSource()).stop();
             gamePanel.setInBattle(false);
+            MusicPlayer.play("level" + gamePanel.getCurrentLevelId());
             String destination = gamePanel.isTutorialMode() ? "TUTORIAL_GAME" : "PLAY GAME";
             cardLayout.show(container, destination);
             gamePanel.requestFocusInWindow();

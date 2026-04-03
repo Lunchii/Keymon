@@ -7,9 +7,13 @@ import javax.swing.*;
 /**
  * Stage selection screen that lets the player choose which level to play.
  *
- * <p>Level 2 and Level 3 buttons are disabled until the corresponding stage
- * has been unlocked. Unlock state is read from {@link ProfileStore#getHighestUnlockedLevel(String)}.
- * Tooltip text on each button shows the stage name and difficulty description.</p>
+ * <p>
+ * Level 2 and Level 3 buttons are disabled until the corresponding stage
+ * has been unlocked. Unlock state is read from
+ * {@link ProfileStore#getHighestUnlockedLevel(String)}.
+ * Tooltip text on each button shows the stage name and difficulty description.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -40,8 +44,7 @@ public class LevelSelectPanel extends JPanel {
         dialogBox.setBackground(new Color(245, 245, 245, 230));
         dialogBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 4),
-                BorderFactory.createEmptyBorder(30, 50, 30, 50)
-        ));
+                BorderFactory.createEmptyBorder(30, 50, 30, 50)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -60,13 +63,13 @@ public class LevelSelectPanel extends JPanel {
 
         int unlockedLevel = ProfileStore.getHighestUnlockedLevel(username);
 
-        JButton level1Btn = createStyledButton("LEVEL 1", Color.BLACK, Color.WHITE);
+        JButton level1Btn = createStyledButton("LEVEL 1", Color.BLACK, Color.BLACK);
         level1Btn.addActionListener(e -> mainApp.startGame(username, "level1_map.csv"));
         level1Btn.setToolTipText(WordRepository.getStageName(1) + " - " + WordRepository.getStageDescription(1));
         gbc.gridy = 2;
         dialogBox.add(level1Btn, gbc);
 
-        JButton level2Btn = createStyledButton("LEVEL 2", Color.BLACK, Color.WHITE);
+        JButton level2Btn = createStyledButton("LEVEL 2", Color.BLACK, Color.BLACK);
         level2Btn.addActionListener(e -> mainApp.startGame(username, "level2_map.csv"));
         level2Btn.setToolTipText(WordRepository.getStageName(2) + " - " + WordRepository.getStageDescription(2));
         if (unlockedLevel < 2) {
@@ -76,7 +79,7 @@ public class LevelSelectPanel extends JPanel {
         gbc.gridy = 3;
         dialogBox.add(level2Btn, gbc);
 
-        JButton level3Btn = createStyledButton("LEVEL 3", Color.BLACK, Color.WHITE);
+        JButton level3Btn = createStyledButton("LEVEL 3", Color.BLACK, Color.BLACK);
         level3Btn.addActionListener(e -> mainApp.startGame(username, "level3_map.csv"));
         level3Btn.setToolTipText(WordRepository.getStageName(3) + " - " + WordRepository.getStageDescription(3));
         if (unlockedLevel < 3) {
@@ -86,7 +89,7 @@ public class LevelSelectPanel extends JPanel {
         gbc.gridy = 4;
         dialogBox.add(level3Btn, gbc);
 
-        JButton backBtn = createStyledButton("BACK", new Color(178, 34, 34), Color.WHITE);
+        JButton backBtn = createStyledButton("BACK", new Color(178, 34, 34), Color.BLACK);
         backBtn.addActionListener(e -> cardLayout.show(mainContainer, "PLAYER_SCREEN"));
         gbc.gridy = 5;
         dialogBox.add(backBtn, gbc);
@@ -113,8 +116,8 @@ public class LevelSelectPanel extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             int pw = getWidth(), ph = getHeight();
             double scale = Math.max((double) pw / backgroundImage.getWidth(),
-                                    (double) ph / backgroundImage.getHeight());
-            int dw = (int) (backgroundImage.getWidth()  * scale);
+                    (double) ph / backgroundImage.getHeight());
+            int dw = (int) (backgroundImage.getWidth() * scale);
             int dh = (int) (backgroundImage.getHeight() * scale);
             g2.drawImage(backgroundImage, (pw - dw) / 2, (ph - dh) / 2, dw, dh, this);
         }
