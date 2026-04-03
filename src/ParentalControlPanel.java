@@ -29,6 +29,14 @@ public class ParentalControlPanel extends JPanel {
     private JPanel container;
     private Main mainApp;
 
+    /**
+     * Constructs the parental controls panel with navigation buttons and
+     * keyboard support.
+     *
+     * @param layout    the shared CardLayout used to switch screens
+     * @param container the parent panel that holds all screens
+     * @param mainApp   the main application instance for screen coordination
+     */
     public ParentalControlPanel(CardLayout layout, JPanel container, Main mainApp) {
         this.cardLayout = layout;
         this.container = container;
@@ -106,6 +114,12 @@ public class ParentalControlPanel extends JPanel {
         setupKeyboardNavigation();
     }
 
+    /**
+     * Handles a button selection by navigating to the appropriate admin screen
+     * or performing the selected action such as resetting the high score table.
+     *
+     * @param label the text label of the selected button
+     */
     private void handleSelection(String label) {
         if (label.equals("BACK")) {
             cardLayout.show(container, "MENU");
@@ -134,6 +148,10 @@ public class ParentalControlPanel extends JPanel {
         }
     }
 
+    /**
+     * Updates button foreground colours to highlight the currently focused
+     * button and dim the rest.
+     */
     private void updateButtonStyles() {
         for (int i = 0; i < buttons.size(); i++) {
             JButton btn = buttons.get(i);
@@ -150,6 +168,12 @@ public class ParentalControlPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Creates a large outlined title label styled for the panel heading.
+     *
+     * @param text the title text to display
+     * @return a configured {@link OutlinedLabel}
+     */
     private OutlinedLabel createTitle(String text) {
         OutlinedLabel lbl = new OutlinedLabel(text);
         lbl.setFont(customFont.deriveFont(Font.BOLD, 100f));
@@ -159,6 +183,9 @@ public class ParentalControlPanel extends JPanel {
         return lbl;
     }
 
+    /**
+     * Registers W/S/ENTER key bindings for keyboard navigation of the panel.
+     */
     private void setupKeyboardNavigation() {
         InputMap im = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = this.getActionMap();
@@ -184,6 +211,11 @@ public class ParentalControlPanel extends JPanel {
         });
     }
 
+    /**
+     * Paints the animated GIF background scaled to fill the panel.
+     *
+     * @param g the graphics context
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -191,6 +223,10 @@ public class ParentalControlPanel extends JPanel {
             g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
     }
 
+    /**
+     * Loads the custom KA1 TrueType font from the fonts directory. Falls back
+     * to Arial if the font file cannot be read.
+     */
     private void loadCustomFont() {
         try {
             customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/ka1.ttf"));
