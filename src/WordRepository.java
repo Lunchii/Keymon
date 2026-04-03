@@ -10,14 +10,19 @@ public final class WordRepository {
         "cat", "dog", "sun", "leaf", "tree", "rock", "pond", "jump", "run", "glow",
         "mint", "drum", "cloud", "grass", "frog", "bug", "play", "smile", "happy", "spark",
         "train", "blue", "green", "track", "slide", "light", "brave", "quick", "piano", "story",
-        "water", "castle", "garden", "feather", "ribbon", "kitten", "rainbow", "planet", "rocket", "school"
+        "water", "castle", "garden", "feather", "ribbon", "kitten", "rainbow", "planet", "rocket", "school",
+        "work", "friend", "family", "music", "flower", "ocean", "mountain", "river", "sunset",
+        "candle", "cookie", "balloon", "guitar", "firefly", "galaxy", "honey", "jungle", "koala", "lemon", 
+        "marble", "noodle", "orange", "pencil", "quilt", "rainbow", "turtle", "volcano", "whale", "yarn", "zebra"
     };
 
     private static final String[] LEVEL_TWO_WORDS = {
         "thunder", "monster", "journey", "lantern", "correct", "battle", "puzzle", "potion", "typing", "teacher",
         "velvet", "whisper", "harvest", "compass", "glacier", "crystal", "magnet", "victory", "sparkle", "traffic",
         "library", "orchard", "kingdom", "blanket", "marble", "ginger", "pepper", "program", "painter", "rhythm",
-        "blanket", "sunrise", "backpack", "triangle", "adventure", "keyboard", "practice", "festival", "velocity", "starlight"
+        "blanket", "sunrise", "backpack", "triangle", "adventure", "keyboard", "practice", "festival", "velocity", "starlight",
+        "thousand", "various", "difference", "especially", "necessary", "weight", "electric", "according", "familiar", 
+        "statement", "attention", "separate", "business", "government", "environment", "opportunity", "development", "relationship", "knowledge"
     };
 
     private static final String[] LEVEL_THREE_WORDS = {
@@ -25,7 +30,15 @@ public final class WordRepository {
         "guardians", "mountainous", "friendship", "telescope", "microscope", "brilliant", "adrenaline", "flashlight",
         "butterflies", "commander", "celebration", "dragonfruit", "typewriter", "labyrinth", "symphonic", "trailblazer",
         "vocabulary", "remarkable", "helicopter", "harmonica", "constellation", "jubilant", "perfection", "enchanted",
-        "grandmaster", "treasuremap", "surprising", "dinosaur", "watermelon", "chocolate", "metronome", "adaptation"
+        "grandmaster", "treasuremap", "surprising", "dinosaur", "watermelon", "chocolate", "metronome", "adaptation",
+        "imagination", "extraordinary", "university", "philosopher", "revolution", "incredible", "determination", "friendliness",
+        "immediately", "electricity", "community", "condition", "individual", "transportation", "xylophone", "zookeeper", 
+        "quarantine", "vulnerability", "opportunity", "sustainability", "entrepreneurship", "communication", "collaboration", "innovation",
+        "accretion", "anathema", "bibliophile", "camaraderie", "defenestration", "ephemeral", "flabbergasted", "gargantuan", "haphazard",
+        "iconoclast", "asphyxiation", "juxtaposition", "kaleidoscope", "limerence", "mellifluous", "nomenclature", "obfuscation", "perspicacious",
+        "quixotic", "reciprocity", "serendipity", "tintinnabulation", "ultracrepidarian", "verisimilitude", "wanderlust", "xenophobia",
+        "yesteryear", "zephyr", "embezzlement", "floccinaucinihilipilification", "antidisestablishmentarianism",
+        "pneumonoultramicroscopicsilicovolcanoconiosis"
     };
 
     private WordRepository() {
