@@ -6,17 +6,17 @@
   "unlockedLevel": 2,
   "levelX": [
     1472,
-    544,
+    508,
     320
   ],
   "levelY": [
     800,
-    416,
+    544,
     320
   ],
   "levelSpriteRow": [
     10,
-    10,
+    140,
     10
   ],
   "party": [
@@ -43,12 +43,17 @@
     }
   ],
   "itemCounts": {
-    "SLOW_TIME": 3,
-    "POTION": 4,
-    "FULL_HEAL": 1,
-    "ATTACK_BOOST": 2
+    "SLOW_TIME": 13,
+    "POTION": 6,
+    "FULL_HEAL": 7,
+    "ATTACK_BOOST": 11
   },
-  "totalTimePlayedSeconds": 48,
+  "collectedPokeballs": [
+    "2:13:13",
+    "2:12:13",
+    "2:14:17"
+  ],
+  "totalTimePlayedSeconds": 175,
   "wordsTyped": 0,
   "correctChars": 0,
   "totalTypedChars": 0,
@@ -58,6 +63,6 @@
   "averageWpmSamples": 0,
   "longestStreak": 0,
   "powerupsUsed": 0,
-  "gamesPlayed": 4,
+  "gamesPlayed": 19,
   "levelWins": 1
 }
