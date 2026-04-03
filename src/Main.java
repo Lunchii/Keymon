@@ -126,13 +126,13 @@ public class Main {
 
         MapLoader loader = new MapLoader(mapFile);
         int[][] worldMap = loader.getWorldMap();
-        Trainer trainer = loader.getTrainer();
+        List<Trainer> trainers = loader.getTrainers();
 
         List<TerrainObjects> terrainObjects = loader.getTerrainObjects();
         terrainObjects.removeIf(obj -> obj.getTileValue() == 3 &&
             ProfileStore.hasCollectedPokeball(username, levelId, obj.getX() / TILE_SIZE, obj.getY() / TILE_SIZE));
 
-        Point spawnPoint = resolveSpawnPoint(worldMap, data.x, data.y);
+        Point spawnPoint = resolveSpawnPoint(worldMap, terrainObjects, trainers, data.x, data.y);
         Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
 
         if (activeGamePanel != null) {
@@ -140,7 +140,7 @@ public class Main {
         }
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
-            worldMap, trainer, terrainObjects, username, this, false, levelId, mapFile);
+            worldMap, trainers, terrainObjects, username, this, false, levelId, mapFile);
         gamePanel.setParty(team);
         gamePanel.setItemBag(itemBag);
         activeGamePanel = gamePanel;
@@ -169,15 +169,20 @@ public class Main {
         }
     }
 
-    private Point resolveSpawnPoint(int[][] map, int savedX, int savedY) {
-        if (isValidSpawn(map, savedX, savedY)) {
+    private Point resolveSpawnPoint(int[][] map, List<TerrainObjects> terrainObjects, List<Trainer> trainers,
+                                    int savedX, int savedY) {
+        if (isValidSpawn(map, terrainObjects, trainers, savedX, savedY)) {
             return new Point(savedX, savedY);
         }
 
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[row].length; col++) {
                 if (map[row][col] == 0) {
-                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
+                    int px = col * TILE_SIZE;
+                    int py = row * TILE_SIZE;
+                    if (isValidSpawn(map, terrainObjects, trainers, px, py)) {
+                        return new Point(px, py);
+                    }
                 }
             }
         }
@@ -185,7 +190,8 @@ public class Main {
         return new Point(0, 0);
     }
 
-    private boolean isValidSpawn(int[][] map, int x, int y) {
+    private boolean isValidSpawn(int[][] map, List<TerrainObjects> terrainObjects, List<Trainer> trainers,
+                                 int x, int y) {
         if (map == null || map.length == 0 || map[0].length == 0)
             return false;
         if (x < 0 || y < 0)
@@ -196,7 +202,27 @@ public class Main {
         if (row < 0 || row >= map.length || col < 0 || col >= map[row].length)
             return false;
 
-        return map[row][col] != 5;
+        if (map[row][col] == 5)
+            return false;
+
+        // Reject positions occupied by a solid terrain object (trees, rocks)
+        if (terrainObjects != null) {
+            for (TerrainObjects obj : terrainObjects) {
+                if (obj.isSolid() && obj.collidesWith(x, y)) {
+                    return false;
+                }
+            }
+        }
+
+        if (trainers != null) {
+            for (Trainer trainer : trainers) {
+                if (trainer.occupies(x, y)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private int sanitizeSpriteRow(int spriteRow) {
@@ -210,7 +236,7 @@ public class Main {
 
     public void startTutorial() {
         MapLoader tutorialLoader = new MapLoader("maps/tutorial_map.csv");
-        Trainer trainer = tutorialLoader.getTrainer();
+        List<Trainer> tutorialTrainers = tutorialLoader.getTrainers();
 
         if (tutorialGamePanel != null) {
             mainContainer.remove(tutorialGamePanel);
@@ -218,7 +244,7 @@ public class Main {
 
         Player player = new Player(3 * TILE_SIZE, 3 * TILE_SIZE, 0, TILE_SIZE);
         tutorialGamePanel = new GamePanel(cardLayout, mainContainer, player, tutorialLoader.getWorldMap(),
-                trainer, tutorialLoader.getTerrainObjects(), "", this, true, 1, "maps/tutorial_map.csv");
+                tutorialTrainers, tutorialLoader.getTerrainObjects(), "", this, true, 1, "maps/tutorial_map.csv");
         List<Pokemon> tutorialParty = new java.util.ArrayList<>();
         tutorialParty.add(Pokemon.random());
         tutorialGamePanel.setParty(tutorialParty);
