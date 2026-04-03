@@ -35,7 +35,6 @@ import javax.swing.Timer;
  */
 public class GamePanel extends JPanel {
     private static final int TILE_SIZE = 32;
-    private static final int MAX_FOCUS = 100;
 
     private final int[][] map;
     private final Player player;
@@ -79,7 +78,6 @@ public class GamePanel extends JPanel {
 
     private int levelScore;
     private int bestScore;
-    private int focusHealth = MAX_FOCUS;
     private int wordsTyped;
     private int correctChars;
     private int totalTypedChars;
@@ -246,14 +244,6 @@ public class GamePanel extends JPanel {
         return bestScore;
     }
 
-    public int getFocusHealth() {
-        return focusHealth;
-    }
-
-    public int getMaxFocusHealth() {
-        return MAX_FOCUS;
-    }
-
     public int getWordsTyped() {
         return wordsTyped;
     }
@@ -389,8 +379,6 @@ public class GamePanel extends JPanel {
         } else {
             errorCount++;
             comboStreak = 0;
-            focusHealth = Math.max(0, focusHealth - WordRepository.mistakeDamage(currentLevelId));
-            setStatusBanner("Typing mistake! Focus -" + WordRepository.mistakeDamage(currentLevelId));
         }
 
         updateLiveWpm();
@@ -418,10 +406,6 @@ public class GamePanel extends JPanel {
         }
     }
 
-    public boolean isFocusDepleted() {
-        return focusHealth <= 0;
-    }
-
     public void awardBattleVictory(Pokemon defeatedPokemon, boolean trainerBattle) {
         if (levelEnded || levelFailed) {
             return;
@@ -434,7 +418,6 @@ public class GamePanel extends JPanel {
         }
         levelScore += bonus;
         bestScore = Math.max(bestScore, levelScore);
-        focusHealth = Math.min(MAX_FOCUS, focusHealth + (trainerBattle ? 12 : 6));
 
         String reward = maybeAwardItem(trainerBattle);
         String suffix = reward.isEmpty() ? "" : " " + reward;
@@ -636,7 +619,7 @@ public class GamePanel extends JPanel {
         String[] lines = {
             "Type the highlighted word before the timer runs out.",
             "Correct letters glow green as you build the word.",
-            "Mistakes drain your Focus bar, so accuracy matters.",
+            "Mistakes reset your combo streak, so accuracy matters.",
             "Long streaks earn bigger score bonuses.",
             "Use BAG powerups for extra time, healing, or stronger attacks.",
             "Reach the dark exit tile after surviving the route."
@@ -1017,7 +1000,7 @@ public class GamePanel extends JPanel {
         int hudX = getWidth() - 320;
         int hudY = 16;
         int hudW = 296;
-        int hudH = 170;
+        int hudH = 154;
 
         graphics.setColor(new Color(8, 15, 26, 210));
         graphics.fillRoundRect(hudX, hudY, hudW, hudH, 18, 18);
@@ -1044,8 +1027,6 @@ public class GamePanel extends JPanel {
         graphics.drawString("Items: " + totalItemsInBag(), hudX + 18, hudY + 142);
         graphics.drawString("Battles: " + battlesWon, hudX + 156, hudY + 142);
 
-        drawFocusBar(graphics, hudX + 18, hudY + 150, hudW - 36, 12);
-
         if (!statusBanner.isEmpty()) {
             graphics.setColor(new Color(0, 0, 0, 180));
             graphics.fillRoundRect(20, getHeight() - 58, 410, 36, 14, 14);
@@ -1055,20 +1036,6 @@ public class GamePanel extends JPanel {
             graphics.setFont(new Font("SansSerif", Font.BOLD, 14));
             graphics.drawString(statusBanner, 34, getHeight() - 35);
         }
-    }
-
-    private void drawFocusBar(Graphics2D graphics, int x, int y, int width, int height) {
-        graphics.setColor(new Color(25, 35, 48));
-        graphics.fillRoundRect(x, y, width, height, 7, 7);
-        float ratio = Math.max(0f, Math.min(1f, (float) focusHealth / MAX_FOCUS));
-        graphics.setColor(ratio > 0.5f ? new Color(74, 219, 110) : ratio > 0.25f
-            ? new Color(243, 196, 77) : new Color(233, 96, 89));
-        graphics.fillRoundRect(x, y, (int) (width * ratio), height, 7, 7);
-        graphics.setColor(new Color(255, 255, 255, 95));
-        graphics.drawRoundRect(x, y, width, height, 7, 7);
-        graphics.setColor(Color.WHITE);
-        graphics.setFont(new Font("SansSerif", Font.BOLD, 12));
-        graphics.drawString("Focus " + focusHealth + "/" + MAX_FOCUS, x + 8, y - 2);
     }
 
     private int totalItemsInBag() {

@@ -127,6 +127,7 @@ public final class WordRepository {
 
     /**
      * Returns an enemy damage bonus for a stage.
+     * Values are scaled up 20% to compensate for the removal of the Focus penalty system.
      *
      * @param levelId current stage identifier
      * @return extra enemy attack damage
@@ -136,26 +137,9 @@ public final class WordRepository {
             case 1:
                 return 0;
             case 2:
-                return 4;
-            default:
-                return 8;
-        }
-    }
-
-    /**
-     * Returns how much typing damage a keying mistake causes in a stage.
-     *
-     * @param levelId current stage identifier
-     * @return focus damage per mistake
-     */
-    public static int mistakeDamage(int levelId) {
-        switch (sanitizeLevel(levelId)) {
-            case 1:
                 return 5;
-            case 2:
-                return 6;
             default:
-                return 7;
+                return 10;
         }
     }
 

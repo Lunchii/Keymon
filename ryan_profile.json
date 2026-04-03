@@ -1,7 +1,7 @@
 {
   "username": "ryan",
   "password": "1234",
-  "highScore": 799,
+  "highScore": 846,
   "currentLevel": 2,
   "unlockedLevel": 2,
   "levelX": [
@@ -15,7 +15,7 @@
     320
   ],
   "levelSpriteRow": [
-    10,
+    140,
     10,
     10
   ],
@@ -23,7 +23,7 @@
     {
       "name": "Flamezard",
       "maxHp": 95,
-      "currentHp": 95,
+      "currentHp": 82,
       "attack": 26,
       "spritePath": "keymonsters/flamezard.png"
     },
@@ -46,18 +46,18 @@
     "SLOW_TIME": 2,
     "POTION": 3,
     "FULL_HEAL": 1,
-    "ATTACK_BOOST": 2
+    "ATTACK_BOOST": 3
   },
-  "totalTimePlayedSeconds": 106,
-  "wordsTyped": 11,
-  "correctChars": 75,
-  "totalTypedChars": 79,
-  "errorCount": 4,
+  "totalTimePlayedSeconds": 171,
+  "wordsTyped": 19,
+  "correctChars": 123,
+  "totalTypedChars": 134,
+  "errorCount": 11,
   "peakWpm": 14.499758337361044,
-  "cumulativeAverageWpm": 14.804670285514382,
-  "averageWpmSamples": 2,
+  "cumulativeAverageWpm": 24.45912138974223,
+  "averageWpmSamples": 3,
   "longestStreak": 4,
   "powerupsUsed": 0,
-  "gamesPlayed": 3,
-  "levelWins": 1
+  "gamesPlayed": 4,
+  "levelWins": 2
 }

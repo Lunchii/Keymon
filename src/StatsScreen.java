@@ -57,8 +57,6 @@ public class StatsScreen {
         lineY += 34;
         drawLine(graphics, leftX, lineY, "Best", String.valueOf(gamePanel.getBestScore()));
         lineY += 34;
-        drawLine(graphics, leftX, lineY, "Focus", gamePanel.getFocusHealth() + "/" + gamePanel.getMaxFocusHealth());
-        lineY += 34;
         drawLine(graphics, leftX, lineY, "WPM", String.format("%.1f", gamePanel.getCurrentWpm()));
         lineY += 34;
         drawLine(graphics, leftX, lineY, "Peak", String.format("%.1f", gamePanel.getPeakWpm()));
@@ -77,7 +75,7 @@ public class StatsScreen {
         int goalY = leftY + 42;
         graphics.drawString("Reach the exit tile to clear the stage.", rightX, goalY);
         goalY += 36;
-        graphics.drawString("Mistakes reduce Focus, so accuracy matters.", rightX, goalY);
+        graphics.drawString("Accuracy matters — mistakes reset your combo.", rightX, goalY);
         goalY += 36;
         graphics.drawString("Win battles to earn extra score and item drops.", rightX, goalY);
         goalY += 36;

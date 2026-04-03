@@ -368,12 +368,8 @@ public class BattlePanel extends JPanel {
                 gamePanel.recordTypedCharacter(correct);
                 if (!correct) {
                     feedbackLabel.setForeground(new Color(255, 120, 100));
-                    feedbackLabel.setText("Mistakes reduce focus. Reset and keep going.");
+                    feedbackLabel.setText("Mistake! Keep going.");
                     statsLabel.setText(buildStatsLine());
-                    if (gamePanel.isFocusDepleted()) {
-                        triggerFocusFailure();
-                        return;
-                    }
                 }
             }
         }
@@ -558,7 +554,7 @@ public class BattlePanel extends JPanel {
         new Timer(1100, event -> {
             ((Timer) event.getSource()).stop();
             Pokemon active = activePokemon();
-            int damage = wildPokemon.attack + WordRepository.enemyAttackBonus(gamePanel.getCurrentLevelId());
+            int damage = (int) Math.round((wildPokemon.attack + WordRepository.enemyAttackBonus(gamePanel.getCurrentLevelId())) * 1.2);
             active.currentHp = Math.max(0, active.currentHp - damage);
             feedbackLabel.setForeground(new Color(255, 120, 100));
             feedbackLabel.setText(wildPokemon.name + " hit " + active.name + " for " + damage + " damage!");
@@ -661,13 +657,6 @@ public class BattlePanel extends JPanel {
         }).start();
     }
 
-    private void triggerFocusFailure() {
-        if (phase == Phase.FINISHED) {
-            return;
-        }
-        failBattle("Your focus meter hit zero.");
-    }
-
     private void failBattle(String reason) {
         phase = Phase.FINISHED;
         stopTimers();
@@ -763,8 +752,7 @@ public class BattlePanel extends JPanel {
     }
 
     private String buildStatsLine() {
-        return "Focus " + gamePanel.getFocusHealth()
-            + " | Score " + gamePanel.getLevelScore()
+        return "Score " + gamePanel.getLevelScore()
             + " | WPM " + String.format("%.1f", gamePanel.getCurrentWpm())
             + " | Combo x" + Math.max(1, gamePanel.getComboStreak());
     }
