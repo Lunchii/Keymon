@@ -1,22 +1,22 @@
 {
-  "username": "124871T4",
+  "username": "miguel",
   "password": "1234",
-  "highScore": 0,
-  "currentLevel": 1,
-  "unlockedLevel": 1,
+  "highScore": 500,
+  "currentLevel": 3,
+  "unlockedLevel": 3,
   "levelX": [
-    320,
-    320,
+    1856,
+    1856,
     320
   ],
   "levelY": [
-    288,
-    320,
+    928,
+    928,
     320
   ],
   "levelSpriteRow": [
     140,
-    10,
+    140,
     10
   ],
   "party": [
@@ -44,14 +44,15 @@
   ],
   "itemCounts": {
     "SLOW_TIME": 2,
-    "POTION": 3,
+    "POTION": 4,
     "FULL_HEAL": 1,
     "ATTACK_BOOST": 2
   },
   "collectedPokeballs": [
-    "1:44:12"
+    "1:53:29",
+    "3:12:22"
   ],
-  "totalTimePlayedSeconds": 11,
+  "totalTimePlayedSeconds": 118,
   "wordsTyped": 0,
   "correctChars": 0,
   "totalTypedChars": 0,
@@ -61,6 +62,6 @@
   "averageWpmSamples": 0,
   "longestStreak": 0,
   "powerupsUsed": 0,
-  "gamesPlayed": 1,
-  "levelWins": 0
+  "gamesPlayed": 2,
+  "levelWins": 2
 }

@@ -120,9 +120,11 @@ public class BattlePanel extends JPanel {
 
         timerLabel = createLabel(" ", Font.BOLD, 18);
         timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        timerLabel.setVerticalAlignment(SwingConstants.CENTER);
         add(timerLabel);
 
         wordLabel = createLabel(" ", Font.BOLD, 24);
+        wordLabel.setVerticalAlignment(SwingConstants.CENTER);
         add(wordLabel);
 
         feedbackLabel = createLabel(" ", Font.PLAIN, 15);
@@ -886,17 +888,37 @@ public class BattlePanel extends JPanel {
         graphics.setStroke(new BasicStroke(1.7f));
         graphics.drawRoundRect(x + 1, y + 1, width - 3, height - 3, 16, 16);
 
-        Font labelFont = new Font("SansSerif", Font.BOLD, Math.max(11, Math.min(13, height / 5)));
-        Font valueFont = new Font("SansSerif", Font.BOLD, Math.max(22, Math.min(30, height / 2)));
+        Font labelFont = new Font("SansSerif", Font.BOLD, Math.max(10, Math.min(12, height / 6)));
+        FontMetrics labelMetrics = graphics.getFontMetrics(labelFont);
+
+        int valueSize = Math.max(16, Math.min(26, height / 2 - 2));
+        Font valueFont = new Font("SansSerif", Font.BOLD, valueSize);
+        FontMetrics valueMetrics = graphics.getFontMetrics(valueFont);
+
+        int topInset = y + 8;
+        int bottomInset = y + height - 8;
+        int labelBaseline = topInset + labelMetrics.getAscent();
+
+        while (valueSize > 14) {
+            int minValueBaseline = labelBaseline + labelMetrics.getDescent() + 8 + valueMetrics.getAscent();
+            int maxValueBaseline = bottomInset - valueMetrics.getDescent();
+            if (minValueBaseline <= maxValueBaseline) {
+                break;
+            }
+            valueSize--;
+            valueFont = new Font("SansSerif", Font.BOLD, valueSize);
+            valueMetrics = graphics.getFontMetrics(valueFont);
+        }
 
         graphics.setFont(labelFont);
         graphics.setColor(new Color(182, 222, 196));
-        graphics.drawString(label, x + 14, y + 20);
+        graphics.drawString(label, x + 14, labelBaseline);
 
         graphics.setFont(valueFont);
         graphics.setColor(Color.WHITE);
-        FontMetrics valueMetrics = graphics.getFontMetrics(valueFont);
-        int valueBaseline = y + height - Math.max(12, valueMetrics.getDescent() + 8);
+        int minValueBaseline = labelBaseline + labelMetrics.getDescent() + 8 + valueMetrics.getAscent();
+        int maxValueBaseline = bottomInset - valueMetrics.getDescent();
+        int valueBaseline = Math.max(minValueBaseline, maxValueBaseline);
         graphics.drawString(value, x + 14, valueBaseline);
     }
 
@@ -991,15 +1013,16 @@ public class BattlePanel extends JPanel {
 
             timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
             timerLabel.setFont(new Font("SansSerif", Font.BOLD, phase == Phase.COUNTDOWN ? 54 : 32));
-            timerLabel.setBounds(focusPanelBounds.x + 20, focusPanelBounds.y + 18, focusPanelBounds.width - 40,
-                    phase == Phase.COUNTDOWN ? 62 : 38);
+                timerLabel.setBounds(focusPanelBounds.x + 20, focusPanelBounds.y + (phase == Phase.COUNTDOWN ? 20 : 22),
+                    focusPanelBounds.width - 40, phase == Phase.COUNTDOWN ? 72 : 44);
 
             wordLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            wordLabel.setBounds(focusPanelBounds.x + 28, focusPanelBounds.y + (phase == Phase.COUNTDOWN ? 76 : 64),
-                    focusPanelBounds.width - 56, phase == Phase.COUNTDOWN ? 50 : 66);
+                wordLabel.setBounds(focusPanelBounds.x + 28, focusPanelBounds.y + (phase == Phase.COUNTDOWN ? 86 : 70),
+                    focusPanelBounds.width - 56, phase == Phase.COUNTDOWN ? 62 : 84);
 
             if (phase == Phase.PLAYER_TURN) {
-                inputField.setBounds(focusPanelBounds.x + 106, focusPanelBounds.y + 156, focusPanelBounds.width - 212, 42);
+                inputField.setBounds(focusPanelBounds.x + 106, focusPanelBounds.y + 176, focusPanelBounds.width - 212,
+                    42);
             } else {
                 inputField.setBounds(textX, boxY + 168, textWidth, 36);
             }
