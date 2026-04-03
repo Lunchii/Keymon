@@ -54,7 +54,8 @@ public class MapLoader {
                         worldMap[row][col] = 9;
                     } else if (value >= 1 && value <= 7) {
                         // Terrain objects (trees, rocks, etc.)
-                        terrainObjects.add(new TerrainObjects(col, row, value));
+                        boolean isPokeball = value == 3;
+                        terrainObjects.add(new TerrainObjects(col, row, value, !isPokeball));
                         worldMap[row][col] = 0; // draw grass under terrain object
                     } else {
                         worldMap[row][col] = value;
