@@ -1,16 +1,19 @@
-import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 /**
  * Player hub screen shown immediately after login.
  *
- * <p>Displays a brief stats summary (best score, stage, average WPM) and
+ * <p>
+ * Displays a brief stats summary (best score, stage, average WPM) and
  * coaching tips loaded from the player's saved profile. From here the player
- * can continue their last session, pick a stage, view full stats, or log out.</p>
+ * can continue their last session, pick a stage, view full stats, or log out.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -44,8 +47,7 @@ public class PlayerScreen extends JPanel {
         dialogBox.setBackground(new Color(245, 245, 245, 230));
         dialogBox.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(Color.BLACK, 4),
-                BorderFactory.createEmptyBorder(30, 50, 30, 50)
-        ));
+                BorderFactory.createEmptyBorder(30, 50, 30, 50)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -73,22 +75,22 @@ public class PlayerScreen extends JPanel {
         gbc.gridy = 2;
         dialogBox.add(new JScrollPane(detailArea), gbc);
 
-        JButton continueBtn = createStyledButton("CONTINUE JOURNEY", Color.BLACK, Color.WHITE);
+        JButton continueBtn = createStyledButton("CONTINUE JOURNEY", Color.BLACK, Color.BLACK);
         continueBtn.addActionListener(e -> mainApp.continueGame(username));
         gbc.gridy = 3;
         dialogBox.add(continueBtn, gbc);
 
-        JButton selectLevelBtn = createStyledButton("SELECT STAGE", new Color(70, 130, 180), Color.WHITE);
+        JButton selectLevelBtn = createStyledButton("SELECT STAGE", new Color(70, 130, 180), Color.BLACK);
         selectLevelBtn.addActionListener(e -> mainApp.startGame(username));
         gbc.gridy = 4;
         dialogBox.add(selectLevelBtn, gbc);
 
-        JButton statsBtn = createStyledButton("VIEW FULL STATS", new Color(90, 110, 170), Color.WHITE);
+        JButton statsBtn = createStyledButton("VIEW FULL STATS", new Color(90, 110, 170), Color.BLACK);
         statsBtn.addActionListener(e -> mainApp.showStatsPage(username));
         gbc.gridy = 5;
         dialogBox.add(statsBtn, gbc);
 
-        JButton logoutBtn = createStyledButton("LOGOUT", new Color(178, 34, 34), Color.WHITE);
+        JButton logoutBtn = createStyledButton("LOGOUT", new Color(178, 34, 34), Color.BLACK);
         logoutBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
         gbc.gridy = 6;
         dialogBox.add(logoutBtn, gbc);
@@ -98,7 +100,8 @@ public class PlayerScreen extends JPanel {
         deleteBtn.setContentAreaFilled(false);
         deleteBtn.setBorderPainted(false);
         deleteBtn.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Delete all data for " + username + "?", "Warning", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete all data for " + username + "?", "Warning",
+                    JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 ProfileStore.deleteAccount(username);
                 cardLayout.show(container, "MENU");
@@ -119,8 +122,7 @@ public class PlayerScreen extends JPanel {
                 "Best Score: %d | Stage: %d | Avg WPM: %.1f",
                 profile.highScore,
                 profile.unlockedLevel,
-                profile.averageWpm
-        ));
+                profile.averageWpm));
 
         StringBuilder builder = new StringBuilder();
         builder.append("Accuracy: ").append(String.format("%.1f%%", profile.accuracyPercent)).append('\n');
@@ -161,8 +163,8 @@ public class PlayerScreen extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             int pw = getWidth(), ph = getHeight();
             double scale = Math.max((double) pw / backgroundImage.getWidth(),
-                                    (double) ph / backgroundImage.getHeight());
-            int dw = (int) (backgroundImage.getWidth()  * scale);
+                    (double) ph / backgroundImage.getHeight());
+            int dw = (int) (backgroundImage.getWidth() * scale);
             int dh = (int) (backgroundImage.getHeight() * scale);
             g2.drawImage(backgroundImage, (pw - dw) / 2, (ph - dh) / 2, dw, dh, this);
         }

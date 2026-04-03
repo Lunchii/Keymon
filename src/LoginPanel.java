@@ -1,17 +1,20 @@
-import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 /**
  * Login and account-creation screen.
  *
- * <p>Displays a centred dialog box over a scaled {@code LoginBackground.png}
+ * <p>
+ * Displays a centred dialog box over a scaled {@code LoginBackground.png}
  * image. Delegates authentication and account creation to {@link ProfileStore}.
  * On success the user is forwarded to {@link PlayerScreen} via
- * {@link Main#showPlayerScreen(String)}.</p>
+ * {@link Main#showPlayerScreen(String)}.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -39,8 +42,7 @@ public class LoginPanel extends JPanel {
         dialogBox.setBackground(new Color(245, 245, 245, 235));
         dialogBox.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(Color.BLACK, 4),
-                BorderFactory.createEmptyBorder(25, 40, 25, 40)
-        ));
+                BorderFactory.createEmptyBorder(25, 40, 25, 40)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 6, 8, 6);
@@ -52,7 +54,9 @@ public class LoginPanel extends JPanel {
         gbc.gridy = 0;
         dialogBox.add(promptLabel, gbc);
 
-        JLabel helpLabel = new JLabel("<html><div style='text-align:center;'>Use your username and password.<br/>New trainers can create an account here.</div></html>", SwingConstants.CENTER);
+        JLabel helpLabel = new JLabel(
+                "<html><div style='text-align:center;'>Use your username and password.<br/>New trainers can create an account here.</div></html>",
+                SwingConstants.CENTER);
         helpLabel.setFont(new Font("Monospaced", Font.PLAIN, 13));
         gbc.gridy = 1;
         dialogBox.add(helpLabel, gbc);
@@ -88,7 +92,8 @@ public class LoginPanel extends JPanel {
         gbc.gridy = 5;
         dialogBox.add(backBtn, gbc);
 
-        JLabel legacyHint = new JLabel("Legacy accounts can try their username as the password.", SwingConstants.CENTER);
+        JLabel legacyHint = new JLabel("Legacy accounts can try their username as the password.",
+                SwingConstants.CENTER);
         legacyHint.setFont(new Font("Monospaced", Font.ITALIC, 11));
         gbc.gridy = 6;
         dialogBox.add(legacyHint, gbc);
@@ -100,7 +105,7 @@ public class LoginPanel extends JPanel {
         JButton button = new JButton(text);
         button.setFont(new Font("Monospaced", Font.BOLD, 15));
         button.setBackground(bg);
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
