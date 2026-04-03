@@ -123,18 +123,13 @@ public class ParentalControlPanel extends JPanel {
             cardLayout.show(container, "HIGHSCORE");
         } else if (label.equals("RESET TABLE")) {
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Reset ALL data? This will clear high scores and delete save files.",
-                    "CRITICAL WARNING", JOptionPane.YES_NO_OPTION);
+                    "Reset the high score table to defaults?",
+                    "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Wipe user save files [_profile.json]
-                java.util.List<String> users = ProfileStore.getAllUsernames();
-                for (String user : users) {
-                    ProfileStore.deleteAccount(user);
-                }
-                // Reset Highscore table to defaults
+                // Reset Highscore table to defaults only
                 ProfileStore.resetHighScoreTable();
-                JOptionPane.showMessageDialog(this, "System Reset Complete.");
+                JOptionPane.showMessageDialog(this, "High score table has been reset to defaults.");
             }
         }
     }

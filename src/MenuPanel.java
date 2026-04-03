@@ -135,7 +135,7 @@ public class MenuPanel extends JPanel {
             if (passcode == JOptionPane.OK_OPTION) {
                 String password = new String(pf.getPassword());
                 // Using the hardcoded PIN from ProfileStore logic
-                if (password.equals("1234")) {
+                if (ProfileStore.verifyParentPin(password)) {
                     cardLayout.show(container, "PARENTAL");
                 } else {
                     JOptionPane.showMessageDialog(this, "Incorrect PIN!", "Access Denied",
