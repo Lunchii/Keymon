@@ -22,10 +22,11 @@ public class Main {
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
 
-        MenuPanel menuPanel        = new MenuPanel(cardLayout, mainContainer);
-        LoginPanel loginPanel      = new LoginPanel(mainContainer, this);
+        MenuPanel menuPanel = new MenuPanel(cardLayout, mainContainer);
+        LoginPanel loginPanel = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
         TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
+        ParentalPanel parentalPanel = new ParentalPanel(cardLayout, mainContainer, this);
 
         // Initialize PlayerScreen with references for navigation
         playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
@@ -38,6 +39,7 @@ public class Main {
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
         mainContainer.add(highscorePanel, "HIGHSCORE");
         mainContainer.add(tutorialPanel, "TUTORIAL");
+        mainContainer.add(parentalPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
 
         frame.add(mainContainer);
@@ -62,7 +64,10 @@ public class Main {
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
     public void startGame(String username) {
-        try { mainContainer.remove(mainContainer.getComponentCount() - 1); } catch (Exception ignored) {}
+        try {
+            mainContainer.remove(mainContainer.getComponentCount() - 1);
+        } catch (Exception ignored) {
+        }
         mainContainer.add(new TeamSelectPanel(mainContainer, this, username), "TEAM_SELECT");
         cardLayout.show(mainContainer, "TEAM_SELECT");
     }
@@ -71,9 +76,9 @@ public class Main {
     public void startGame(String username, List<Pokemon> team) {
         SaveManager.PlayerData data = SaveManager.loadGame(username);
 
-        MapLoader loader  = new MapLoader("map.csv");
-        Trainer trainer   = loader.getTrainer();
-        Player player     = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
+        MapLoader loader = new MapLoader("map.csv");
+        Trainer trainer = loader.getTrainer();
+        Player player = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
                 loader.getWorldMap(), trainer, loader.getTerrainObjects(), username, this);
