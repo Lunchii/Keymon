@@ -5,11 +5,15 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 /**
- * Main menu screen with an animated background and keyboard/mouse navigable buttons.
+ * Main menu screen with an animated background and keyboard/mouse navigable
+ * buttons.
  *
- * <p>Buttons: LOGIN, HIGH SCORES, TUTORIAL, PARENTAL CONTROLS, EXIT.
+ * <p>
+ * Buttons: LOGIN, HIGH SCORES, TUTORIAL, PARENTAL CONTROLS, EXIT.
  * Keyboard navigation uses W/S to change selection and ENTER to activate.
- * The custom KA1 font is loaded at startup; Arial is used as the fallback.</p>
+ * The custom KA1 font is loaded at startup; Arial is used as the fallback.
+ * </p>
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -115,7 +119,21 @@ public class MenuPanel extends JPanel {
             }
             cardLayout.show(container, "HIGHSCORE");
         } else if (label.equals("PARENTAL CONTROLS")) {
-            // handled by teammate — no action
+            // --- SECURE PASSCODE CHECK ---
+            JPasswordField pf = new JPasswordField();
+            int passcode = JOptionPane.showConfirmDialog(this, pf, "Enter Parental PIN",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (passcode == JOptionPane.OK_OPTION) {
+                String password = new String(pf.getPassword());
+                // Using the hardcoded PIN from ProfileStore logic
+                if (password.equals("1234")) {
+                    cardLayout.show(container, "PARENTAL");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Incorrect PIN!", "Access Denied",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
         } else if (label.equals("LOGIN")) {
             cardLayout.show(container, "LOGIN");
         } else {
