@@ -1,6 +1,4 @@
 import org.junit.jupiter.api.*;
-import java.io.File;
-import java.nio.file.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,7 +18,6 @@ class ProfileStoreTest {
 
     @BeforeEach
     void setup() {
-        // Clean up any leftover test account before each test
         ProfileStore.deleteAccount(TEST_USER);
     }
 
@@ -41,6 +38,38 @@ class ProfileStoreTest {
         assertFalse(ProfileStore.verifyParentPin("1234"));
     }
 
+    // -------------------------------------------------------- Account creation
+
+    @Test
+    void createAccountSucceeds() {
+        assertTrue(ProfileStore.createAccount(TEST_USER, TEST_PASS));
+    }
+
+    // ----------------------------------------------------- Authentication
+
+    @Test
+    void correctCredentialsAuthenticate() {
+        ProfileStore.createAccount(TEST_USER, TEST_PASS);
+        assertTrue(ProfileStore.authenticate(TEST_USER, TEST_PASS));
+    }
+
+    @Test
+    void wrongPasswordRejected() {
+        ProfileStore.createAccount(TEST_USER, TEST_PASS);
+        assertFalse(ProfileStore.authenticate(TEST_USER, "wrongpass"));
+    }
+
+    // ---------------------------------------------------- Delete account
+
+    @Test
+    void deleteAccountRemovesUser() {
+        ProfileStore.createAccount(TEST_USER, TEST_PASS);
+        ProfileStore.deleteAccount(TEST_USER);
+        assertFalse(ProfileStore.accountExists(TEST_USER));
+    }
+
+    // --- The following tests were generated with assistance from Claude (Anthropic) ---
+
     @Test
     void emptyPinRejected() {
         assertFalse(ProfileStore.verifyParentPin(""));
@@ -49,13 +78,6 @@ class ProfileStoreTest {
     @Test
     void nullPinRejected() {
         assertFalse(ProfileStore.verifyParentPin(null));
-    }
-
-    // -------------------------------------------------------- Account creation
-
-    @Test
-    void createAccountSucceeds() {
-        assertTrue(ProfileStore.createAccount(TEST_USER, TEST_PASS));
     }
 
     @Test
@@ -85,26 +107,10 @@ class ProfileStoreTest {
         assertNotNull(ProfileStore.validateNewAccount("", TEST_PASS));
     }
 
-    // ----------------------------------------------------- Authentication
-
-    @Test
-    void correctCredentialsAuthenticate() {
-        ProfileStore.createAccount(TEST_USER, TEST_PASS);
-        assertTrue(ProfileStore.authenticate(TEST_USER, TEST_PASS));
-    }
-
-    @Test
-    void wrongPasswordRejected() {
-        ProfileStore.createAccount(TEST_USER, TEST_PASS);
-        assertFalse(ProfileStore.authenticate(TEST_USER, "wrongpass"));
-    }
-
     @Test
     void unknownUserRejected() {
         assertFalse(ProfileStore.authenticate("nonexistent_user_xyz", "anypass"));
     }
-
-    // ---------------------------------------------------- Password reset
 
     @Test
     void passwordResetWorks() {
@@ -119,8 +125,6 @@ class ProfileStoreTest {
         ProfileStore.createAccount(TEST_USER, TEST_PASS);
         assertFalse(ProfileStore.resetPassword(TEST_USER, "ab"));
     }
-
-    // ------------------------------------------------- Statistics reset
 
     @Test
     void statisticsResetKeepsAccount() {
@@ -138,8 +142,6 @@ class ProfileStoreTest {
         ProfileStore.ProfileData profile = ProfileStore.loadProfile(TEST_USER);
         assertEquals(0, profile.highScore);
     }
-
-    // ---------------------------------------------------- High score table
 
     @Test
     void highScoreTableResetRestoresDefaults() {
@@ -167,8 +169,6 @@ class ProfileStoreTest {
         assertTrue(found);
     }
 
-    // ---------------------------------------------------- Profile loading
-
     @Test
     void loadProfileReturnsDefaultForNewUser() {
         ProfileStore.createAccount(TEST_USER, TEST_PASS);
@@ -182,12 +182,5 @@ class ProfileStoreTest {
         ProfileStore.createAccount(TEST_USER, TEST_PASS);
         List<String> users = ProfileStore.getAllUsernames();
         assertTrue(users.contains(TEST_USER));
-    }
-
-    @Test
-    void deleteAccountRemovesUser() {
-        ProfileStore.createAccount(TEST_USER, TEST_PASS);
-        ProfileStore.deleteAccount(TEST_USER);
-        assertFalse(ProfileStore.accountExists(TEST_USER));
     }
 }

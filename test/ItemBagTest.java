@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
+ * Generated with assistance from Claude (Anthropic).
  */
 class ItemBagTest {
 

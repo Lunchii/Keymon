@@ -12,7 +12,23 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class WordRepositoryTest {
 
-    // ---------------------------------------------------- Word selection
+    // ---------------------------------------------------- Scoring
+
+    @Test
+    void scoreIsPositive() {
+        assertTrue(WordRepository.scoreWord(1, "cat", 1) > 0);
+    }
+
+    // ------------------------------------------------- Level sanitization
+
+    @Test
+    void validLevelsUnchanged() {
+        assertEquals(1, WordRepository.sanitizeLevel(1));
+        assertEquals(2, WordRepository.sanitizeLevel(2));
+        assertEquals(3, WordRepository.sanitizeLevel(3));
+    }
+
+    // --- The following tests were generated with assistance from Claude (Anthropic) ---
 
     @Test
     void pickWordReturnsNonNull() {
@@ -26,7 +42,6 @@ class WordRepositoryTest {
 
     @Test
     void pickWordLevel1IsShort() {
-        // Level 1 words should be short/beginner
         String word = WordRepository.pickWord(1, new Random(0));
         assertTrue(word.length() <= 10);
     }
@@ -44,8 +59,6 @@ class WordRepositoryTest {
         assertTrue(hasLongWord);
     }
 
-    // ---------------------------------------------------- Timer values
-
     @Test
     void level1HasLongestTimer() {
         assertTrue(WordRepository.getTurnTimeSeconds(1) > WordRepository.getTurnTimeSeconds(2));
@@ -61,13 +74,6 @@ class WordRepositoryTest {
         assertTrue(WordRepository.getTurnTimeSeconds(1) > 0);
         assertTrue(WordRepository.getTurnTimeSeconds(2) > 0);
         assertTrue(WordRepository.getTurnTimeSeconds(3) > 0);
-    }
-
-    // ---------------------------------------------------- Scoring
-
-    @Test
-    void scoreIsPositive() {
-        assertTrue(WordRepository.scoreWord(1, "cat", 1) > 0);
     }
 
     @Test
@@ -91,8 +97,6 @@ class WordRepositoryTest {
         assertTrue(withCombo > noCombo);
     }
 
-    // ------------------------------------------------- Level sanitization
-
     @Test
     void levelBelowOneClampedToOne() {
         assertEquals(1, WordRepository.sanitizeLevel(0));
@@ -104,15 +108,6 @@ class WordRepositoryTest {
         assertEquals(3, WordRepository.sanitizeLevel(4));
         assertEquals(3, WordRepository.sanitizeLevel(100));
     }
-
-    @Test
-    void validLevelsUnchanged() {
-        assertEquals(1, WordRepository.sanitizeLevel(1));
-        assertEquals(2, WordRepository.sanitizeLevel(2));
-        assertEquals(3, WordRepository.sanitizeLevel(3));
-    }
-
-    // -------------------------------------------- Completion bonus
 
     @Test
     void completionBonusPositive() {
