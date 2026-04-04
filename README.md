@@ -22,6 +22,19 @@ No other third-party libraries or tools are required. Gson is bundled in the `li
 
 ---
 
+## Submission Artifacts
+
+The following deliverables are included and ready to submit:
+
+| Artifact | Location | Purpose |
+|---|---|---|
+| Compiled executable JAR | `group72.jar` | Runnable build of the game |
+| Javadoc ZIP archive | `javadoc-output.zip` | Copy of generated API documentation |
+
+If submitting one combined repository ZIP, keep both files clearly named inside that archive.
+
+---
+
 ## Building from Source
 
 > These instructions are written for **Windows 11** using a standard Command Prompt or PowerShell window.
@@ -64,6 +77,16 @@ java -cp "out;lib\gson-2.10.1.jar" Main
 The game window will open maximised. All asset files (images, fonts, maps, save files) must be in the `group72/` working directory, which is the default when launching from there.
 
 > **Note:** Use a semicolon (`;`) as the classpath separator on Windows. On macOS/Linux use a colon (`:`).
+
+### Running the Prebuilt Executable JAR
+
+From the `group72/` directory, run:
+
+```
+java -jar group72.jar
+```
+
+The JAR manifest already includes `Main` and the Gson dependency path (`lib/gson-2.10.1.jar`).
 
 ---
 
@@ -200,10 +223,11 @@ Stage 2 unlocks after completing Stage 1. Stage 3 unlocks after completing Stage
 From the `group72/` directory, run:
 
 ```
-javadoc -cp "lib\gson-2.10.1.jar" -d docs src\*.java
+javadoc -Xdoclint:none -cp "lib\gson-2.10.1.jar" -d docs\javadoc src\*.java
+Compress-Archive -Path docs\javadoc\* -DestinationPath javadoc-output.zip -Force
 ```
 
-The generated HTML documentation will be placed in the `docs/` folder. Open `docs\index.html` in any browser to browse it.
+The generated HTML documentation will be placed in `docs/javadoc/`. Open `docs/javadoc/index.html` in any browser to browse it.
 
 ---
 
