@@ -93,6 +93,7 @@ public class GamePanel extends JPanel {
     private long levelStartMillis;
 
     private Point endTilePoint;
+    private Point tutorialGrassPoint;
     private String statusBanner = "";
     private long statusBannerUntil;
 
@@ -132,6 +133,7 @@ public class GamePanel extends JPanel {
         this.bestScore = tutorialMode ? 0 : ProfileStore.loadProfile(this.currentUsername).highScore;
         this.levelStartMillis = System.currentTimeMillis();
         this.endTilePoint = findEndTilePoint();
+        this.tutorialGrassPoint = findTutorialGrassPoint();
 
         this.player.setTerrainObjects(terrainObjects);
         this.player.setTrainers(this.trainers);
@@ -893,6 +895,15 @@ public class GamePanel extends JPanel {
     }
 
     private void drawTutorialBubbles(Graphics2D graphics) {
+        if (tutorialGrassPoint != null) {
+            int bubbleX = tutorialGrassPoint.x + 56;
+            int bubbleY = tutorialGrassPoint.y - 52;
+            drawBubble(graphics, bubbleX, bubbleY,
+                "Tall grass can trigger wild battles. Step in only when you're ready.");
+            drawBubbleArrow(graphics, bubbleX + 22, bubbleY + 44,
+                tutorialGrassPoint.x + TILE_SIZE / 2, tutorialGrassPoint.y + TILE_SIZE / 2);
+        }
+
         if (trainers != null && !trainers.isEmpty()) {
             Trainer t = trainers.get(0);
             int bubbleX = t.getX() + 52;
@@ -961,6 +972,35 @@ public class GamePanel extends JPanel {
             }
         }
         return null;
+    }
+
+    private Point findTutorialGrassPoint() {
+        if (!tutorialMode) {
+            return null;
+        }
+
+        Point closest = null;
+        int bestDistSq = Integer.MAX_VALUE;
+        int playerCenterX = (int) player.x + TILE_SIZE / 2;
+        int playerCenterY = (int) player.y + TILE_SIZE / 2;
+
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
+                int tile = map[row][col];
+                if (tile == 9 || tile == 10) {
+                    int tileX = col * TILE_SIZE;
+                    int tileY = row * TILE_SIZE;
+                    int dx = tileX + TILE_SIZE / 2 - playerCenterX;
+                    int dy = tileY + TILE_SIZE / 2 - playerCenterY;
+                    int distSq = dx * dx + dy * dy;
+                    if (distSq < bestDistSq) {
+                        bestDistSq = distSq;
+                        closest = new Point(tileX, tileY);
+                    }
+                }
+            }
+        }
+        return closest;
     }
 
     private String defaultMapFile(int levelId) {
