@@ -216,13 +216,4 @@ public class AccountManagementPanel extends JPanel {
             g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
         }
     }
-
-    private OutlinedLabel createTitle(String text) {
-        OutlinedLabel lbl = new OutlinedLabel(text);
-        lbl.setFont(customFont.deriveFont(Font.BOLD, 100f));
-        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lbl.setPreferredSize(new Dimension(800, 150));
-        lbl.setMaximumSize(new Dimension(800, 150));
-        return lbl;
-    }
 }
