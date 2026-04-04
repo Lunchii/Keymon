@@ -1,4 +1,6 @@
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 
 /**
@@ -26,7 +28,7 @@ public class InputHandler {
     }
 
     private void setupKeyBindings() {
-        // We use the gp's InputMap and ActionMap
+        // We use the gp's InputMap and ActionMap for non-movement keys
         InputMap im = gp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = gp.getActionMap();
 
@@ -39,91 +41,27 @@ public class InputHandler {
             }
         });
 
-        // UP (W)
-        im.put(KeyStroke.getKeyStroke("W"), "move_up");
-        am.put("move_up", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (gp.isPaused() && !gp.isStat()) {
-                    gp.navigateMenuUp();
-                } else if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
-                    int newY = gp.getPlayer().targetY - gp.getTileSize(); // change to getTileSize()
-                    if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
-                        gp.getPlayer().targetY = newY;
-                        gp.getPlayer().isMoving = true;
-                        gp.getPlayer().setDirection(200, 35, 52, 14, 29);
-                        gp.getPlayer().startAnimation();
-                    }
-                }
-            }
-        });
-
-        im.put(KeyStroke.getKeyStroke("S"), "move_down");
-        am.put("move_down", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (gp.isPaused() && !gp.isStat()) {
-                    gp.navigateMenuDown();
-                } else if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
-                    int newY = gp.getPlayer().targetY + gp.getTileSize();
-                    if (gp.getPlayer().isPositionWalkable(gp.getPlayer().targetX, newY)) {
-                        gp.getPlayer().targetY = newY;
-                        gp.getPlayer().isMoving = true;
-                        gp.getPlayer().setDirection(10, 35, 50, 14, 29);
-                        gp.getPlayer().startAnimation();
-                    }
-                }
-            }
-        });
-
-        im.put(KeyStroke.getKeyStroke("A"), "move_left");
-        am.put("move_left", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
-                    int newX = gp.getPlayer().targetX - gp.getTileSize();
-                    if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
-                        gp.getPlayer().targetX = newX;
-                        gp.getPlayer().isMoving = true;
-                        gp.getPlayer().setDirection(76, 33, 48, 15, 32);
-                        gp.getPlayer().startAnimation();
-                    }
-                }
-            }
-        });
-
-        im.put(KeyStroke.getKeyStroke("D"), "move_right");
-        am.put("move_right", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.isInBattle() && !gp.getPlayer().isMoving) {
-                    int newX = gp.getPlayer().targetX + gp.getTileSize();
-                    if (gp.getPlayer().isPositionWalkable(newX, gp.getPlayer().targetY)) {
-                        gp.getPlayer().targetX = newX;
-                        gp.getPlayer().isMoving = true;
-                        gp.getPlayer().setDirection(140, 33, 48, 15, 32);
-                        gp.getPlayer().startAnimation();
-                    }
-                }
-            }
-        });
-
         // P — toggle party menu
         im.put(KeyStroke.getKeyStroke("P"), "party_menu");
         am.put("party_menu", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.isInBattle() && !gp.isShowingPartyMenu()) {
-                    gp.togglePartyMenu();
-                } else if (gp.isShowingPartyMenu()) {
-                    gp.togglePartyMenu();
-                }
+                gp.togglePartyMenu();
             }
         });
 
+        // B — toggle bag menu
         im.put(KeyStroke.getKeyStroke("B"), "bag_menu");
         am.put("bag_menu", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (!gp.isPaused() && !gp.isInBattle() && !gp.isShowingBagMenu()) {
-                    gp.toggleBagMenu();
-                } else if (gp.isShowingBagMenu()) {
-                    gp.toggleBagMenu();
-                }
+                gp.toggleBagMenu();
+            }
+        });
+
+        // T — toggle HUD
+        im.put(KeyStroke.getKeyStroke("T"), "toggle_hud");
+        am.put("toggle_hud", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                gp.toggleHud();
             }
         });
 
@@ -133,6 +71,53 @@ public class InputHandler {
             public void actionPerformed(ActionEvent e) {
                 if (gp.isPaused()) {
                     gp.handlePauseSelection();
+                }
+            }
+        });
+
+        // Add KeyListener for movement keys
+        gp.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (gp.isPaused() && !gp.isStat()) {
+                    if (e.getKeyCode() == KeyEvent.VK_W) {
+                        gp.navigateMenuUp();
+                    } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                        gp.navigateMenuDown();
+                    }
+                } else if (!gp.isPaused() && !gp.isInBattle()) {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_W:
+                            gp.getPlayer().moveUp = true;
+                            break;
+                        case KeyEvent.VK_S:
+                            gp.getPlayer().moveDown = true;
+                            break;
+                        case KeyEvent.VK_A:
+                            gp.getPlayer().moveLeft = true;
+                            break;
+                        case KeyEvent.VK_D:
+                            gp.getPlayer().moveRight = true;
+                            break;
+                    }
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_W:
+                        gp.getPlayer().moveUp = false;
+                        break;
+                    case KeyEvent.VK_S:
+                        gp.getPlayer().moveDown = false;
+                        break;
+                    case KeyEvent.VK_A:
+                        gp.getPlayer().moveLeft = false;
+                        break;
+                    case KeyEvent.VK_D:
+                        gp.getPlayer().moveRight = false;
+                        break;
                 }
             }
         });

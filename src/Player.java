@@ -33,10 +33,16 @@ public class Player {
     private final int ANIMATION_SPEED = 3;
 
     // Grid Movement Data
-    public int x, y;
-    public int targetX, targetY;
+    public float x, y;
+    public float targetX, targetY;
     public boolean isMoving = false;
-    private final int SPEED = 4;;
+    private final float SPEED = 4.0f;
+
+    // Continuous movement flags
+    public boolean moveUp = false;
+    public boolean moveDown = false;
+    public boolean moveLeft = false;
+    public boolean moveRight = false;
 
     // Terrain collision
     private List<TerrainObjects> terrainObjects;
@@ -121,32 +127,57 @@ public class Player {
 
     /** Advances the player one game tick: moves toward the target tile and advances the animation frame. */
     public void update() {
-        if (isMoving) {
-            // 1. Move (8 frames total to finish)
-            if (x < targetX)
-                x += SPEED;
-            else if (x > targetX)
-                x -= SPEED;
-            else if (y < targetY)
-                y += SPEED;
-            else if (y > targetY)
-                y -= SPEED;
+        // Check for continuous movement initiation
+        if (!isMoving) {
+            if (moveUp && isPositionWalkable((int)x, (int)y - TILE_SIZE)) {
+                targetY = y - TILE_SIZE;
+                isMoving = true;
+                setDirection(200, 35, 52, 14, 29);
+                startAnimation();
+            } else if (moveDown && isPositionWalkable((int)x, (int)y + TILE_SIZE)) {
+                targetY = y + TILE_SIZE;
+                isMoving = true;
+                setDirection(10, 35, 50, 14, 29);
+                startAnimation();
+            } else if (moveLeft && isPositionWalkable((int)x - TILE_SIZE, (int)y)) {
+                targetX = x - TILE_SIZE;
+                isMoving = true;
+                setDirection(76, 33, 48, 15, 32);
+                startAnimation();
+            } else if (moveRight && isPositionWalkable((int)x + TILE_SIZE, (int)y)) {
+                targetX = x + TILE_SIZE;
+                isMoving = true;
+                setDirection(140, 33, 48, 15, 32);
+                startAnimation();
+            }
+        }
 
-            // 2. Animation (Needs to be fast!)
+        if (isMoving) {
+            // 1. Move towards target
+            float dx = targetX - x;
+            float dy = targetY - y;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+            if (distance > SPEED) {
+                x += (dx / distance) * SPEED;
+                y += (dy / distance) * SPEED;
+            } else {
+                x = targetX;
+                y = targetY;
+            }
+
+            // 2. Animation
             animationTick++;
             if (animationTick >= ANIMATION_SPEED) {
                 animationTick = 0;
                 frameIndex++;
                 if (frameIndex >= 4)
-                    frameIndex = 0; // Cycle through all 8
+                    frameIndex = 0;
                 updateSprite();
             }
 
             // 3. Arrival
             if (x == targetX && y == targetY) {
                 isMoving = false;
-                // Don't reset frameIndex here if you want a smooth transition,
-                // but usually, we reset to 0 for the "Idle" pose.
                 frameIndex = 0;
                 updateSprite();
             }
@@ -188,8 +219,8 @@ public class Player {
      */
     public void draw(Graphics g) {
         if (currentFrame != null) {
-            int drawY = y - (frameHeight - TILE_SIZE);
-            g.drawImage(currentFrame, x, drawY, null);
+            int drawY = (int)y - (frameHeight - TILE_SIZE);
+            g.drawImage(currentFrame, (int)x, drawY, null);
         }
     }
 

@@ -112,6 +112,11 @@ public class BattlePanel extends JPanel {
         if (trainerTeam != null && !trainerTeam.isEmpty()) {
             this.wildPokemon = trainerTeam.get(0);
         }
+        runButton.setVisible(false);
+    }
+
+    public void autoStartBattle() {
+        startPlayerTurn();
     }
 
     private void setupUI() {
@@ -168,7 +173,11 @@ public class BattlePanel extends JPanel {
         add(switchButton);
 
         runButton = createBattleButton("RUN", new Color(180, 70, 60));
-        runButton.addActionListener(event -> endBattle(false, true));
+        runButton.addActionListener(event -> {
+            if (!isTrainerBattle) {
+                endBattle(false, true);
+            }
+        });
         add(runButton);
 
         switchOverlay = new JPanel(null);

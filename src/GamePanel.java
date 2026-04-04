@@ -1,4 +1,16 @@
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -6,13 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
 /**
- * World gameplay panel that handles exploration, battle encounters, score
- * tracking, and level
+ * World gameplay panel that handles exploration, battle encounters, score tracking, and level
  * progression for the typing adventure.
- * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
@@ -33,7 +50,6 @@ public class GamePanel extends JPanel {
     private final boolean tutorialMode;
     private final int currentLevelId;
     private final String currentMapFile;
-    private PauseMenu pauseMenu = new PauseMenu(this);
 
     private final TimeManager timeManager = new TimeManager(0);
     private final UIManager uiManager;
@@ -48,15 +64,15 @@ public class GamePanel extends JPanel {
     private boolean showingPartyMenu;
     private boolean showingBagMenu;
     private boolean showSpottedMessage;
-    private boolean showWildEncounterMessage;
     private boolean tutorialBattleExplained;
     private boolean levelEnded;
     private boolean levelFailed;
     private boolean sessionRecorded;
     private boolean isPaused;
     private boolean isStat;
+    private boolean showHud = true;
 
-    private final String[] pauseOptions = { "RESUME", "RESTART STAGE", "VIEW STATS", "QUIT TO HUB" };
+    private final String[] pauseOptions = {"RESUME", "RESTART STAGE", "VIEW STATS", "QUIT TO HUB"};
     private int pauseOptionIndex;
 
     private int lastTileRow = -1;
@@ -77,32 +93,30 @@ public class GamePanel extends JPanel {
     private long levelStartMillis;
 
     private Point endTilePoint;
-    private Point tutorialTallGrassPoint;
     private String statusBanner = "";
     private long statusBannerUntil;
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
-            List<TerrainObjects> terrainObjects, String username, Main mainApp) {
-        this(layout, container, player, map, trainers, terrainObjects, username, mainApp, false, 1,
-                "maps/level1_map.csv");
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp) {
+        this(layout, container, player, map, trainers, terrainObjects, username, mainApp, false, 1, "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
-            List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode) {
         this(layout, container, player, map, trainers, terrainObjects, username, mainApp, tutorialMode, 1,
-                tutorialMode ? "maps/tutorial_map.csv" : "maps/level1_map.csv");
+            tutorialMode ? "maps/tutorial_map.csv" : "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
-            List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
-            int levelId) {
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
+                     int levelId) {
         this(layout, container, player, map, trainers, terrainObjects, username, mainApp, tutorialMode, levelId,
-                levelId == 2 ? "maps/level2_map.csv" : levelId == 3 ? "maps/level3_map.csv" : "maps/level1_map.csv");
+            levelId == 2 ? "maps/level2_map.csv" : levelId == 3 ? "maps/level3_map.csv" : "maps/level1_map.csv");
     }
 
     public GamePanel(CardLayout layout, JPanel container, Player player, int[][] map, List<Trainer> trainers,
-            List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
-            int levelId, String mapFile) {
+                     List<TerrainObjects> terrainObjects, String username, Main mainApp, boolean tutorialMode,
+                     int levelId, String mapFile) {
         this.cardLayout = layout;
         this.container = container;
         this.player = player;
@@ -118,7 +132,6 @@ public class GamePanel extends JPanel {
         this.bestScore = tutorialMode ? 0 : ProfileStore.loadProfile(this.currentUsername).highScore;
         this.levelStartMillis = System.currentTimeMillis();
         this.endTilePoint = findEndTilePoint();
-        this.tutorialTallGrassPoint = findFirstTallGrassPoint();
 
         this.player.setTerrainObjects(terrainObjects);
         this.player.setTrainers(this.trainers);
@@ -127,42 +140,6 @@ public class GamePanel extends JPanel {
             MusicPlayer.play("level" + this.currentLevelId);
         }
 
-        this.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(java.awt.event.MouseEvent e) {
-                // Only process if paused and NOT showing the full-screen stats overlay
-                if (isPaused && !isStat) {
-                    int hoverIndex = pauseMenu.getOptionIndexAt(e.getPoint());
-
-                    if (hoverIndex != -1) {
-                        pauseOptionIndex = hoverIndex;
-                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                    } else {
-                        setCursor(Cursor.getDefaultCursor());
-                    }
-                    repaint();
-                }
-            }
-        });
-
-        this.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                if (isPaused) {
-                    if (isStat) {
-                        // If the stats overlay is open, click anywhere to go back to Pause Menu
-                        isStat = false;
-                        repaint();
-                    } else {
-                        // Check the hitbox from PauseMenu
-                        if (pauseMenu.getOptionIndexAt(e.getPoint()) != -1) {
-                            handlePauseSelection();
-                        }
-                    }
-                }
-            }
-        });
-
         setBackground(Color.BLACK);
         setFocusable(true);
         setLayout(null);
@@ -170,6 +147,7 @@ public class GamePanel extends JPanel {
 
         new InputHandler(this);
         timeManager.resume();
+        installMouseSupport();
         startGameLoop();
     }
 
@@ -335,6 +313,11 @@ public class GamePanel extends JPanel {
         repaint();
     }
 
+    public void toggleHud() {
+        showHud = !showHud;
+        repaint();
+    }
+
     public void navigateMenuUp() {
         pauseOptionIndex = pauseOptionIndex > 0 ? pauseOptionIndex - 1 : pauseOptions.length - 1;
         repaint();
@@ -467,22 +450,21 @@ public class GamePanel extends JPanel {
 
         if (tutorialMode) {
             JOptionPane.showMessageDialog(this,
-                    reason + "\nTry the tutorial stage again when you're ready.",
-                    "Tutorial Over",
-                    JOptionPane.WARNING_MESSAGE);
+                reason + "\nTry the tutorial stage again when you're ready.",
+                "Tutorial Over",
+                JOptionPane.WARNING_MESSAGE);
             cardLayout.show(container, "TUTORIAL");
             return;
         }
 
         String summary = reason + "\n\nScore: " + levelScore
-                + "\nWords typed: " + wordsTyped
-                + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
-                + "\nPeak WPM: " + String.format("%.1f", peakWpm)
-                + "\n\nProgress saved.";
+            + "\nWords typed: " + wordsTyped
+            + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
+            + "\nPeak WPM: " + String.format("%.1f", peakWpm);
 
-        Object[] options = { "Retry Stage", "Player Hub" };
+        Object[] options = {"Retry Stage", "Player Hub"};
         int choice = JOptionPane.showOptionDialog(this, summary, "Game Over",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+            JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
         if (choice == 0) {
             restartStage();
@@ -525,12 +507,32 @@ public class GamePanel extends JPanel {
         add(button);
     }
 
+    private void installMouseSupport() {
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(java.awt.event.MouseEvent event) {
+                if (isPaused && !isStat) {
+                    handleMouseHover(event.getX(), event.getY());
+                }
+            }
+        });
+
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent event) {
+                if (isPaused) {
+                    handlePauseSelection();
+                }
+            }
+        });
+    }
+
     private void startGameLoop() {
         Timer timer = new Timer(16, (ActionEvent event) -> {
             if (!isPaused && !levelEnded && !levelFailed && player != null) {
                 player.update();
-                int playerCol = player.x / TILE_SIZE;
-                int playerRow = player.y / TILE_SIZE;
+                int playerCol = (int)player.x / TILE_SIZE;
+                int playerRow = (int)player.y / TILE_SIZE;
                 if (playerRow != lastTileRow || playerCol != lastTileCol) {
                     lastTileRow = playerRow;
                     lastTileCol = playerCol;
@@ -558,8 +560,8 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        int playerX = player.x;
-        int playerY = player.y;
+        int playerX = (int)player.x;
+        int playerY = (int)player.y;
 
         for (int i = terrainObjects.size() - 1; i >= 0; i--) {
             TerrainObjects obj = terrainObjects.get(i);
@@ -570,7 +572,7 @@ public class GamePanel extends JPanel {
 
                 statusBanner = "Picked up " + earned.displayName + "!";
                 statusBannerUntil = System.currentTimeMillis() + 2000;
-
+                
                 int pickedCol = obj.getX() / TILE_SIZE;
                 int pickedRow = obj.getY() / TILE_SIZE;
                 ProfileStore.recordPokeballPickup(currentUsername, currentLevelId, pickedCol, pickedRow);
@@ -589,8 +591,7 @@ public class GamePanel extends JPanel {
     }
 
     private void checkTrainerLineOfSight(int playerCol, int playerRow) {
-        if (inBattle || party.isEmpty() || trainers == null)
-            return;
+        if (inBattle || party.isEmpty() || trainers == null) return;
         for (Trainer t : trainers) {
             if (t.canSeePlayer(playerCol, playerRow)) {
                 activeBattleTrainer = t;
@@ -610,8 +611,8 @@ public class GamePanel extends JPanel {
     }
 
     private void maybeStartWildBattle() {
-        int col = player.x / TILE_SIZE;
-        int row = player.y / TILE_SIZE;
+        int col = (int)player.x / TILE_SIZE;
+        int row = (int)player.y / TILE_SIZE;
         if (row < 0 || row >= map.length || col < 0 || col >= map[row].length || party.isEmpty()) {
             return;
         }
@@ -621,20 +622,13 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        double encounterChance = tile == 10 ? 0.0 : 0.20;
+        double encounterChance = tile == 10 ? 0.45 : 0.20;
         if (random.nextDouble() > encounterChance) {
             return;
         }
 
         inBattle = true;
-        showWildEncounterMessage = true;
-        Timer timer = new Timer(850, event -> {
-            ((Timer) event.getSource()).stop();
-            showWildEncounterMessage = false;
-            startBattleSequence(null, false);
-        });
-        timer.setRepeats(false);
-        timer.start();
+        startBattleSequence(null, false);
     }
 
     private void startBattleSequence(List<Pokemon> trainerTeam, boolean trainerBattle) {
@@ -655,8 +649,9 @@ public class GamePanel extends JPanel {
         box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
         box.setBackground(new Color(12, 18, 22));
         box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.WHITE, 3),
-                BorderFactory.createEmptyBorder(24, 32, 24, 32)));
+            BorderFactory.createLineBorder(Color.WHITE, 3),
+            BorderFactory.createEmptyBorder(24, 32, 24, 32)
+        ));
 
         JLabel title = new JLabel("HOW BATTLES WORK");
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
@@ -666,12 +661,12 @@ public class GamePanel extends JPanel {
         box.add(Box.createVerticalStrut(16));
 
         String[] lines = {
-                "Type the highlighted word before the timer runs out.",
-                "Correct letters glow green as you build the word.",
-                "Mistakes reset your combo streak, so accuracy matters.",
-                "Long streaks earn bigger score bonuses.",
-                "Use BAG powerups for extra time, healing, or stronger attacks.",
-                "Reach the dark exit tile after surviving the route."
+            "Type the highlighted word before the timer runs out.",
+            "Correct letters glow green as you build the word.",
+            "Mistakes reset your combo streak, so accuracy matters.",
+            "Long streaks earn bigger score bonuses.",
+            "Use BAG powerups for extra time, healing, or stronger attacks.",
+            "Reach the dark exit tile after surviving the route."
         };
 
         for (String line : lines) {
@@ -710,8 +705,8 @@ public class GamePanel extends JPanel {
 
     private void openBattlePanel(List<Pokemon> trainerTeam, boolean trainerBattle) {
         Pokemon opponent = trainerBattle && trainerTeam != null && !trainerTeam.isEmpty()
-                ? trainerTeam.get(0)
-                : Pokemon.random();
+            ? trainerTeam.get(0)
+            : Pokemon.random();
 
         for (Component component : container.getComponents()) {
             if (component instanceof BattlePanel) {
@@ -725,8 +720,33 @@ public class GamePanel extends JPanel {
         }
 
         container.add(battlePanel, "BATTLE");
+        // Stop player movement when entering battle
+        player.moveUp = false;
+        player.moveDown = false;
+        player.moveLeft = false;
+        player.moveRight = false;
         cardLayout.show(container, "BATTLE");
         battlePanel.requestFocusInWindow();
+    }
+
+    private void handleMouseHover(int mouseX, int mouseY) {
+        int menuX = getWidth() / 2 - 120;
+        int menuWidth = 240;
+        int startY = 220;
+        int optionHeight = 52;
+        if (mouseX >= menuX && mouseX <= menuX + menuWidth) {
+            for (int i = 0; i < pauseOptions.length; i++) {
+                int top = startY + (i * optionHeight);
+                int bottom = top + optionHeight;
+                if (mouseY >= top && mouseY <= bottom) {
+                    if (pauseOptionIndex != i) {
+                        pauseOptionIndex = i;
+                        repaint();
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     private void restartStage() {
@@ -752,22 +772,16 @@ public class GamePanel extends JPanel {
 
         persistSession(false, currentLevelId);
         JOptionPane.showMessageDialog(this,
-                "Progress saved.\nYou can continue from the player hub.",
-                "Saved",
-                JOptionPane.INFORMATION_MESSAGE);
+            "Progress saved.\nYou can continue from the player hub.",
+            "Saved",
+            JOptionPane.INFORMATION_MESSAGE);
         mainApp.showPlayerScreen(currentUsername);
     }
 
     private void updateLiveWpm() {
-        double activeSeconds = timeManager.getTotalMillis() / 1000.0;
-        double minutes = activeSeconds / 60.0;
-
-        if (minutes > 0 && correctChars > 0) {
-            currentWpm = (correctChars / 5.0) / minutes;
-        } else {
-            currentWpm = 0.0;
-        }
-
+        long elapsedMillis = Math.max(1L, System.currentTimeMillis() - levelStartMillis);
+        double elapsedMinutes = elapsedMillis / 60000.0;
+        currentWpm = elapsedMinutes <= 0.0 ? 0.0 : wordsTyped / elapsedMinutes;
         peakWpm = Math.max(peakWpm, currentWpm);
     }
 
@@ -776,8 +790,8 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        int col = player.x / TILE_SIZE;
-        int row = player.y / TILE_SIZE;
+        int col = (int)player.x / TILE_SIZE;
+        int row = (int)player.y / TILE_SIZE;
         if (row < 0 || row >= map.length || col < 0 || col >= map[row].length) {
             return;
         }
@@ -790,9 +804,9 @@ public class GamePanel extends JPanel {
 
             if (tutorialMode) {
                 JOptionPane.showMessageDialog(this,
-                        "Tutorial clear!\nYou reached the goal tile and learned the battle flow.",
-                        "Tutorial Complete",
-                        JOptionPane.INFORMATION_MESSAGE);
+                    "Tutorial clear!\nYou reached the goal tile and learned the battle flow.",
+                    "Tutorial Complete",
+                    JOptionPane.INFORMATION_MESSAGE);
                 cardLayout.show(container, "TUTORIAL");
                 return;
             }
@@ -802,19 +816,18 @@ public class GamePanel extends JPanel {
             persistSession(true, nextLevel);
 
             String summary = "Stage cleared: " + WordRepository.getStageName(currentLevelId)
-                    + "\nScore: " + levelScore
-                    + "\nWords typed: " + wordsTyped
-                    + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
-                    + "\nPeak WPM: " + String.format("%.1f", peakWpm)
-                    + "\nBest score: " + bestScore
-                    + "\n\nProgress saved.";
+                + "\nScore: " + levelScore
+                + "\nWords typed: " + wordsTyped
+                + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
+                + "\nPeak WPM: " + String.format("%.1f", peakWpm)
+                + "\nBest score: " + bestScore;
 
             Object[] options = currentLevelId < 3
-                    ? new Object[] { "Next Stage", "Replay Stage", "Player Hub" }
-                    : new Object[] { "Replay Stage", "Player Hub" };
+                ? new Object[]{"Next Stage", "Replay Stage", "Player Hub"}
+                : new Object[]{"Replay Stage", "Player Hub"};
 
             int choice = JOptionPane.showOptionDialog(this, summary, "Stage Complete",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
             if (currentLevelId < 3 && choice == 0) {
                 mainApp.startGame(currentUsername, defaultMapFile(nextLevel));
@@ -832,21 +845,22 @@ public class GamePanel extends JPanel {
         }
 
         ProfileStore.recordLevelSummary(currentUsername, new ProfileStore.SessionStats(
-                currentLevelId,
-                levelScore,
-                currentWpm,
-                peakWpm,
-                correctChars,
-                totalTypedChars,
-                errorCount,
-                wordsTyped,
-                Math.max(1L, (System.currentTimeMillis() - levelStartMillis) / 1000L),
-                longestStreak,
-                powerupsUsed,
-                wonLevel));
+            currentLevelId,
+            levelScore,
+            currentWpm,
+            peakWpm,
+            correctChars,
+            totalTypedChars,
+            errorCount,
+            wordsTyped,
+            Math.max(1L, (System.currentTimeMillis() - levelStartMillis) / 1000L),
+            longestStreak,
+            powerupsUsed,
+            wonLevel
+        ));
 
-        ProfileStore.saveProgress(currentUsername, currentLevelId, player.x, player.y,
-                player.getSpriteRow(), bestScore, progressLevel, party, itemBag);
+        ProfileStore.saveProgress(currentUsername, currentLevelId, (int)player.x, (int)player.y,
+            player.getSpriteRow(), bestScore, progressLevel, party, itemBag);
         sessionRecorded = true;
     }
 
@@ -879,21 +893,12 @@ public class GamePanel extends JPanel {
     }
 
     private void drawTutorialBubbles(Graphics2D graphics) {
-        if (tutorialTallGrassPoint != null) {
-            int bubbleX = tutorialTallGrassPoint.x + 54;
-            int bubbleY = tutorialTallGrassPoint.y - 72;
-            drawBubble(graphics, bubbleX, bubbleY,
-                    "these are tall grass, stepping on them has a chance for an encounter");
-            drawBubbleArrow(graphics, bubbleX + 18, bubbleY + 52,
-                    tutorialTallGrassPoint.x + TILE_SIZE / 2, tutorialTallGrassPoint.y + TILE_SIZE / 2);
-        }
-
         if (trainers != null && !trainers.isEmpty()) {
             Trainer t = trainers.get(0);
             int bubbleX = t.getX() + 52;
             int bubbleY = t.getY() - 70;
             drawBubble(graphics, bubbleX, bubbleY,
-                    "Trainer battles are tougher. Beat the trainer team to clear the lane.");
+                "Trainer battles are tougher. Beat the trainer team to clear the lane.");
             drawBubbleArrow(graphics, bubbleX + 22, bubbleY + 50, t.getX() + 16, t.getY() - 8);
         }
 
@@ -901,9 +906,9 @@ public class GamePanel extends JPanel {
             int bubbleX = endTilePoint.x + 58;
             int bubbleY = endTilePoint.y - 46;
             drawBubble(graphics, bubbleX, bubbleY,
-                    "The dark exit tile finishes the level after you survive the route.");
+                "The dark exit tile finishes the level after you survive the route.");
             drawBubbleArrow(graphics, bubbleX + 22, bubbleY + 42,
-                    endTilePoint.x + TILE_SIZE / 2, endTilePoint.y + TILE_SIZE / 2);
+                endTilePoint.x + TILE_SIZE / 2, endTilePoint.y + TILE_SIZE / 2);
         }
     }
 
@@ -958,17 +963,6 @@ public class GamePanel extends JPanel {
         return null;
     }
 
-    private Point findFirstTallGrassPoint() {
-        for (int row = 0; row < map.length; row++) {
-            for (int col = 0; col < map[row].length; col++) {
-                if (map[row][col] == 9 || map[row][col] == 10) {
-                    return new Point(col * TILE_SIZE, row * TILE_SIZE);
-                }
-            }
-        }
-        return null;
-    }
-
     private String defaultMapFile(int levelId) {
         switch (WordRepository.sanitizeLevel(levelId)) {
             case 2:
@@ -983,18 +977,16 @@ public class GamePanel extends JPanel {
     private int getCameraX() {
         int mapPixelWidth = map.length > 0 ? map[0].length * TILE_SIZE : 0;
         int screenWidth = getWidth();
-        if (mapPixelWidth <= screenWidth)
-            return 0;
-        int camX = player.x + TILE_SIZE / 2 - screenWidth / 2;
+        if (mapPixelWidth <= screenWidth) return 0;
+        int camX = (int)player.x + TILE_SIZE / 2 - screenWidth / 2;
         return Math.max(0, Math.min(camX, mapPixelWidth - screenWidth));
     }
 
     private int getCameraY() {
         int mapPixelHeight = map.length * TILE_SIZE;
         int screenHeight = getHeight();
-        if (mapPixelHeight <= screenHeight)
-            return 0;
-        int camY = player.y + TILE_SIZE / 2 - screenHeight / 2;
+        if (mapPixelHeight <= screenHeight) return 0;
+        int camY = (int)player.y + TILE_SIZE / 2 - screenHeight / 2;
         return Math.max(0, Math.min(camY, mapPixelHeight - screenHeight));
     }
 
@@ -1069,7 +1061,11 @@ public class GamePanel extends JPanel {
         // Reset to screen space for HUD and overlays
         graphics.translate(camX, camY);
 
-        drawHud(graphics);
+        if (showHud) {
+            drawHud(graphics);
+        } else {
+            drawExpandButton(graphics);
+        }
         uiManager.draw(graphics);
 
         if (showingPartyMenu) {
@@ -1081,22 +1077,28 @@ public class GamePanel extends JPanel {
         if (showSpottedMessage) {
             drawSpottedOverlay(graphics);
         }
-        if (showWildEncounterMessage) {
-            drawWildEncounterOverlay(graphics);
-        }
     }
 
     private void drawHud(Graphics2D graphics) {
         int hudX = getWidth() - 320;
         int hudY = 16;
         int hudW = 296;
-        int hudH = 178;
+        int hudH = 154;
 
         graphics.setColor(new Color(8, 15, 26, 210));
         graphics.fillRoundRect(hudX, hudY, hudW, hudH, 18, 18);
         graphics.setColor(new Color(255, 255, 255, 70));
         graphics.setStroke(new BasicStroke(2f));
         graphics.drawRoundRect(hudX, hudY, hudW, hudH, 18, 18);
+
+        // Draw "press T to hide" text in top right corner
+        graphics.setColor(new Color(255, 255, 255, 180));
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        FontMetrics metrics = graphics.getFontMetrics();
+        String hideText = "Press T to Hide";
+        int textX = getWidth() - metrics.stringWidth(hideText) - 40;
+        int textY = 40;
+        graphics.drawString(hideText, textX, textY);
 
         graphics.setColor(Color.WHITE);
         graphics.setFont(new Font("SansSerif", Font.BOLD, 19));
@@ -1114,14 +1116,8 @@ public class GamePanel extends JPanel {
         graphics.drawString("Accuracy: " + String.format("%.1f%%", getAccuracyPercent()), hudX + 156, hudY + 98);
         graphics.drawString("Words: " + wordsTyped, hudX + 18, hudY + 120);
         graphics.drawString("Combo: x" + Math.max(1, comboStreak), hudX + 156, hudY + 120);
-        graphics.drawString("Battles: " + battlesWon, hudX + 18, hudY + 142);
-        graphics.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        graphics.setColor(new Color(180, 220, 255));
-        int pt = itemBag.getCount(Item.POTION);
-        int fh = itemBag.getCount(Item.FULL_HEAL);
-        int ab = itemBag.getCount(Item.ATTACK_BOOST);
-        int st = itemBag.getCount(Item.SLOW_TIME);
-        graphics.drawString("Pt:" + pt + " FH:" + fh + " Atk:" + ab + " Slw:" + st, hudX + 18, hudY + 164);
+        graphics.drawString("Items: " + totalItemsInBag(), hudX + 18, hudY + 142);
+        graphics.drawString("Battles: " + battlesWon, hudX + 156, hudY + 142);
 
         if (!statusBanner.isEmpty()) {
             graphics.setColor(new Color(0, 0, 0, 180));
@@ -1140,6 +1136,27 @@ public class GamePanel extends JPanel {
             total += count;
         }
         return total;
+    }
+
+    private void drawExpandButton(Graphics2D graphics) {
+        int buttonX = getWidth() - 200;
+        int buttonY = 16;
+        int buttonW = 180;
+        int buttonH = 40;
+
+        graphics.setColor(new Color(8, 15, 26, 210));
+        graphics.fillRoundRect(buttonX, buttonY, buttonW, buttonH, 12, 12);
+        graphics.setColor(new Color(255, 255, 255, 70));
+        graphics.setStroke(new BasicStroke(2f));
+        graphics.drawRoundRect(buttonX, buttonY, buttonW, buttonH, 12, 12);
+
+        graphics.setColor(Color.WHITE);
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 14));
+        FontMetrics metrics = graphics.getFontMetrics();
+        String text = "Press T to expand";
+        int textX = buttonX + (buttonW - metrics.stringWidth(text)) / 2;
+        int textY = buttonY + (buttonH + metrics.getAscent() - metrics.getDescent()) / 2;
+        graphics.drawString(text, textX, textY);
     }
 
     private void drawSpottedOverlay(Graphics2D graphics) {
@@ -1167,34 +1184,6 @@ public class GamePanel extends JPanel {
         metrics = graphics.getFontMetrics();
         String line2 = "Get ready for a tougher typing battle.";
         graphics.setColor(new Color(255, 230, 230));
-        graphics.drawString(line2, boxX + (boxW - metrics.stringWidth(line2)) / 2, boxY + boxH + 24);
-    }
-
-    private void drawWildEncounterOverlay(Graphics2D graphics) {
-        int width = getWidth();
-        int height = getHeight();
-        graphics.setColor(new Color(0, 0, 0, 165));
-        graphics.fillRect(0, 0, width, height);
-
-        int boxW = 360;
-        int boxH = 88;
-        int boxX = (width - boxW) / 2;
-        int boxY = height / 2 - 60;
-        graphics.setColor(new Color(64, 108, 46));
-        graphics.fillRoundRect(boxX, boxY, boxW, boxH, 16, 16);
-        graphics.setColor(Color.WHITE);
-        graphics.setStroke(new BasicStroke(3f));
-        graphics.drawRoundRect(boxX, boxY, boxW, boxH, 16, 16);
-
-        graphics.setFont(new Font("SansSerif", Font.BOLD, 28));
-        FontMetrics metrics = graphics.getFontMetrics();
-        String line1 = "A Wild Keymon Appeared!";
-        graphics.drawString(line1, boxX + (boxW - metrics.stringWidth(line1)) / 2, boxY + 52);
-
-        graphics.setFont(new Font("SansSerif", Font.PLAIN, 15));
-        metrics = graphics.getFontMetrics();
-        String line2 = "Steady hands - get ready to type.";
-        graphics.setColor(new Color(235, 255, 225));
         graphics.drawString(line2, boxX + (boxW - metrics.stringWidth(line2)) / 2, boxY + boxH + 24);
     }
 
@@ -1249,7 +1238,7 @@ public class GamePanel extends JPanel {
                 graphics.setFont(new Font("SansSerif", Font.BOLD, 14));
                 graphics.setColor(pokemon.isFainted() ? new Color(200, 80, 80) : Color.WHITE);
                 graphics.drawString(pokemon.name + (pokemon.isFainted() ? "  [FAINTED]" : ""),
-                        startX + 84, slotY + 20);
+                    startX + 84, slotY + 20);
 
                 int barX = startX + 84;
                 int barY = slotY + 32;
@@ -1258,10 +1247,8 @@ public class GamePanel extends JPanel {
                 graphics.setColor(new Color(10, 30, 20));
                 graphics.fillRoundRect(barX, barY, barW, barH, 4, 4);
                 float ratio = (float) pokemon.currentHp / Math.max(1, pokemon.maxHp);
-                graphics.setColor(ratio > 0.5f ? new Color(60, 210, 100)
-                        : ratio > 0.25f
-                                ? new Color(230, 200, 50)
-                                : new Color(220, 70, 70));
+                graphics.setColor(ratio > 0.5f ? new Color(60, 210, 100) : ratio > 0.25f
+                    ? new Color(230, 200, 50) : new Color(220, 70, 70));
                 graphics.fillRoundRect(barX, barY, (int) (barW * Math.max(0, ratio)), barH, 4, 4);
                 graphics.setFont(new Font("SansSerif", Font.PLAIN, 12));
                 graphics.setColor(Color.WHITE);
@@ -1302,7 +1289,7 @@ public class GamePanel extends JPanel {
         graphics.setFont(new Font("SansSerif", Font.PLAIN, 12));
         graphics.setColor(new Color(215, 205, 235));
         graphics.drawString("Battle powerups are earned by winning fights and help on harder stages.",
-                panelX + 20, panelY + 54);
+            panelX + 20, panelY + 54);
 
         int cardX = panelX + 20;
         int cardY = panelY + 76;
