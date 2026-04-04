@@ -60,7 +60,7 @@ public class Main {
         MenuPanel menuPanel = new MenuPanel(cardLayout, mainContainer);
         LoginPanel loginPanel = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
-        InstructionPanel tutorialPanel = new InstructionPanel(cardLayout, mainContainer, this);
+        TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
         ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
         ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
 
