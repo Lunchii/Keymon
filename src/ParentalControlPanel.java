@@ -10,6 +10,7 @@ import javax.swing.*;
  * <p>
  * Provides navigation for the admin dashboard and exposes controls for:
  * <ul>
+ * <li>Viewing player stats</li>
  * <li>Viewing high score table</li>
  * <li>Performing a full reset of user and highscore data</li>
  * <li>Returning to the main menu</li>
@@ -60,7 +61,7 @@ public class ParentalControlPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "HIGH SCORES", "ACCOUNT MANAGEMENT", "RESET TABLE", "BACK" };
+        String[] labels = { "PLAYER STATS", "HIGH SCORES", "ACCOUNT MANAGEMENT", "RESET TABLE", "BACK" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -122,6 +123,8 @@ public class ParentalControlPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("BACK")) {
             cardLayout.show(container, "MENU");
+        } else if (label.equals("PLAYER STATS")) {
+            mainApp.showAdminStats();
         } else if (label.equals("HIGH SCORES")) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof HighscorePanel) {

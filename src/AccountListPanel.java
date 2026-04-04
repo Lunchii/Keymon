@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.*;
@@ -56,9 +58,8 @@ public class AccountListPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(accountJList);
         scrollPane.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         scrollPane.setMaximumSize(new Dimension(400, 300));
         scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -76,7 +77,26 @@ public class AccountListPanel extends JPanel {
             if (selectedUsername != null) {
                 showAccountDetailsPanel(selectedUsername);
             } else {
-                JOptionPane.showMessageDialog(this, "Please select an account first.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please select an account first.", "No Selection",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        accountJList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    String selectedUsername = accountJList.getSelectedValue();
+                    if (selectedUsername != null) {
+                        if (ProfileStore.loadProfile(selectedUsername) != null) {
+                            mainApp.showStatsPage(selectedUsername);
+                        } else {
+                            JOptionPane.showMessageDialog(AccountListPanel.this,
+                                    "No statistics are available for " + selectedUsername + ".",
+                                    "No Stats", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                }
             }
         });
 
