@@ -806,7 +806,8 @@ public class GamePanel extends JPanel {
                     + "\nWords typed: " + wordsTyped
                     + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
                     + "\nPeak WPM: " + String.format("%.1f", peakWpm)
-                    + "\nBest score: " + bestScore;
+                    + "\nBest score: " + bestScore
+                    + "\n\nProgress saved.";
 
             Object[] options = currentLevelId < 3
                     ? new Object[] { "Next Stage", "Replay Stage", "Player Hub" }
@@ -1089,7 +1090,7 @@ public class GamePanel extends JPanel {
         int hudX = getWidth() - 320;
         int hudY = 16;
         int hudW = 296;
-        int hudH = 154;
+        int hudH = 178;
 
         graphics.setColor(new Color(8, 15, 26, 210));
         graphics.fillRoundRect(hudX, hudY, hudW, hudH, 18, 18);
@@ -1113,8 +1114,14 @@ public class GamePanel extends JPanel {
         graphics.drawString("Accuracy: " + String.format("%.1f%%", getAccuracyPercent()), hudX + 156, hudY + 98);
         graphics.drawString("Words: " + wordsTyped, hudX + 18, hudY + 120);
         graphics.drawString("Combo: x" + Math.max(1, comboStreak), hudX + 156, hudY + 120);
-        graphics.drawString("Items: " + totalItemsInBag(), hudX + 18, hudY + 142);
-        graphics.drawString("Battles: " + battlesWon, hudX + 156, hudY + 142);
+        graphics.drawString("Battles: " + battlesWon, hudX + 18, hudY + 142);
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        graphics.setColor(new Color(180, 220, 255));
+        int pt = itemBag.getCount(Item.POTION);
+        int fh = itemBag.getCount(Item.FULL_HEAL);
+        int ab = itemBag.getCount(Item.ATTACK_BOOST);
+        int st = itemBag.getCount(Item.SLOW_TIME);
+        graphics.drawString("Pt:" + pt + " FH:" + fh + " Atk:" + ab + " Slw:" + st, hudX + 18, hudY + 164);
 
         if (!statusBanner.isEmpty()) {
             graphics.setColor(new Color(0, 0, 0, 180));

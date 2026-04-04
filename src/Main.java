@@ -129,6 +129,11 @@ public class Main {
         startGame(username, mapFileForLevel(targetLevel));
     }
 
+    /** Called by PlayerScreen — start a fresh game from Stage 1. */
+    public void startNewGame(String username) {
+        startGame(username, "maps/level1_map.csv");
+    }
+
     /** Called by LevelSelectPanel — launch selected map. */
     public void startGame(String username, String mapFile) {
         int levelId = getLevelIdFromMap(mapFile);

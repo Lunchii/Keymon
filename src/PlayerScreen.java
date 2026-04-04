@@ -80,19 +80,24 @@ public class PlayerScreen extends JPanel {
         gbc.gridy = 3;
         dialogBox.add(continueBtn, gbc);
 
+        JButton newGameBtn = createStyledButton("NEW GAME", new Color(40, 160, 80), Color.BLACK);
+        newGameBtn.addActionListener(e -> mainApp.startNewGame(username));
+        gbc.gridy = 4;
+        dialogBox.add(newGameBtn, gbc);
+
         JButton selectLevelBtn = createStyledButton("SELECT STAGE", new Color(70, 130, 180), Color.BLACK);
         selectLevelBtn.addActionListener(e -> mainApp.startGame(username));
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         dialogBox.add(selectLevelBtn, gbc);
 
         JButton statsBtn = createStyledButton("VIEW FULL STATS", new Color(90, 110, 170), Color.BLACK);
         statsBtn.addActionListener(e -> mainApp.showStatsPage(username));
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         dialogBox.add(statsBtn, gbc);
 
         JButton logoutBtn = createStyledButton("LOGOUT", new Color(178, 34, 34), Color.BLACK);
         logoutBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         dialogBox.add(logoutBtn, gbc);
 
         JButton deleteBtn = new JButton("Delete Save");
@@ -107,7 +112,7 @@ public class PlayerScreen extends JPanel {
                 cardLayout.show(container, "MENU");
             }
         });
-        gbc.gridy = 7;
+        gbc.gridy = 8;
         dialogBox.add(deleteBtn, gbc);
 
         add(dialogBox);
