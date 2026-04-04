@@ -70,7 +70,6 @@ public class HighscorePanel extends JPanel {
         backBtn.setBackground(Color.BLACK);
         backBtn.setForeground(Color.WHITE);
         backBtn.setFocusPainted(false);
-        backBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
 
         footer.add(backBtn);
         add(footer, BorderLayout.SOUTH);

@@ -53,7 +53,7 @@ public class ParentalControlPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "PLAYER STATS", "HIGH SCORES", "RESET TABLE", "BACK" };
+        String[] labels = { "PLAYER STATS", "HIGH SCORES", "ACCOUNT MANAGEMENT", "RESET TABLE", "BACK" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -61,7 +61,7 @@ public class ParentalControlPanel extends JPanel {
             OutlinedButton btn = new OutlinedButton(label);
             btn.setFont(customFont.deriveFont(Font.PLAIN, 28f));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(400, 60));
+            btn.setMaximumSize(new Dimension(450, 60));
             btn.setFocusable(false);
             btn.setForeground(Color.BLACK); // Black font by default
 
@@ -121,20 +121,17 @@ public class ParentalControlPanel extends JPanel {
                 }
             }
             cardLayout.show(container, "HIGHSCORE");
+        } else if (label.equals("ACCOUNT MANAGEMENT")) {
+            cardLayout.show(container, "ACCOUNT_MANAGEMENT");
         } else if (label.equals("RESET TABLE")) {
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Reset ALL data? This will clear high scores and delete save files.",
-                    "CRITICAL WARNING", JOptionPane.YES_NO_OPTION);
+                    "Reset the high score table to defaults?",
+                    "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Wipe user save files [_profile.json]
-                java.util.List<String> users = ProfileStore.getAllUsernames();
-                for (String user : users) {
-                    ProfileStore.deleteAccount(user);
-                }
-                // Reset Highscore table to defaults
+                // Reset Highscore table to defaults only
                 ProfileStore.resetHighScoreTable();
-                JOptionPane.showMessageDialog(this, "System Reset Complete.");
+                JOptionPane.showMessageDialog(this, "High score table has been reset to defaults.");
             }
         }
     }

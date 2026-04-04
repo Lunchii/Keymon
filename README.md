@@ -39,7 +39,7 @@ No other third-party libraries or tools are required. Gson is bundled in the `li
 
 ### Step 2 — Obtain the Project
 
-Clone the repository or extract the submitted zip archive. The project root should contain a `src/` folder, a `lib/` folder, and asset files (`.png`, `.csv`, `.ttf`, `.json`, `.gif`).
+Clone the repository or extract the submitted zip archive. The project root should contain `src/`, `lib/`, the asset folders, and the `data/` directory used for local saves and leaderboard storage.
 
 ### Step 3 — Compile
 
@@ -152,7 +152,7 @@ Press **ESC** during exploration to pause. Use **W / S** to navigate options and
 
 ### Saving
 
-Progress is saved automatically when you complete a stage, fail a stage, or quit to the hub via the pause menu. Your position on the map, party HP, item counts, and statistics are all persisted locally in a `<username>_profile.json` file.
+Progress is saved automatically when you complete a stage, fail a stage, or quit to the hub via the pause menu. Your position on the map, party HP, item counts, and statistics are all persisted locally in `data/profiles/<username>_profile.json`.
 
 ---
 
@@ -223,10 +223,19 @@ group72/
 └── README.md         This file
 ```
 
+Current runtime data is organized under:
+
+```
+data/
+|-- profiles/   Player profile and save data
+|-- system/     Leaderboard and shared runtime data
+`-- legacy/     Archived older save formats
+```
+
 ---
 
 ## Known Limitations
 
-- Save files are stored locally in the working directory; they are not encrypted.
+- Save files are stored locally under `data/`; they are not encrypted.
 - The teacher PIN is hardcoded to `2212`.
 - The animated menu background (`menuBackground.gif`) is a large file and may take a moment to load on slower machines.

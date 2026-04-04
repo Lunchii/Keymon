@@ -477,7 +477,8 @@ public class GamePanel extends JPanel {
         String summary = reason + "\n\nScore: " + levelScore
                 + "\nWords typed: " + wordsTyped
                 + "\nAccuracy: " + String.format("%.1f%%", getAccuracyPercent())
-                + "\nPeak WPM: " + String.format("%.1f", peakWpm);
+                + "\nPeak WPM: " + String.format("%.1f", peakWpm)
+                + "\n\nProgress saved.";
 
         Object[] options = { "Retry Stage", "Player Hub" };
         int choice = JOptionPane.showOptionDialog(this, summary, "Game Over",
