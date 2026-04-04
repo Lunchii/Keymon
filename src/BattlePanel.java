@@ -510,6 +510,7 @@ public class BattlePanel extends JPanel {
         phase = Phase.SWITCH_SELECT;
         hideActionButtons();
         hideInputField();
+        setBattleLabelsVisible(false);
         switchOverlay.setVisible(true);
         bagOverlay.setVisible(false);
         statsLabel.setText(buildStatsLine());
@@ -545,6 +546,7 @@ public class BattlePanel extends JPanel {
 
         gamePanel.setActivePartyIndex(index);
         switchOverlay.setVisible(false);
+        setBattleLabelsVisible(true);
         statusLabel.setText("Go, " + party.get(index).name + "!");
         wordLabel.setText(wrapWordHtml("Fresh energy enters the battle."));
         feedbackLabel.setForeground(Color.WHITE);
@@ -568,6 +570,7 @@ public class BattlePanel extends JPanel {
         phase = Phase.ENEMY_TURN;
         hideActionButtons();
         hideInputField();
+        setBattleLabelsVisible(true);
         switchOverlay.setVisible(false);
         bagOverlay.setVisible(false);
         statusLabel.setText(wildPokemon.name + " attacks!");
@@ -616,6 +619,7 @@ public class BattlePanel extends JPanel {
         phase = Phase.MENU;
         hideActionButtons();
         hideInputField();
+        setBattleLabelsVisible(false);
         switchOverlay.setVisible(false);
         bagOverlay.setVisible(true);
         statusLabel.setText("Pick a powerup");
@@ -672,6 +676,7 @@ public class BattlePanel extends JPanel {
         }
 
         bagOverlay.setVisible(false);
+        setBattleLabelsVisible(true);
         statusLabel.setText(item.displayName + " used");
         wordLabel.setText(wrapWordHtml(effect));
         feedbackLabel.setForeground(new Color(255, 220, 100));
