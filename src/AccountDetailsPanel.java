@@ -49,11 +49,13 @@ public class AccountDetailsPanel extends JPanel {
         usernameLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        OutlinedLabel profileExistsLabel = new OutlinedLabel("Profile Exists: " + (ProfileStore.accountExists(username) ? "Yes" : "No"));
+        OutlinedLabel profileExistsLabel = new OutlinedLabel(
+                "Profile Exists: " + (ProfileStore.accountExists(username) ? "Yes" : "No"));
         profileExistsLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         profileExistsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        OutlinedLabel statsExistsLabel = new OutlinedLabel("Stats Available: " + (ProfileStore.loadProfile(username) != null ? "Yes" : "No"));
+        OutlinedLabel statsExistsLabel = new OutlinedLabel(
+                "Stats Available: " + (ProfileStore.loadProfile(username) != null ? "Yes" : "No"));
         statsExistsLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         statsExistsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -82,7 +84,7 @@ public class AccountDetailsPanel extends JPanel {
         OutlinedButton deleteAccountBtn = new OutlinedButton("DELETE ACCOUNT");
         deleteAccountBtn.setFont(customFont.deriveFont(Font.PLAIN, 20f));
         deleteAccountBtn.setBackground(new Color(200, 50, 50));
-        deleteAccountBtn.setForeground(Color.WHITE);
+        deleteAccountBtn.setForeground(Color.BLACK);
         deleteAccountBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         deleteAccountBtn.addActionListener(e -> deleteAccount());
 
@@ -109,84 +111,87 @@ public class AccountDetailsPanel extends JPanel {
 
     private void resetPassword() {
         int result = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to reset the password for '" + username + "'?\n\nThis will set the password to 'password'.",
-            "Confirm Password Reset",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE);
+                "Are you sure you want to reset the password for '" + username
+                        + "'?\n\nThis will set the password to 'password'.",
+                "Confirm Password Reset",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
 
         if (result == JOptionPane.YES_OPTION) {
             boolean success = ProfileStore.resetPassword(username, "password");
             if (success) {
                 JOptionPane.showMessageDialog(this,
-                    "Password for '" + username + "' has been reset to 'password'.",
-                    "Password Reset Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "Password for '" + username + "' has been reset to 'password'.",
+                        "Password Reset Successful",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                    "Failed to reset password for '" + username + "'.",
-                    "Password Reset Failed",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Failed to reset password for '" + username + "'.",
+                        "Password Reset Failed",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void resetStats() {
         int result = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to reset all typing statistics for '" + username + "'?\n\nThis action cannot be undone.",
-            "Confirm Statistics Reset",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE);
+                "Are you sure you want to reset all typing statistics for '" + username
+                        + "'?\n\nThis action cannot be undone.",
+                "Confirm Statistics Reset",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
 
         if (result == JOptionPane.YES_OPTION) {
             boolean success = ProfileStore.resetStatistics(username);
             if (success) {
                 JOptionPane.showMessageDialog(this,
-                    "Typing statistics for '" + username + "' have been reset.",
-                    "Statistics Reset Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "Typing statistics for '" + username + "' have been reset.",
+                        "Statistics Reset Successful",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                    "Failed to reset statistics for '" + username + "'.",
-                    "Statistics Reset Failed",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Failed to reset statistics for '" + username + "'.",
+                        "Statistics Reset Failed",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void deleteAccount() {
         int result = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to DELETE the account '" + username + "'?\n\nThis will permanently remove the profile and all associated data.\nThis action cannot be undone!",
-            "Confirm Account Deletion",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.ERROR_MESSAGE);
+                "Are you sure you want to DELETE the account '" + username
+                        + "'?\n\nThis will permanently remove the profile and all associated data.\nThis action cannot be undone!",
+                "Confirm Account Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.ERROR_MESSAGE);
 
         if (result == JOptionPane.YES_OPTION) {
             // Double confirmation
             String confirmation = JOptionPane.showInputDialog(this,
-                "Type 'DELETE' to confirm account deletion:",
-                "Final Confirmation",
-                JOptionPane.WARNING_MESSAGE);
+                    "Type 'DELETE' to confirm account deletion:",
+                    "Final Confirmation",
+                    JOptionPane.WARNING_MESSAGE);
 
             if ("DELETE".equals(confirmation)) {
                 boolean success = ProfileStore.deleteAccount(username);
                 if (success) {
                     JOptionPane.showMessageDialog(this,
-                        "Account '" + username + "' has been permanently deleted.",
-                        "Account Deleted",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Account '" + username + "' has been permanently deleted.",
+                            "Account Deleted",
+                            JOptionPane.INFORMATION_MESSAGE);
                     // Go back to account list
                     cardLayout.show(container, "ACCOUNT_LIST");
                 } else {
                     JOptionPane.showMessageDialog(this,
-                        "Failed to delete account '" + username + "'.",
-                        "Deletion Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to delete account '" + username + "'.",
+                            "Deletion Failed",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(this,
-                    "Account deletion cancelled.",
-                    "Cancelled",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "Account deletion cancelled.",
+                        "Cancelled",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
