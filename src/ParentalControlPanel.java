@@ -10,7 +10,6 @@ import javax.swing.*;
  * <p>
  * Provides navigation for the admin dashboard and exposes controls for:
  * <ul>
- * <li>Viewing player stats</li>
  * <li>Viewing high score table</li>
  * <li>Performing a full reset of user and highscore data</li>
  * <li>Returning to the main menu</li>
@@ -61,7 +60,7 @@ public class ParentalControlPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "PLAYER STATS", "HIGH SCORES", "RESET TABLE", "BACK" };
+        String[] labels = { "HIGH SCORES", "ACCOUNT MANAGEMENT", "RESET TABLE", "BACK" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -69,7 +68,7 @@ public class ParentalControlPanel extends JPanel {
             OutlinedButton btn = new OutlinedButton(label);
             btn.setFont(customFont.deriveFont(Font.PLAIN, 28f));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(400, 60));
+            btn.setMaximumSize(new Dimension(450, 60));
             btn.setFocusable(false);
             btn.setForeground(Color.BLACK); // Black font by default
 
@@ -123,8 +122,6 @@ public class ParentalControlPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("BACK")) {
             cardLayout.show(container, "MENU");
-        } else if (label.equals("PLAYER STATS")) {
-            mainApp.showAdminStats();
         } else if (label.equals("HIGH SCORES")) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof HighscorePanel) {
@@ -135,6 +132,8 @@ public class ParentalControlPanel extends JPanel {
                 }
             }
             cardLayout.show(container, "HIGHSCORE");
+        } else if (label.equals("ACCOUNT MANAGEMENT")) {
+            cardLayout.show(container, "ACCOUNT_MANAGEMENT");
         } else if (label.equals("RESET TABLE")) {
             int confirm = JOptionPane.showConfirmDialog(this,
                     "Reset the high score table to defaults?",

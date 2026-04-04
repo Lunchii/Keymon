@@ -64,6 +64,14 @@ public class Main {
         ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
         ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
 
+        // Account management panels
+        AccountManagementPanel accountManagementPanel = new AccountManagementPanel(cardLayout, mainContainer, this);
+        AccountListPanel accountListPanel = new AccountListPanel(cardLayout, mainContainer, this);
+        CreateAccountPanel createAccountPanel = new CreateAccountPanel(cardLayout, mainContainer, this);
+        ResetPasswordPanel resetPasswordPanel = new ResetPasswordPanel(cardLayout, mainContainer, this);
+        ResetStatsPanel resetStatsPanel = new ResetStatsPanel(cardLayout, mainContainer, this);
+        DeleteAccountPanel deleteAccountPanel = new DeleteAccountPanel(cardLayout, mainContainer, this);
+
         playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
         statsPage = new StatsPage(this);
 
@@ -75,6 +83,14 @@ public class Main {
         mainContainer.add(parentalControlPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
         mainContainer.add(adminStatsPanel, "ADMIN_STATS");
+
+        // Account management panels
+        mainContainer.add(accountManagementPanel, "ACCOUNT_MANAGEMENT");
+        mainContainer.add(accountListPanel, "ACCOUNT_LIST");
+        mainContainer.add(createAccountPanel, "CREATE_ACCOUNT");
+        mainContainer.add(resetPasswordPanel, "RESET_PASSWORD");
+        mainContainer.add(resetStatsPanel, "RESET_STATS");
+        mainContainer.add(deleteAccountPanel, "DELETE_ACCOUNT");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
