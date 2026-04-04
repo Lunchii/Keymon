@@ -72,9 +72,8 @@ public class DeleteAccountPanel extends JPanel {
         usernameField.setMaximumSize(new Dimension(300, 40));
         usernameField.setAlignmentX(Component.CENTER_ALIGNMENT);
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Confirmation field
         OutlinedLabel confirmationLabel = new OutlinedLabel("Type 'DELETE' to confirm:");
@@ -86,15 +85,14 @@ public class DeleteAccountPanel extends JPanel {
         confirmationField.setMaximumSize(new Dimension(300, 40));
         confirmationField.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirmationField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.RED, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createLineBorder(Color.RED, 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Delete button
         OutlinedButton deleteBtn = new OutlinedButton("DELETE ACCOUNT");
         deleteBtn.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         deleteBtn.setBackground(new Color(200, 50, 50));
-        deleteBtn.setForeground(Color.WHITE);
+        deleteBtn.setForeground(Color.BLACK);
         deleteBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         deleteBtn.addActionListener(e -> deleteAccount());
 
@@ -148,45 +146,50 @@ public class DeleteAccountPanel extends JPanel {
 
         // Validation
         if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
 
         if (!"DELETE".equals(confirmation)) {
-            JOptionPane.showMessageDialog(this, "You must type 'DELETE' to confirm.", "Confirmation Required", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "You must type 'DELETE' to confirm.", "Confirmation Required",
+                    JOptionPane.ERROR_MESSAGE);
             confirmationField.requestFocus();
             return;
         }
 
         // Check if account exists
         if (!ProfileStore.accountExists(username)) {
-            JOptionPane.showMessageDialog(this, "Account '" + username + "' does not exist.", "Account Not Found", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Account '" + username + "' does not exist.", "Account Not Found",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
 
         // Triple confirmation
         int result1 = JOptionPane.showConfirmDialog(this,
-            "Are you absolutely sure you want to PERMANENTLY DELETE the account '" + username + "'?\n\nThis will erase ALL data including:\n- Profile information\n- Typing statistics\n- Game progress\n- Inventory items\n\nThis action CANNOT be undone!",
-            "Final Confirmation - Step 1",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.ERROR_MESSAGE);
+                "Are you absolutely sure you want to PERMANENTLY DELETE the account '" + username
+                        + "'?\n\nThis will erase ALL data including:\n- Profile information\n- Typing statistics\n- Game progress\n- Inventory items\n\nThis action CANNOT be undone!",
+                "Final Confirmation - Step 1",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.ERROR_MESSAGE);
 
         if (result1 == JOptionPane.YES_OPTION) {
             int result2 = JOptionPane.showConfirmDialog(this,
-                "This is your LAST CHANCE to cancel.\n\nAccount '" + username + "' will be completely removed from the system.\n\nAre you certain?",
-                "Final Confirmation - Step 2",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.ERROR_MESSAGE);
+                    "This is your LAST CHANCE to cancel.\n\nAccount '" + username
+                            + "' will be completely removed from the system.\n\nAre you certain?",
+                    "Final Confirmation - Step 2",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.ERROR_MESSAGE);
 
             if (result2 == JOptionPane.YES_OPTION) {
                 boolean success = ProfileStore.deleteAccount(username);
                 if (success) {
                     JOptionPane.showMessageDialog(this,
-                        "Account '" + username + "' has been permanently deleted from the system.",
-                        "Account Deleted",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Account '" + username + "' has been permanently deleted from the system.",
+                            "Account Deleted",
+                            JOptionPane.INFORMATION_MESSAGE);
 
                     // Clear fields
                     usernameField.setText("");
@@ -196,9 +199,9 @@ public class DeleteAccountPanel extends JPanel {
                     cardLayout.show(container, "ACCOUNT_MANAGEMENT");
                 } else {
                     JOptionPane.showMessageDialog(this,
-                        "Failed to delete account. Please try again.",
-                        "Deletion Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to delete account. Please try again.",
+                            "Deletion Failed",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         }

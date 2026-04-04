@@ -29,6 +29,7 @@ public class AccountManagementPanel extends JPanel {
         loadCustomFont();
 
         this.setLayout(new BorderLayout());
+        this.setOpaque(false); // Required to see the custom painted background
         this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150));
 
         // --- RIGHT SIDE: ACCOUNT MANAGEMENT BUTTONS ---
@@ -44,7 +45,8 @@ public class AccountManagementPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "LIST ACCOUNTS", "CREATE ACCOUNT", "RESET PASSWORD", "RESET STATS", "DELETE ACCOUNT", "BACK" };
+        String[] labels = { "LIST ACCOUNTS", "CREATE ACCOUNT", "RESET PASSWORD", "RESET STATS", "DELETE ACCOUNT",
+                "BACK" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];

@@ -51,43 +51,46 @@ public class CreateAccountPanel extends JPanel {
         OutlinedLabel usernameLabel = new OutlinedLabel("Username:");
         usernameLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        usernameLabel.setPreferredSize(new Dimension(250, 50));
+        usernameLabel.setMaximumSize(new Dimension(250, 50));
 
         usernameField = new JTextField(20);
         usernameField.setFont(customFont.deriveFont(Font.PLAIN, 20f));
         usernameField.setMaximumSize(new Dimension(300, 40));
         usernameField.setAlignmentX(Component.CENTER_ALIGNMENT);
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Password field
         OutlinedLabel passwordLabel = new OutlinedLabel("Password:");
         passwordLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         passwordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        passwordLabel.setPreferredSize(new Dimension(250, 50));
+        passwordLabel.setMaximumSize(new Dimension(250, 50));
 
         passwordField = new JPasswordField(20);
         passwordField.setFont(customFont.deriveFont(Font.PLAIN, 20f));
         passwordField.setMaximumSize(new Dimension(300, 40));
         passwordField.setAlignmentX(Component.CENTER_ALIGNMENT);
         passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Confirm password field
         OutlinedLabel confirmPasswordLabel = new OutlinedLabel("Confirm Password:");
         confirmPasswordLabel.setFont(customFont.deriveFont(Font.PLAIN, 24f));
         confirmPasswordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        confirmPasswordLabel.setPreferredSize(new Dimension(300, 60));
+        confirmPasswordLabel.setMaximumSize(new Dimension(300, 60));
 
         confirmPasswordField = new JPasswordField(20);
         confirmPasswordField.setFont(customFont.deriveFont(Font.PLAIN, 20f));
         confirmPasswordField.setMaximumSize(new Dimension(300, 40));
         confirmPasswordField.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirmPasswordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Create button
         OutlinedButton createBtn = new OutlinedButton("CREATE ACCOUNT");
@@ -147,44 +150,51 @@ public class CreateAccountPanel extends JPanel {
 
         // Validation
         if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
 
         if (username.length() < 3) {
-            JOptionPane.showMessageDialog(this, "Username must be at least 3 characters long.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Username must be at least 3 characters long.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
 
         if (username.contains(" ")) {
-            JOptionPane.showMessageDialog(this, "Username cannot contain spaces.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Username cannot contain spaces.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
 
         if (password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Password cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password cannot be empty.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             passwordField.requestFocus();
             return;
         }
 
         if (password.length() < 4) {
-            JOptionPane.showMessageDialog(this, "Password must be at least 4 characters long.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password must be at least 4 characters long.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             passwordField.requestFocus();
             return;
         }
 
         if (!password.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
             confirmPasswordField.requestFocus();
             return;
         }
 
         // Check if username already exists
         if (ProfileStore.accountExists(username)) {
-            JOptionPane.showMessageDialog(this, "An account with this username already exists.", "Username Taken", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "An account with this username already exists.", "Username Taken",
+                    JOptionPane.ERROR_MESSAGE);
             usernameField.requestFocus();
             return;
         }
@@ -193,9 +203,9 @@ public class CreateAccountPanel extends JPanel {
         boolean success = ProfileStore.createAccount(username, password);
         if (success) {
             JOptionPane.showMessageDialog(this,
-                "Account '" + username + "' has been created successfully!",
-                "Account Created",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Account '" + username + "' has been created successfully!",
+                    "Account Created",
+                    JOptionPane.INFORMATION_MESSAGE);
 
             // Clear fields
             usernameField.setText("");
@@ -206,9 +216,9 @@ public class CreateAccountPanel extends JPanel {
             cardLayout.show(container, "ACCOUNT_MANAGEMENT");
         } else {
             JOptionPane.showMessageDialog(this,
-                "Failed to create account. Please try again.",
-                "Creation Failed",
-                JOptionPane.ERROR_MESSAGE);
+                    "Failed to create account. Please try again.",
+                    "Creation Failed",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
