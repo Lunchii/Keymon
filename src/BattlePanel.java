@@ -3,7 +3,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -29,11 +28,14 @@ import javax.swing.event.DocumentListener;
 
 /**
  * Typing battle screen used for wild encounters and trainer fights.
+ * 
  * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
  * @version 1.0
  */
 public class BattlePanel extends JPanel {
-    private enum Phase { MENU, COUNTDOWN, PLAYER_TURN, ENEMY_TURN, SWITCH_SELECT, FINISHED }
+    private enum Phase {
+        MENU, COUNTDOWN, PLAYER_TURN, ENEMY_TURN, SWITCH_SELECT, FINISHED
+    }
 
     private final CardLayout cardLayout;
     private final JPanel container;
@@ -80,7 +82,7 @@ public class BattlePanel extends JPanel {
     private final JButton[] itemButtons = new JButton[Item.values().length];
 
     public BattlePanel(CardLayout layout, JPanel container, GamePanel gamePanel,
-                       Pokemon wildPokemon, List<Pokemon> party) {
+            Pokemon wildPokemon, List<Pokemon> party) {
         this.cardLayout = layout;
         this.container = container;
         this.gamePanel = gamePanel;
@@ -365,7 +367,7 @@ public class BattlePanel extends JPanel {
             for (int i = prefix; i < text.length(); i++) {
                 char typed = text.charAt(i);
                 boolean correct = i < currentWord.length()
-                    && Character.toLowerCase(typed) == Character.toLowerCase(currentWord.charAt(i));
+                        && Character.toLowerCase(typed) == Character.toLowerCase(currentWord.charAt(i));
                 gamePanel.recordTypedCharacter(correct);
                 if (!correct) {
                     feedbackLabel.setForeground(new Color(255, 120, 100));
@@ -383,7 +385,7 @@ public class BattlePanel extends JPanel {
     private void updateWordPreview(String typed) {
         int matched = 0;
         while (matched < typed.length() && matched < currentWord.length()
-            && Character.toLowerCase(typed.charAt(matched)) == Character.toLowerCase(currentWord.charAt(matched))) {
+                && Character.toLowerCase(typed.charAt(matched)) == Character.toLowerCase(currentWord.charAt(matched))) {
             matched++;
         }
 
@@ -416,7 +418,7 @@ public class BattlePanel extends JPanel {
             MusicPlayer.playEffect("attack");
             typedWordsThisTurn++;
             int score = WordRepository.scoreWord(gamePanel.getCurrentLevelId(), currentWord,
-                Math.max(1, gamePanel.getComboStreak() + 1));
+                    Math.max(1, gamePanel.getComboStreak() + 1));
             gamePanel.recordCompletedWord(currentWord, score);
             turnDamage += activePokemon().attack + currentWord.length() * gamePanel.getCurrentLevelId();
 
@@ -464,7 +466,8 @@ public class BattlePanel extends JPanel {
                     statusLabel.setText("Trainer sent out " + wildPokemon.name + "!");
                     wordLabel.setText(wrapWordHtml("Another opponent jumps into the battle."));
                     feedbackLabel.setForeground(new Color(255, 220, 100));
-                    feedbackLabel.setText("The trainer still has " + (trainerTeam.size() - trainerIndex) + " Keymon left.");
+                    feedbackLabel
+                            .setText("The trainer still has " + (trainerTeam.size() - trainerIndex) + " Keymon left.");
                     new Timer(1400, event -> {
                         ((Timer) event.getSource()).stop();
                         showMenu();
@@ -500,10 +503,11 @@ public class BattlePanel extends JPanel {
                 boolean fainted = pokemon.isFainted();
                 String activeTag = active ? " [ACTIVE]" : "";
                 String faintedTag = fainted ? " [X]" : "";
-                switchSlots[i].setText(pokemon.name + " " + pokemon.currentHp + "/" + pokemon.maxHp + activeTag + faintedTag);
+                switchSlots[i]
+                        .setText(pokemon.name + " " + pokemon.currentHp + "/" + pokemon.maxHp + activeTag + faintedTag);
                 switchSlots[i].setEnabled(!active && !fainted);
                 switchSlots[i].setBackground(fainted ? new Color(80, 40, 40)
-                    : active ? new Color(40, 80, 60) : new Color(40, 100, 70));
+                        : active ? new Color(40, 80, 60) : new Color(40, 100, 70));
                 switchSlots[i].setVisible(true);
             } else {
                 switchSlots[i].setVisible(false);
@@ -556,7 +560,8 @@ public class BattlePanel extends JPanel {
         new Timer(1100, event -> {
             ((Timer) event.getSource()).stop();
             Pokemon active = activePokemon();
-            int damage = (int) Math.round((wildPokemon.attack + WordRepository.enemyAttackBonus(gamePanel.getCurrentLevelId())) * 1.2);
+            int damage = (int) Math
+                    .round((wildPokemon.attack + WordRepository.enemyAttackBonus(gamePanel.getCurrentLevelId())) * 1.2);
             active.currentHp = Math.max(0, active.currentHp - damage);
             feedbackLabel.setForeground(new Color(255, 120, 100));
             feedbackLabel.setText(wildPokemon.name + " hit " + active.name + " for " + damage + " damage!");
@@ -605,7 +610,7 @@ public class BattlePanel extends JPanel {
             Item item = Item.values()[i];
             int count = gamePanel.getItemBag().getCount(item);
             String label = "<html><div style='text-align:center; padding:6px 10px;'><b>" + item.displayName
-                + " x" + count + "</b><br/>" + item.description + "</div></html>";
+                    + " x" + count + "</b><br/>" + item.description + "</div></html>";
             itemButtons[i].setText(label);
             itemButtons[i].setEnabled(count > 0);
             itemButtons[i].setBackground(count > 0 ? item.color.darker() : new Color(50, 50, 50));
@@ -757,8 +762,8 @@ public class BattlePanel extends JPanel {
 
     private String buildStatsLine() {
         return "Score " + gamePanel.getLevelScore()
-            + " | WPM " + String.format("%.1f", gamePanel.getCurrentWpm())
-            + " | Combo x" + Math.max(1, gamePanel.getComboStreak());
+                + " | WPM " + String.format("%.1f", gamePanel.getCurrentWpm())
+                + " | Combo x" + Math.max(1, gamePanel.getComboStreak());
     }
 
     private String wrapWordHtml(String text) {
@@ -767,8 +772,8 @@ public class BattlePanel extends JPanel {
 
     private String escapeHtml(String text) {
         return text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     @Override
@@ -854,7 +859,8 @@ public class BattlePanel extends JPanel {
         for (int i = 0; i < itemButtons.length; i++) {
             int col = i % 2;
             int row = i / 2;
-            itemButtons[i].setBounds(14 + col * (itemButtonW + 16), 58 + row * (itemButtonH + 12), itemButtonW, itemButtonH);
+            itemButtons[i].setBounds(14 + col * (itemButtonW + 16), 58 + row * (itemButtonH + 12), itemButtonW,
+                    itemButtonH);
         }
         closeBagButton.setBounds(overlayW - 118, boxH - 62, 108, 30);
     }
@@ -901,7 +907,7 @@ public class BattlePanel extends JPanel {
         graphics.fillRoundRect(barX, barY, barW, barH, 6, 6);
         float ratio = maxHp > 0 ? (float) hp / maxHp : 0;
         graphics.setColor(ratio > 0.5f ? new Color(60, 210, 100)
-            : ratio > 0.25f ? new Color(230, 200, 50) : new Color(220, 70, 70));
+                : ratio > 0.25f ? new Color(230, 200, 50) : new Color(220, 70, 70));
         graphics.fillRoundRect(barX, barY, (int) (barW * Math.max(0, ratio)), barH, 6, 6);
         graphics.setColor(new Color(255, 255, 255, 60));
         graphics.drawRoundRect(barX, barY, barW, barH, 6, 6);

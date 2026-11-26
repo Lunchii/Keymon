@@ -37,8 +37,57 @@ public class PlayerScreen extends JPanel {
                     int x = (getWidth() - w) / 2;
                     int y = (getHeight() - h) / 2;
 
-                    g2d.drawImage(player.getCurrentFrame(), x, y, w, h, null);
-                }
+        // 1. Welcome Header
+        welcomeLabel = new JLabel("WELCOME, TRAINER", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Monospaced", Font.BOLD, 26));
+        gbc.gridy = 0;
+        dialogBox.add(welcomeLabel, gbc);
+
+        statsSummaryLabel = new JLabel("Best Score: 0 | Stage: 1 | Avg WPM: 0", SwingConstants.CENTER);
+        statsSummaryLabel.setFont(new Font("Monospaced", Font.PLAIN, 18));
+        gbc.gridy = 1;
+        dialogBox.add(statsSummaryLabel, gbc);
+
+        detailArea = new JTextArea(8, 28);
+        detailArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        detailArea.setEditable(false);
+        detailArea.setLineWrap(true);
+        detailArea.setWrapStyleWord(true);
+        detailArea.setBackground(new Color(235, 235, 235));
+        detailArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        gbc.gridy = 2;
+        dialogBox.add(new JScrollPane(detailArea), gbc);
+
+        JButton continueBtn = createStyledButton("CONTINUE JOURNEY", Color.BLACK, Color.BLACK);
+        continueBtn.addActionListener(e -> mainApp.continueGame(username));
+        gbc.gridy = 3;
+        dialogBox.add(continueBtn, gbc);
+
+        JButton selectLevelBtn = createStyledButton("SELECT STAGE", new Color(70, 130, 180), Color.BLACK);
+        selectLevelBtn.addActionListener(e -> mainApp.startGame(username));
+        gbc.gridy = 4;
+        dialogBox.add(selectLevelBtn, gbc);
+
+        JButton statsBtn = createStyledButton("VIEW FULL STATS", new Color(90, 110, 170), Color.BLACK);
+        statsBtn.addActionListener(e -> mainApp.showStatsPage(username));
+        gbc.gridy = 5;
+        dialogBox.add(statsBtn, gbc);
+
+        JButton logoutBtn = createStyledButton("LOGOUT", new Color(178, 34, 34), Color.BLACK);
+        logoutBtn.addActionListener(e -> cardLayout.show(container, "MENU"));
+        gbc.gridy = 6;
+        dialogBox.add(logoutBtn, gbc);
+
+        JButton deleteBtn = new JButton("Delete Save");
+        deleteBtn.setFont(new Font("Monospaced", Font.ITALIC, 12));
+        deleteBtn.setContentAreaFilled(false);
+        deleteBtn.setBorderPainted(false);
+        deleteBtn.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete all data for " + username + "?", "Warning",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                ProfileStore.deleteAccount(username);
+                cardLayout.show(container, "MENU");
             }
         };
         centerPanel.setOpaque(false);

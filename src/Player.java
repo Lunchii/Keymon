@@ -201,5 +201,48 @@ public class Player {
     public int getSpriteRow() {
         return this.spriteRow;
     }
-    public java.awt.image.BufferedImage getCurrentFrame() { return this.currentFrame; }
+
+    /**
+     * Provides the terrain collision list used by {@link #isPositionWalkable(int, int)}.
+     *
+     * @param terrainObjects list of solid terrain tiles from the current map
+     */
+    public void setTerrainObjects(List<TerrainObjects> terrainObjects) {
+        this.terrainObjects = terrainObjects;
+    }
+
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+    /**
+     * Returns {@code true} if the given pixel position does not collide with any terrain object.
+     *
+     * @param pixelX target X position in world pixels
+     * @param pixelY target Y position in world pixels
+     * @return true when the position is free of solid terrain
+     */
+    public boolean isPositionWalkable(int pixelX, int pixelY) {
+        if (terrainObjects == null) {
+            return true;
+        }
+
+        for (TerrainObjects terrain : terrainObjects) {
+            if (!terrain.isSolid()) {
+                continue;
+            }
+            if (terrain.collidesWith(pixelX, pixelY)) {
+                return false;
+            }
+        }
+
+        if (trainers != null) {
+            for (Trainer trainer : trainers) {
+                if (trainer.occupies(pixelX, pixelY)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

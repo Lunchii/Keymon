@@ -1,6 +1,10 @@
 {
   "records": [
     {
+      "name": "lunchi",
+      "score": 7733
+    },
+    {
       "name": "Professor Lex",
       "score": 1800
     },
@@ -15,6 +19,10 @@
     {
       "name": "Rocket Robin",
       "score": 1200
+    },
+    {
+      "name": "isaac",
+      "score": 1044
     },
     {
       "name": "Comet Fox",

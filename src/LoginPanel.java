@@ -58,11 +58,9 @@ public class LoginPanel extends JPanel {
         gbc.gridx = 1;
         loginBox.add(userField, gbc);
 
-        // Password row
-        gbc.gridx = 0; gbc.gridy = 2;
-        loginBox.add(createStyledLabel("Password:"), gbc);
-        gbc.gridx = 1;
-        loginBox.add(passField, gbc);
+        JButton loginBtn = createActionButton("LOGIN", Color.WHITE);
+        loginBtn.addActionListener(e -> handleLogin());
+        buttonRow.add(loginBtn);
 
         // Action Buttons
         gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
@@ -94,8 +92,50 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        // Simply returns to the Menu screen
-        backBtn.addActionListener(e -> layout.show(container, "MENU"));
+    private JButton createActionButton(String text, Color bg) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Monospaced", Font.BOLD, 15));
+        button.setBackground(Color.WHITE);
+        double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
+        button.setForeground(luminance < 128 ? Color.WHITE : Color.BLACK);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
+        return button;
+    }
+
+    private void handleLogin() {
+        String username = ProfileStore.sanitizeUsername(usernameField.getText());
+        String password = new String(passwordField.getPassword());
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both a username and a password.");
+            return;
+        }
+
+        if (!ProfileStore.authenticate(username, password)) {
+            JOptionPane.showMessageDialog(this, "That username or password was not recognized.");
+            return;
+        }
+
+        mainApp.showPlayerScreen(username);
+    }
+
+    private void handleCreateAccount() {
+        String username = ProfileStore.sanitizeUsername(usernameField.getText());
+        String password = new String(passwordField.getPassword());
+        String validationMessage = ProfileStore.validateNewAccount(username, password);
+        if (validationMessage != null) {
+            JOptionPane.showMessageDialog(this, validationMessage);
+            return;
+        }
+
+        if (!ProfileStore.createAccount(username, password)) {
+            JOptionPane.showMessageDialog(this, "The account could not be created right now.");
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Account created. Welcome to Keymon, " + username + "!");
+        mainApp.showPlayerScreen(username);
     }
 
     /**

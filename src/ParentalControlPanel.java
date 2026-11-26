@@ -96,6 +96,14 @@ public class ParentalControlPanel extends JPanel {
         } else if (label.equals("PLAYER STATS")) {
             mainApp.showAdminStats();
         } else if (label.equals("HIGH SCORES")) {
+            for (Component comp : container.getComponents()) {
+                if (comp instanceof HighscorePanel) {
+                    HighscorePanel hp = (HighscorePanel) comp;
+                    hp.setPreviousCard("PARENTAL"); // Tell it to return to Admin Dashboard
+                    hp.refreshData();
+                    break;
+                }
+            }
             cardLayout.show(container, "HIGHSCORE");
         } else if (label.equals("RESET TABLE")) {
             int confirm = JOptionPane.showConfirmDialog(this,

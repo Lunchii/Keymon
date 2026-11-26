@@ -135,7 +135,9 @@ public class MenuPanel extends JPanel {
         } else if (label.equals("HIGHSCORE")) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof HighscorePanel) {
-                    ((HighscorePanel) comp).refreshData();
+                    HighscorePanel hp = (HighscorePanel) comp;
+                    hp.setPreviousCard("MENU"); // Tell it to return here
+                    hp.refreshData();
                     break;
                 }
             }

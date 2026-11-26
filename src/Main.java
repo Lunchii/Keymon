@@ -110,9 +110,31 @@ public class Main {
         startGame(username, mapFileForLevel(targetLevel));
     }
 
-        MapLoader loader = new MapLoader("map.csv");
-        Trainer trainer = loader.getTrainer();
-        Player player = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
+    /** Called by LevelSelectPanel — launch selected map. */
+    public void startGame(String username, String mapFile) {
+        int levelId = getLevelIdFromMap(mapFile);
+        ProfileStore.PlayerProgress data = ProfileStore.loadProgress(username, levelId);
+        List<Pokemon> team = ProfileStore.loadParty(username);
+        if (team == null || team.isEmpty()) {
+            team = buildStarterTeam();
+        }
+        healParty(team);
+        ItemBag itemBag = ProfileStore.loadItemBag(username);
+
+        MapLoader loader = new MapLoader(mapFile);
+        int[][] worldMap = loader.getWorldMap();
+        List<Trainer> trainers = loader.getTrainers();
+
+        List<TerrainObjects> terrainObjects = loader.getTerrainObjects();
+        terrainObjects.removeIf(obj -> obj.getTileValue() == 3 &&
+            ProfileStore.hasCollectedPokeball(username, levelId, obj.getX() / TILE_SIZE, obj.getY() / TILE_SIZE));
+
+        Point spawnPoint = resolveSpawnPoint(worldMap, terrainObjects, trainers, data.x, data.y);
+        Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
+
+        if (activeGamePanel != null) {
+            mainContainer.remove(activeGamePanel);
+        }
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
             worldMap, trainers, terrainObjects, username, this, false, levelId, mapFile);
