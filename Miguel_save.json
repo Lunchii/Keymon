@@ -1,0 +1,46 @@
+{
+  "x": 1024,
+  "y": 192,
+  "spriteRow": 200,
+  "highScore": 0,
+  "currentLevel": 2,
+  "unlockedLevel": 2,
+  "levelX": [
+    256,
+    736,
+    320
+  ],
+  "levelY": [
+    416,
+    512,
+    320
+  ],
+  "levelSpriteRow": [
+    10,
+    200,
+    10
+  ],
+  "party": [
+    {
+      "name": "Flamezard",
+      "spritePath": "keymonsters/flamezard.png",
+      "maxHp": 95,
+      "currentHp": 78,
+      "attack": 26
+    },
+    {
+      "name": "Puffypuff",
+      "spritePath": "keymonsters/puffypuff.png",
+      "maxHp": 130,
+      "currentHp": 130,
+      "attack": 11
+    },
+    {
+      "name": "Wukong",
+      "spritePath": "keymonsters/wukong.png",
+      "maxHp": 60,
+      "currentHp": 60,
+      "attack": 35
+    }
+  ]
+}
