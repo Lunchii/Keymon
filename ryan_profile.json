@@ -1,0 +1,64 @@
+{
+  "username": "ryan",
+  "password": "1234",
+  "highScore": 500,
+  "currentLevel": 3,
+  "unlockedLevel": 3,
+  "levelX": [
+    1472,
+    1856,
+    320
+  ],
+  "levelY": [
+    800,
+    928,
+    320
+  ],
+  "levelSpriteRow": [
+    10,
+    140,
+    10
+  ],
+  "party": [
+    {
+      "name": "Flamezard",
+      "maxHp": 95,
+      "currentHp": 95,
+      "attack": 26,
+      "spritePath": "keymonsters/flamezard.png"
+    },
+    {
+      "name": "Puffypuff",
+      "maxHp": 130,
+      "currentHp": 130,
+      "attack": 11,
+      "spritePath": "keymonsters/puffypuff.png"
+    },
+    {
+      "name": "Wukong",
+      "maxHp": 60,
+      "currentHp": 60,
+      "attack": 35,
+      "spritePath": "keymonsters/wukong.png"
+    }
+  ],
+  "itemCounts": {
+    "SLOW_TIME": 2,
+    "POTION": 3,
+    "FULL_HEAL": 1,
+    "ATTACK_BOOST": 2
+  },
+  "collectedPokeballs": [],
+  "totalTimePlayedSeconds": 213,
+  "wordsTyped": 0,
+  "correctChars": 0,
+  "totalTypedChars": 0,
+  "errorCount": 0,
+  "peakWpm": 0.0,
+  "cumulativeAverageWpm": 0.0,
+  "averageWpmSamples": 0,
+  "longestStreak": 0,
+  "powerupsUsed": 0,
+  "gamesPlayed": 8,
+  "levelWins": 2
+}
