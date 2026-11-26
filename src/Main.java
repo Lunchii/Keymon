@@ -64,17 +64,12 @@ public class Main {
         ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
         ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
 
-        playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
-        statsPage = new StatsPage(this);
-
-        mainContainer.add(menuPanel, "MENU");
-        mainContainer.add(loginPanel, "LOGIN");
+        // Just create instances of your other files
+        mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
+        mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap()), "PLAY GAME");
+        PlayerScreen playerScreen = new PlayerScreen(cardLayout, mainContainer, player);
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
-        mainContainer.add(highscorePanel, "HIGHSCORE");
-        mainContainer.add(tutorialPanel, "TUTORIAL");
-        mainContainer.add(parentalControlPanel, "PARENTAL");
-        mainContainer.add(statsPage, "STATS_PAGE");
-        mainContainer.add(adminStatsPanel, "ADMIN_STATS");
+        mainContainer.add(new LoginPanel(cardLayout, mainContainer), "LOGIN");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,182 +1,121 @@
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
+import javax.swing.border.EmptyBorder;
 
 /**
- * Login and account-creation screen.
- *
- * <p>
- * Displays a centred dialog box over a scaled {@code LoginBackground.png}
- * image. Delegates authentication and account creation to {@link ProfileStore}.
- * On success the user is forwarded to {@link PlayerScreen} via
- * {@link Main#showPlayerScreen(String)}.
- * </p>
- * 
- * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
- * @version 1.0
+ * LoginPanel.java
+ * Purpose: Provides a user interface for player authentication.
+ * Integrated with CardLayout for screen switching.
+ * Part of Issue #9.
  */
 public class LoginPanel extends JPanel {
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private Main mainApp;
-    private BufferedImage backgroundImage;
+    private Image backgroundGif;
+    private CardLayout layout;
+    private JPanel container;
 
-    public LoginPanel(JPanel container, Main mainApp) {
-        this.mainApp = mainApp;
+    public LoginPanel(CardLayout layout, JPanel container) {
+        this.layout = layout;
+        this.container = container;
 
-        // 1. Load the tileable grass background image (Ensure it's in project root)
-        try {
-            backgroundImage = ImageIO.read(new File("images/LoginBackground.png"));
-        } catch (Exception e) {
-            System.err.println("LoginPanel: Could not load grass.png. Using fallback color.");
-        }
+        // Load the background GIF (Consistent with MenuPanel)
+        this.backgroundGif = new ImageIcon("menuBackground.gif").getImage();
 
-        // Set layout to GridBagLayout to center the login dialog box
-        setLayout(new GridBagLayout());
-        setOpaque(false); // Required to see the custom painted background
+        // Main layout of the panel itself to center the login box
+        this.setLayout(new GridBagLayout());
 
-        JPanel dialogBox = new JPanel(new GridBagLayout());
-        dialogBox.setBackground(new Color(245, 245, 245, 235));
-        dialogBox.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(Color.BLACK, 4),
-                BorderFactory.createEmptyBorder(25, 40, 25, 40)));
+        // --- VISUAL OPTIMIZATION: Semi-transparent Login Box ---
+        // Creates a "Glass Pane" effect for better readability against a moving background
+        JPanel loginBox = new JPanel(new GridBagLayout());
+        loginBox.setBackground(new Color(0, 0, 0, 150)); // Black with 150/255 transparency
+        loginBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.CYAN, 2), // Thematic border color
+                new EmptyBorder(30, 40, 30, 40) // Internal padding for components
+        ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 6, 8, 6);
+        gbc.insets = new Insets(10, 10, 10, 10); // Spacing between components
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
 
-        JLabel promptLabel = new JLabel("TRAINER LOGIN", SwingConstants.CENTER);
-        promptLabel.setFont(new Font("Monospaced", Font.BOLD, 24));
-        gbc.gridy = 0;
-        dialogBox.add(promptLabel, gbc);
+        // --- COMPONENT INITIALIZATION ---
+        JLabel loginTitle = new JLabel("USER LOGIN", SwingConstants.CENTER);
+        loginTitle.setFont(new Font("Monospaced", Font.BOLD, 30));
+        loginTitle.setForeground(Color.CYAN);
 
-        JLabel helpLabel = new JLabel(
-                "<html><div style='text-align:center;'>Use your username and password.<br/>New trainers can create an account here.</div></html>",
-                SwingConstants.CENTER);
-        helpLabel.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        gbc.gridy = 1;
-        dialogBox.add(helpLabel, gbc);
+        JTextField userField = new JTextField(15);
+        JPasswordField passField = new JPasswordField(15);
 
-        usernameField = new JTextField(14);
-        usernameField.setFont(new Font("Monospaced", Font.PLAIN, 18));
-        usernameField.setBorder(BorderFactory.createTitledBorder("Username"));
-        gbc.gridy = 2;
-        dialogBox.add(usernameField, gbc);
+        JButton loginBtn = new JButton("LOGIN");
+        JButton backBtn = new JButton("BACK");
 
-        passwordField = new JPasswordField(14);
-        passwordField.setFont(new Font("Monospaced", Font.PLAIN, 18));
-        passwordField.setBorder(BorderFactory.createTitledBorder("Password"));
-        gbc.gridy = 3;
-        dialogBox.add(passwordField, gbc);
+        // --- LAYOUT ARRANGEMENT ---
+        // Header
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        loginBox.add(loginTitle, gbc);
 
-        JPanel buttonRow = new JPanel(new GridLayout(1, 2, 10, 0));
-        buttonRow.setOpaque(false);
+        // Username row
+        gbc.gridwidth = 1; gbc.gridy = 1;
+        loginBox.add(createStyledLabel("Username:"), gbc);
+        gbc.gridx = 1;
+        loginBox.add(userField, gbc);
 
-        JButton loginBtn = createActionButton("LOGIN", Color.BLACK);
-        loginBtn.addActionListener(e -> handleLogin());
-        buttonRow.add(loginBtn);
+        // Password row
+        gbc.gridx = 0; gbc.gridy = 2;
+        loginBox.add(createStyledLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        loginBox.add(passField, gbc);
 
-        JButton createBtn = createActionButton("CREATE ACCOUNT", new Color(40, 110, 70));
-        createBtn.addActionListener(e -> handleCreateAccount());
-        buttonRow.add(createBtn);
+        // Action Buttons
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
+        loginBox.add(loginBtn, gbc);
 
         gbc.gridy = 4;
-        dialogBox.add(buttonRow, gbc);
+        loginBox.add(backBtn, gbc);
 
-        JButton backBtn = createActionButton("BACK TO MENU", new Color(140, 45, 45));
-        backBtn.addActionListener(e -> mainApp.returnToMenu());
-        gbc.gridy = 5;
-        dialogBox.add(backBtn, gbc);
+        // Add the styled login box to the center of the main panel
+        this.add(loginBox);
 
-        JLabel legacyHint = new JLabel("Legacy accounts can try their username as the password.",
-                SwingConstants.CENTER);
-        legacyHint.setFont(new Font("Monospaced", Font.ITALIC, 11));
-        gbc.gridy = 6;
-        dialogBox.add(legacyHint, gbc);
+        // --- INTERACTION LOGIC ---
+        // Handles login validation and screen transition
+        loginBtn.addActionListener(e -> {
+            String username = userField.getText();
+            char[] password = passField.getPassword();
 
-        add(dialogBox);
-    }
+            if (username.length() > 0 && password.length > 0) {
+                // Success: Clear fields and return to main menu
+                userField.setText("");
+                passField.setText("");
+                layout.show(container, "MENU");
+            } else {
+                // Failure: Show error dialog
+                JOptionPane.showMessageDialog(this,
+                        "Fields cannot be empty!",
+                        "Login Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
-    private JButton createActionButton(String text, Color bg) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Monospaced", Font.BOLD, 15));
-        button.setBackground(bg);
-        double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
-        button.setForeground(luminance < 128 ? Color.WHITE : Color.BLACK);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
-        return button;
-    }
-
-    private void handleLogin() {
-        String username = ProfileStore.sanitizeUsername(usernameField.getText());
-        String password = new String(passwordField.getPassword());
-        if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter both a username and a password.");
-            return;
-        }
-
-        if (!ProfileStore.authenticate(username, password)) {
-            JOptionPane.showMessageDialog(this, "That username or password was not recognized.");
-            return;
-        }
-
-        mainApp.showPlayerScreen(username);
-    }
-
-    private void handleCreateAccount() {
-        String username = ProfileStore.sanitizeUsername(usernameField.getText());
-        String password = new String(passwordField.getPassword());
-        String validationMessage = ProfileStore.validateNewAccount(username, password);
-        if (validationMessage != null) {
-            JOptionPane.showMessageDialog(this, validationMessage);
-            return;
-        }
-
-        if (!ProfileStore.createAccount(username, password)) {
-            JOptionPane.showMessageDialog(this, "The account could not be created right now.");
-            return;
-        }
-
-        JOptionPane.showMessageDialog(this, "Account created. Welcome to Keymon, " + username + "!");
-        mainApp.showPlayerScreen(username);
+        // Simply returns to the Menu screen
+        backBtn.addActionListener(e -> layout.show(container, "MENU"));
     }
 
     /**
-     * Paints the background by tiling the image across the entire panel area.
-     * This fixes the incomplete filling issue seen in previous scale-based code.
+     * Helper method to maintain consistent label styling
+     */
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        return label;
+    }
+
+    /**
+     * Overridden to render the animated background
      */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (backgroundImage != null) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-            int panelWidth = getWidth();
-            int panelHeight = getHeight();
-            int imgWidth = backgroundImage.getWidth();
-            int imgHeight = backgroundImage.getHeight();
-
-            double widthRatio = (double) panelWidth / imgWidth;
-            double heightRatio = (double) panelHeight / imgHeight;
-            double scale = Math.max(widthRatio, heightRatio);
-
-            int drawWidth = (int) (imgWidth * scale);
-            int drawHeight = (int) (imgHeight * scale);
-
-            int x = (panelWidth - drawWidth) / 2;
-            int y = (panelHeight - drawHeight) / 2;
-
-            g2d.drawImage(backgroundImage, x, y, drawWidth, drawHeight, this);
-        } else {
-            g.setColor(new Color(34, 139, 34));
-            g.fillRect(0, 0, getWidth(), getHeight());
+        if (backgroundGif != null) {
+            g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
         }
     }
 }
