@@ -54,7 +54,7 @@ public class MenuPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "LOGIN", "HIGH SCORES", "TUTORIAL", "PARENTAL CONTROLS", "EXIT" };
+        String[] labels = { "LOGIN", "HIGHSCORE", "TUTORIAL", "PARENTAL", "EXIT" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -116,7 +116,23 @@ public class MenuPanel extends JPanel {
     private void handleSelection(String label) {
         if (label.equals("EXIT")) {
             System.exit(0);
-        } else if (label.equals("HIGH SCORES")) {
+        } else if (label.equals("PARENTAL")) {
+            // --- SECURE PASSCODE CHECK ---
+            JPasswordField pf = new JPasswordField();
+            int okCxl = JOptionPane.showConfirmDialog(this, pf, "Enter Parental Passcode", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
+
+            if (okCxl == JOptionPane.OK_OPTION) {
+                String password = new String(pf.getPassword());
+                // You can change "1234" to any code your team chooses
+                if (password.equals("1234")) {
+                    cardLayout.show(container, "PARENTAL");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Incorrect Passcode!", "Access Denied",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else if (label.equals("HIGHSCORE")) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof HighscorePanel) {
                     ((HighscorePanel) comp).refreshData();

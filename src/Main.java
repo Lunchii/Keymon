@@ -60,16 +60,18 @@ public class Main {
         MenuPanel menuPanel = new MenuPanel(cardLayout, mainContainer);
         LoginPanel loginPanel = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
-        InstructionPanel tutorialPanel = new InstructionPanel(cardLayout, mainContainer, this);
-        ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
-        ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
+        TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
+        ParentalPanel parentalPanel = new ParentalPanel(cardLayout, mainContainer, this);
 
         // Just create instances of your other files
         mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
         mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap()), "PLAY GAME");
         PlayerScreen playerScreen = new PlayerScreen(cardLayout, mainContainer, player);
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
-        mainContainer.add(new LoginPanel(cardLayout, mainContainer), "LOGIN");
+        mainContainer.add(highscorePanel, "HIGHSCORE");
+        mainContainer.add(tutorialPanel, "TUTORIAL");
+        mainContainer.add(parentalPanel, "PARENTAL");
+        mainContainer.add(statsPage, "STATS_PAGE");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,12 +96,12 @@ public class Main {
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
     public void startGame(String username) {
-        if (levelSelectPanel != null) {
-            mainContainer.remove(levelSelectPanel);
+        try {
+            mainContainer.remove(mainContainer.getComponentCount() - 1);
+        } catch (Exception ignored) {
         }
-        levelSelectPanel = new LevelSelectPanel(mainContainer, this, username);
-        mainContainer.add(levelSelectPanel, "LEVEL_SELECT");
-        cardLayout.show(mainContainer, "LEVEL_SELECT");
+        mainContainer.add(new TeamSelectPanel(mainContainer, this, username), "TEAM_SELECT");
+        cardLayout.show(mainContainer, "TEAM_SELECT");
     }
 
     public void continueGame(String username) {
@@ -108,31 +110,9 @@ public class Main {
         startGame(username, mapFileForLevel(targetLevel));
     }
 
-    /** Called by LevelSelectPanel — launch selected map. */
-    public void startGame(String username, String mapFile) {
-        int levelId = getLevelIdFromMap(mapFile);
-        ProfileStore.PlayerProgress data = ProfileStore.loadProgress(username, levelId);
-        List<Pokemon> team = ProfileStore.loadParty(username);
-        if (team == null || team.isEmpty()) {
-            team = buildStarterTeam();
-        }
-        healParty(team);
-        ItemBag itemBag = ProfileStore.loadItemBag(username);
-
-        MapLoader loader = new MapLoader(mapFile);
-        int[][] worldMap = loader.getWorldMap();
-        List<Trainer> trainers = loader.getTrainers();
-
-        List<TerrainObjects> terrainObjects = loader.getTerrainObjects();
-        terrainObjects.removeIf(obj -> obj.getTileValue() == 3 &&
-            ProfileStore.hasCollectedPokeball(username, levelId, obj.getX() / TILE_SIZE, obj.getY() / TILE_SIZE));
-
-        Point spawnPoint = resolveSpawnPoint(worldMap, terrainObjects, trainers, data.x, data.y);
-        Player player = new Player(spawnPoint.x, spawnPoint.y, sanitizeSpriteRow(data.spriteRow), TILE_SIZE);
-
-        if (activeGamePanel != null) {
-            mainContainer.remove(activeGamePanel);
-        }
+        MapLoader loader = new MapLoader("map.csv");
+        Trainer trainer = loader.getTrainer();
+        Player player = new Player(data.x, data.y, data.spriteRow, TILE_SIZE);
 
         GamePanel gamePanel = new GamePanel(cardLayout, mainContainer, player,
             worldMap, trainers, terrainObjects, username, this, false, levelId, mapFile);
