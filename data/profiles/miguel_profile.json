@@ -1,23 +1,23 @@
 {
-  "username": "isaac",
-  "password": "tran",
-  "highScore": 1044,
+  "username": "miguel",
+  "password": "1234",
+  "highScore": 500,
   "currentLevel": 3,
   "unlockedLevel": 3,
   "levelX": [
-    320,
-    320,
-    1728
+    1856,
+    1856,
+    320
   ],
   "levelY": [
-    320,
-    320,
-    192
+    928,
+    928,
+    320
   ],
   "levelSpriteRow": [
-    10,
-    10,
-    200
+    140,
+    140,
+    10
   ],
   "party": [
     {
@@ -43,26 +43,25 @@
     }
   ],
   "itemCounts": {
-    "SLOW_TIME": 4,
-    "POTION": 3,
-    "FULL_HEAL": 2,
-    "ATTACK_BOOST": 3
+    "SLOW_TIME": 2,
+    "POTION": 4,
+    "FULL_HEAL": 1,
+    "ATTACK_BOOST": 2
   },
   "collectedPokeballs": [
-    "1:44:12",
-    "3:54:6",
-    "3:54:13"
+    "1:53:29",
+    "3:12:22"
   ],
   "totalTimePlayedSeconds": 118,
-  "wordsTyped": 4,
-  "correctChars": 47,
-  "totalTypedChars": 52,
-  "errorCount": 5,
-  "peakWpm": 7.755946225439503,
-  "cumulativeAverageWpm": 7.584855571708489,
-  "averageWpmSamples": 1,
-  "longestStreak": 3,
+  "wordsTyped": 0,
+  "correctChars": 0,
+  "totalTypedChars": 0,
+  "errorCount": 0,
+  "peakWpm": 0.0,
+  "cumulativeAverageWpm": 0.0,
+  "averageWpmSamples": 0,
+  "longestStreak": 0,
   "powerupsUsed": 0,
   "gamesPlayed": 2,
-  "levelWins": 0
+  "levelWins": 2
 }

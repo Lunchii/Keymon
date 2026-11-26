@@ -25,6 +25,13 @@ public class MenuPanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel container;
 
+    /**
+     * Constructs the main menu panel with buttons, animated background, and
+     * keyboard navigation.
+     *
+     * @param layout    the shared CardLayout used to switch screens
+     * @param container the parent panel that holds all screens
+     */
     public MenuPanel(CardLayout layout, JPanel container) {
         this.cardLayout = layout;
         this.container = container;
@@ -113,6 +120,13 @@ public class MenuPanel extends JPanel {
         setupKeyboardNavigation();
     }
 
+    /**
+     * Handles a menu button selection by navigating to the appropriate screen
+     * or performing the associated action such as PIN verification for parental
+     * controls or terminating the application on exit.
+     *
+     * @param label the text label of the selected button
+     */
     private void handleSelection(String label) {
         if (label.equals("EXIT")) {
             System.exit(0);
@@ -151,7 +165,7 @@ public class MenuPanel extends JPanel {
             if (passcode == JOptionPane.OK_OPTION) {
                 String password = new String(pf.getPassword());
                 // Using the hardcoded PIN from ProfileStore logic
-                if (password.equals("1234")) {
+                if (ProfileStore.verifyParentPin(password)) {
                     cardLayout.show(container, "PARENTAL");
                 } else {
                     JOptionPane.showMessageDialog(this, "Incorrect PIN!", "Access Denied",
@@ -165,6 +179,9 @@ public class MenuPanel extends JPanel {
         }
     }
 
+    /**
+     * Registers W/S/ENTER key bindings for keyboard navigation of the menu.
+     */
     private void setupKeyboardNavigation() {
         InputMap im = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = this.getActionMap();
@@ -193,6 +210,10 @@ public class MenuPanel extends JPanel {
         });
     }
 
+    /**
+     * Updates button foreground colours to highlight the currently focused
+     * button and dim the rest.
+     */
     private void updateButtonStyles() {
         for (int i = 0; i < buttons.size(); i++) {
             JButton btn = buttons.get(i);
@@ -209,6 +230,12 @@ public class MenuPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Creates a large outlined title label styled for the menu heading.
+     *
+     * @param text the title text to display
+     * @return a configured {@link OutlinedLabel}
+     */
     private OutlinedLabel createTitle(String text) {
         OutlinedLabel lbl = new OutlinedLabel(text);
         lbl.setFont(customFont.deriveFont(Font.BOLD, 100f));
@@ -218,6 +245,11 @@ public class MenuPanel extends JPanel {
         return lbl;
     }
 
+    /**
+     * Paints the animated GIF background scaled to fill the panel.
+     *
+     * @param g the graphics context
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -226,6 +258,11 @@ public class MenuPanel extends JPanel {
         }
     }
 
+    /**
+     * Loads the custom KA1 TrueType font from the fonts directory and
+     * registers it with the graphics environment. Falls back to Arial if the
+     * font file cannot be read.
+     */
     private void loadCustomFont() {
         try {
             File fontFile = new File("fonts/ka1.ttf");

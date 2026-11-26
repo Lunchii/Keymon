@@ -1,0 +1,6 @@
+.DS_Store
+out/
+data/profiles/
+*_save.json
+*_profile.json
+keymon.zip

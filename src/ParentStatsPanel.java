@@ -73,6 +73,13 @@ public class ParentStatsPanel extends JPanel {
         resetBtn.addActionListener(e -> resetSelectedPlayer());
         buttonPanel.add(resetBtn);
 
+        JButton resetPasswordBtn = new JButton("RESET SELECTED PLAYER PASSWORD");
+        resetPasswordBtn.setFont(new Font("Monospaced", Font.BOLD, 16));
+        resetPasswordBtn.setBackground(new Color(180, 120, 40));
+        resetPasswordBtn.setForeground(Color.BLACK);
+        resetPasswordBtn.addActionListener(e -> resetSelectedPlayerPassword());
+        buttonPanel.add(resetPasswordBtn);
+
         JButton backBtn = new JButton("BACK TO ADMIN MENU");
         backBtn.setFont(new Font("Monospaced", Font.BOLD, 16));
         backBtn.addActionListener(e -> cardLayout.show(container, "PARENTAL"));
@@ -111,14 +118,41 @@ public class ParentStatsPanel extends JPanel {
                 "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // CALLING YOUR EXISTING METHOD
             boolean success = ProfileStore.resetStatistics(selected);
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Stats for " + selected + " have been reset.");
-                refreshData(); // Updates the list view
+                refreshData();
             } else {
                 JOptionPane.showMessageDialog(this, "Error: Could not reset stats.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void resetSelectedPlayerPassword() {
+        String selected = playerList.getSelectedValue();
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Please select a trainer first.");
+            return;
+        }
+
+        JPasswordField newPasswordField = new JPasswordField();
+        int option = JOptionPane.showConfirmDialog(this, newPasswordField,
+                "Enter new password for " + selected + ":", JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == JOptionPane.OK_OPTION) {
+            String newPassword = new String(newPasswordField.getPassword());
+            if (newPassword.length() < 4) {
+                JOptionPane.showMessageDialog(this, "Password must be at least 4 characters.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            boolean success = ProfileStore.resetPassword(selected, newPassword);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Password for " + selected + " has been reset.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: Could not reset password.", "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
         }

@@ -22,6 +22,19 @@ No other third-party libraries or tools are required. Gson is bundled in the `li
 
 ---
 
+## Submission Artifacts
+
+The following deliverables are included and ready to submit:
+
+| Artifact | Location | Purpose |
+|---|---|---|
+| Compiled executable JAR | `group72.jar` | Runnable build of the game |
+| Javadoc ZIP archive | `javadoc-output.zip` | Copy of generated API documentation |
+
+If submitting one combined repository ZIP, keep both files clearly named inside that archive.
+
+---
+
 ## Building from Source
 
 > These instructions are written for **Windows 11** using a standard Command Prompt or PowerShell window.
@@ -39,7 +52,7 @@ No other third-party libraries or tools are required. Gson is bundled in the `li
 
 ### Step 2 — Obtain the Project
 
-Clone the repository or extract the submitted zip archive. The project root should contain a `src/` folder, a `lib/` folder, and asset files (`.png`, `.csv`, `.ttf`, `.json`, `.gif`).
+Clone the repository or extract the submitted zip archive. The project root should contain `src/`, `lib/`, the asset folders, and the `data/` directory used for local saves and leaderboard storage.
 
 ### Step 3 — Compile
 
@@ -64,6 +77,16 @@ java -cp "out;lib\gson-2.10.1.jar" Main
 The game window will open maximised. All asset files (images, fonts, maps, save files) must be in the `group72/` working directory, which is the default when launching from there.
 
 > **Note:** Use a semicolon (`;`) as the classpath separator on Windows. On macOS/Linux use a colon (`:`).
+
+### Running the Prebuilt Executable JAR
+
+From the `group72/` directory, run:
+
+```
+java -jar group72.jar
+```
+
+The JAR manifest already includes `Main` and the Gson dependency path (`lib/gson-2.10.1.jar`).
 
 ---
 
@@ -152,7 +175,7 @@ Press **ESC** during exploration to pause. Use **W / S** to navigate options and
 
 ### Saving
 
-Progress is saved automatically when you complete a stage, fail a stage, or quit to the hub via the pause menu. Your position on the map, party HP, item counts, and statistics are all persisted locally in a `<username>_profile.json` file.
+Progress is saved automatically when you complete a stage, fail a stage, or quit to the hub via the pause menu. Your position on the map, party HP, item counts, and statistics are all persisted locally in `data/profiles/<username>_profile.json`.
 
 ---
 
@@ -200,10 +223,11 @@ Stage 2 unlocks after completing Stage 1. Stage 3 unlocks after completing Stage
 From the `group72/` directory, run:
 
 ```
-javadoc -cp "lib\gson-2.10.1.jar" -d docs src\*.java
+javadoc -Xdoclint:none -cp "lib\gson-2.10.1.jar" -d docs\javadoc src\*.java
+Compress-Archive -Path docs\javadoc\* -DestinationPath javadoc-output.zip -Force
 ```
 
-The generated HTML documentation will be placed in the `docs/` folder. Open `docs\index.html` in any browser to browse it.
+The generated HTML documentation will be placed in `docs/javadoc/`. Open `docs/javadoc/index.html` in any browser to browse it.
 
 ---
 
@@ -223,10 +247,19 @@ group72/
 └── README.md         This file
 ```
 
+Current runtime data is organized under:
+
+```
+data/
+|-- profiles/   Player profile and save data
+|-- system/     Leaderboard and shared runtime data
+`-- legacy/     Archived older save formats
+```
+
 ---
 
 ## Known Limitations
 
-- Save files are stored locally in the working directory; they are not encrypted.
+- Save files are stored locally under `data/`; they are not encrypted.
 - The teacher PIN is hardcoded to `2212`.
 - The animated menu background (`menuBackground.gif`) is a large file and may take a moment to load on slower machines.

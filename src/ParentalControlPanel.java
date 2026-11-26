@@ -4,6 +4,22 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ * Admin settings panel for parental controls and maintenance operations.
+ *
+ * <p>
+ * Provides navigation for the admin dashboard and exposes controls for:
+ * <ul>
+ * <li>Viewing player stats</li>
+ * <li>Viewing high score table</li>
+ * <li>Performing a full reset of user and highscore data</li>
+ * <li>Returning to the main menu</li>
+ * </ul>
+ * </p>
+ *
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class ParentalControlPanel extends JPanel {
     private Image backgroundGif;
     private ArrayList<JButton> buttons = new ArrayList<>();
@@ -13,6 +29,14 @@ public class ParentalControlPanel extends JPanel {
     private JPanel container;
     private Main mainApp;
 
+    /**
+     * Constructs the parental controls panel with navigation buttons and
+     * keyboard support.
+     *
+     * @param layout    the shared CardLayout used to switch screens
+     * @param container the parent panel that holds all screens
+     * @param mainApp   the main application instance for screen coordination
+     */
     public ParentalControlPanel(CardLayout layout, JPanel container, Main mainApp) {
         this.cardLayout = layout;
         this.container = container;
@@ -37,7 +61,7 @@ public class ParentalControlPanel extends JPanel {
         menuContent.add(title2);
         menuContent.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        String[] labels = { "PLAYER STATS", "HIGH SCORES", "RESET TABLE", "BACK" };
+        String[] labels = { "PLAYER STATS", "HIGH SCORES", "ACCOUNT MANAGEMENT", "RESET TABLE", "BACK" };
         for (int i = 0; i < labels.length; i++) {
             final int index = i;
             final String label = labels[i];
@@ -45,7 +69,7 @@ public class ParentalControlPanel extends JPanel {
             OutlinedButton btn = new OutlinedButton(label);
             btn.setFont(customFont.deriveFont(Font.PLAIN, 28f));
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(400, 60));
+            btn.setMaximumSize(new Dimension(450, 60));
             btn.setFocusable(false);
             btn.setForeground(Color.BLACK); // Black font by default
 
@@ -90,6 +114,12 @@ public class ParentalControlPanel extends JPanel {
         setupKeyboardNavigation();
     }
 
+    /**
+     * Handles a button selection by navigating to the appropriate admin screen
+     * or performing the selected action such as resetting the high score table.
+     *
+     * @param label the text label of the selected button
+     */
     private void handleSelection(String label) {
         if (label.equals("BACK")) {
             cardLayout.show(container, "MENU");
@@ -105,24 +135,25 @@ public class ParentalControlPanel extends JPanel {
                 }
             }
             cardLayout.show(container, "HIGHSCORE");
+        } else if (label.equals("ACCOUNT MANAGEMENT")) {
+            cardLayout.show(container, "ACCOUNT_MANAGEMENT");
         } else if (label.equals("RESET TABLE")) {
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Reset ALL data? This will clear high scores and delete save files.",
-                    "CRITICAL WARNING", JOptionPane.YES_NO_OPTION);
+                    "Reset the high score table to defaults?",
+                    "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Wipe user save files [_profile.json]
-                java.util.List<String> users = ProfileStore.getAllUsernames();
-                for (String user : users) {
-                    ProfileStore.deleteAccount(user);
-                }
-                // Reset Highscore table to defaults
+                // Reset Highscore table to defaults only
                 ProfileStore.resetHighScoreTable();
-                JOptionPane.showMessageDialog(this, "System Reset Complete.");
+                JOptionPane.showMessageDialog(this, "High score table has been reset to defaults.");
             }
         }
     }
 
+    /**
+     * Updates button foreground colours to highlight the currently focused
+     * button and dim the rest.
+     */
     private void updateButtonStyles() {
         for (int i = 0; i < buttons.size(); i++) {
             JButton btn = buttons.get(i);
@@ -139,6 +170,12 @@ public class ParentalControlPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Creates a large outlined title label styled for the panel heading.
+     *
+     * @param text the title text to display
+     * @return a configured {@link OutlinedLabel}
+     */
     private OutlinedLabel createTitle(String text) {
         OutlinedLabel lbl = new OutlinedLabel(text);
         lbl.setFont(customFont.deriveFont(Font.BOLD, 100f));
@@ -148,6 +185,9 @@ public class ParentalControlPanel extends JPanel {
         return lbl;
     }
 
+    /**
+     * Registers W/S/ENTER key bindings for keyboard navigation of the panel.
+     */
     private void setupKeyboardNavigation() {
         InputMap im = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = this.getActionMap();
@@ -173,6 +213,11 @@ public class ParentalControlPanel extends JPanel {
         });
     }
 
+    /**
+     * Paints the animated GIF background scaled to fill the panel.
+     *
+     * @param g the graphics context
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -180,6 +225,10 @@ public class ParentalControlPanel extends JPanel {
             g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
     }
 
+    /**
+     * Loads the custom KA1 TrueType font from the fonts directory. Falls back
+     * to Arial if the font file cannot be read.
+     */
     private void loadCustomFont() {
         try {
             customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/ka1.ttf"));

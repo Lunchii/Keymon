@@ -61,17 +61,35 @@ public class Main {
         LoginPanel loginPanel = new LoginPanel(mainContainer, this);
         HighscorePanel highscorePanel = new HighscorePanel(cardLayout, mainContainer);
         TutorialPanel tutorialPanel = new TutorialPanel(cardLayout, mainContainer, this);
-        ParentalPanel parentalPanel = new ParentalPanel(cardLayout, mainContainer, this);
+        ParentalControlPanel parentalControlPanel = new ParentalControlPanel(cardLayout, mainContainer, this);
+        ParentStatsPanel adminStatsPanel = new ParentStatsPanel(cardLayout, mainContainer, this);
 
-        // Just create instances of your other files
-        mainContainer.add(new MenuPanel(cardLayout, mainContainer), "MENU");
-        mainContainer.add(new GamePanel(cardLayout, mainContainer, player, loader.getWorldMap()), "PLAY GAME");
-        PlayerScreen playerScreen = new PlayerScreen(cardLayout, mainContainer, player);
+        // Account management panels
+        AccountManagementPanel accountManagementPanel = new AccountManagementPanel(cardLayout, mainContainer, this);
+        AccountListPanel accountListPanel = new AccountListPanel(cardLayout, mainContainer, this);
+        CreateAccountPanel createAccountPanel = new CreateAccountPanel(cardLayout, mainContainer, this);
+        ResetPasswordPanel resetPasswordPanel = new ResetPasswordPanel(cardLayout, mainContainer, this);
+        ResetStatsPanel resetStatsPanel = new ResetStatsPanel(cardLayout, mainContainer, this);
+        DeleteAccountPanel deleteAccountPanel = new DeleteAccountPanel(cardLayout, mainContainer, this);
+
+        playerScreen = new PlayerScreen(cardLayout, mainContainer, this);
+        statsPage = new StatsPage(this);
+
+        mainContainer.add(menuPanel, "MENU");
+        mainContainer.add(loginPanel, "LOGIN");
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
         mainContainer.add(highscorePanel, "HIGHSCORE");
         mainContainer.add(tutorialPanel, "TUTORIAL");
         mainContainer.add(parentalPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
+
+        // Account management panels
+        mainContainer.add(accountManagementPanel, "ACCOUNT_MANAGEMENT");
+        mainContainer.add(accountListPanel, "ACCOUNT_LIST");
+        mainContainer.add(createAccountPanel, "CREATE_ACCOUNT");
+        mainContainer.add(resetPasswordPanel, "RESET_PASSWORD");
+        mainContainer.add(resetStatsPanel, "RESET_STATS");
+        mainContainer.add(deleteAccountPanel, "DELETE_ACCOUNT");
 
         frame.add(mainContainer);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -108,6 +126,11 @@ public class Main {
         ProfileStore.ProfileData profile = ProfileStore.loadProfile(username);
         int targetLevel = Math.max(1, Math.min(profile.unlockedLevel, profile.currentLevel));
         startGame(username, mapFileForLevel(targetLevel));
+    }
+
+    /** Called by PlayerScreen — start a fresh game from Stage 1. */
+    public void startNewGame(String username) {
+        startGame(username, "maps/level1_map.csv");
     }
 
     /** Called by LevelSelectPanel — launch selected map. */

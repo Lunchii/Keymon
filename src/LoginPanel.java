@@ -62,15 +62,17 @@ public class LoginPanel extends JPanel {
         loginBtn.addActionListener(e -> handleLogin());
         buttonRow.add(loginBtn);
 
-        // Action Buttons
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
-        loginBox.add(loginBtn, gbc);
+        JButton createBtn = createActionButton("CREATE ACCOUNT", new Color(0,0,0));
+        createBtn.addActionListener(e -> handleCreateAccount());
+        buttonRow.add(createBtn);
 
         gbc.gridy = 4;
         loginBox.add(backBtn, gbc);
 
-        // Add the styled login box to the center of the main panel
-        this.add(loginBox);
+        JButton backBtn = createActionButton("BACK TO MENU", new Color(0,0,0));
+        backBtn.addActionListener(e -> mainApp.returnToMenu());
+        gbc.gridy = 5;
+        dialogBox.add(backBtn, gbc);
 
         // --- INTERACTION LOGIC ---
         // Handles login validation and screen transition
@@ -97,7 +99,7 @@ public class LoginPanel extends JPanel {
         button.setFont(new Font("Monospaced", Font.BOLD, 15));
         button.setBackground(Color.WHITE);
         double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
-        button.setForeground(luminance < 128 ? Color.WHITE : Color.BLACK);
+        button.setForeground(luminance < 128 ? Color.BLACK : Color.BLACK);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));

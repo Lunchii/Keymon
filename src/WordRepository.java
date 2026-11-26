@@ -37,8 +37,7 @@ public final class WordRepository {
         "accretion", "anathema", "bibliophile", "camaraderie", "defenestration", "ephemeral", "flabbergasted", "gargantuan", "haphazard",
         "iconoclast", "asphyxiation", "juxtaposition", "kaleidoscope", "limerence", "mellifluous", "nomenclature", "obfuscation", "perspicacious",
         "quixotic", "reciprocity", "serendipity", "tintinnabulation", "ultracrepidarian", "verisimilitude", "wanderlust", "xenophobia",
-        "yesteryear", "zephyr", "embezzlement", "floccinaucinihilipilification", "antidisestablishmentarianism",
-        "pneumonoultramicroscopicsilicovolcanoconiosis"
+        "yesteryear", "zephyr", "embezzlement",
     };
 
     private WordRepository() {
