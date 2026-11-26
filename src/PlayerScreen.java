@@ -1,41 +1,58 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
+/**
+ * Player hub screen shown immediately after login.
+ *
+ * <p>
+ * Displays a brief stats summary (best score, stage, average WPM) and
+ * coaching tips loaded from the player's saved profile. From here the player
+ * can continue their last session, pick a stage, view full stats, or log out.
+ * </p>
+ * 
+ * @author Group 72 (Isaac, Miguel, Ryan, Nathaniel, Dehou)
+ * @version 1.0
+ */
 public class PlayerScreen extends JPanel {
-    private Player player;
-    private CardLayout layout;
+    private Main mainApp;
     private JPanel container;
+    private CardLayout cardLayout;
+    private String username;
+    private JLabel welcomeLabel;
+    private JLabel statsSummaryLabel;
+    private JTextArea detailArea;
+    private BufferedImage backgroundImage;
 
-    public PlayerScreen(CardLayout layout, JPanel container, Player player) {
-        this.layout = layout;
+    public PlayerScreen(CardLayout layout, JPanel container, Main mainApp) {
+        this.cardLayout = layout;
         this.container = container;
-        this.player = player;
+        this.mainApp = mainApp;
 
-        this.setLayout(new BorderLayout());
-        this.setBackground(new Color(20, 20, 20));
+        try {
+            backgroundImage = ImageIO.read(new File("images/LoginBackground.png"));
+        } catch (Exception e) {
+            // fallback to solid colour below
+        }
 
-        // 1. Title at top
-        JLabel title = new JLabel("PLAYER PROFILE", SwingConstants.CENTER);
-        title.setFont(new Font("Monospaced", Font.BOLD, 60));
-        title.setForeground(Color.CYAN);
-        title.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
-        this.add(title, BorderLayout.NORTH);
+        this.setLayout(new GridBagLayout());
+        this.setOpaque(backgroundImage == null);
+        this.setBackground(new Color(34, 139, 34));
 
-        // 2. Centered Sprite Display (Fixed Position)
-        JPanel centerPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                if (player != null && player.getCurrentFrame() != null) {
-                    Graphics2D g2d = (Graphics2D) g;
-                    // Disable smoothing for sharp pixel art
-                    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        // Main Dialog Box
+        JPanel dialogBox = new JPanel(new GridBagLayout());
+        dialogBox.setBackground(new Color(245, 245, 245, 230));
+        dialogBox.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(Color.BLACK, 4),
+                BorderFactory.createEmptyBorder(30, 50, 30, 50)));
 
-                    int scale = 6; // 6x magnification
-                    int w = player.getCurrentFrame().getWidth() * scale;
-                    int h = player.getCurrentFrame().getHeight() * scale;
-                    int x = (getWidth() - w) / 2;
-                    int y = (getHeight() - h) / 2;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 0, 10, 0);
 
         // 1. Welcome Header
         welcomeLabel = new JLabel("WELCOME, TRAINER", SwingConstants.CENTER);
@@ -94,25 +111,67 @@ public class PlayerScreen extends JPanel {
                 ProfileStore.deleteAccount(username);
                 cardLayout.show(container, "MENU");
             }
-        };
-        centerPanel.setOpaque(false);
-        this.add(centerPanel, BorderLayout.CENTER);
-
-        // 3. Back Button at bottom
-        JButton backButton = new JButton("BACK TO GAME");
-        backButton.setFont(new Font("Arial", Font.BOLD, 25));
-        backButton.addActionListener(e -> {
-            layout.show(container, "PLAY GAME");
-            // FIX for Test 3: Re-gain focus so WASD works immediately
-            container.getComponent(1).requestFocusInWindow();
         });
         gbc.gridy = 8;
         dialogBox.add(deleteBtn, gbc);
 
-        JPanel southPanel = new JPanel();
-        southPanel.setOpaque(false);
-        southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 50, 0));
-        southPanel.add(backButton);
-        this.add(southPanel, BorderLayout.SOUTH);
+        add(dialogBox);
+    }
+
+    public void setUserData(String username) {
+        this.username = username;
+        this.welcomeLabel.setText("WELCOME, " + username.toUpperCase());
+
+        ProfileStore.ProfileData profile = ProfileStore.loadProfile(username);
+        this.statsSummaryLabel.setText(String.format(
+                "Best Score: %d | Stage: %d | Avg WPM: %.1f",
+                profile.highScore,
+                profile.unlockedLevel,
+                profile.averageWpm));
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Accuracy: ").append(String.format("%.1f%%", profile.accuracyPercent)).append('\n');
+        builder.append("Peak WPM: ").append(String.format("%.1f", profile.peakWpm)).append('\n');
+        builder.append("Words Typed: ").append(profile.wordsTyped).append('\n');
+        builder.append("Errors: ").append(profile.errorCount).append('\n');
+        builder.append("Longest Streak: ").append(profile.longestStreak).append('\n');
+        builder.append("Teacher Tips:\n");
+        for (String tip : profile.recommendations) {
+            builder.append("- ").append(tip).append('\n');
+        }
+        if (!profile.achievements.isEmpty()) {
+            builder.append("\nBadges:\n");
+            for (String achievement : profile.achievements) {
+                builder.append("* ").append(achievement).append('\n');
+            }
+        }
+        detailArea.setText(builder.toString());
+        detailArea.setCaretPosition(0);
+    }
+
+    private JButton createStyledButton(String text, Color bg, Color fg) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Monospaced", Font.BOLD, 18));
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            int pw = getWidth(), ph = getHeight();
+            double scale = Math.max((double) pw / backgroundImage.getWidth(),
+                    (double) ph / backgroundImage.getHeight());
+            int dw = (int) (backgroundImage.getWidth() * scale);
+            int dh = (int) (backgroundImage.getHeight() * scale);
+            g2.drawImage(backgroundImage, (pw - dw) / 2, (ph - dh) / 2, dw, dh, this);
+        }
     }
 }

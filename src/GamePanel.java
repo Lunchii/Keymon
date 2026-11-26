@@ -581,46 +581,7 @@ public class GamePanel extends JPanel {
 
                 terrainObjects.remove(i);
             }
-        });
-        im.put(KeyStroke.getKeyStroke("A"), "move_left");
-        am.put("move_left", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetX -= TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(76, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("S"), "move_down");
-        am.put("move_down", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetY += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(10, 35, 50, 14, 29);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("D"), "move_right");
-        am.put("move_right", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                if (!player.isMoving) {
-                    player.targetX += TILE_SIZE;
-                    player.isMoving = true;
-                    player.setDirection(140, 33, 48, 15, 32);
-                    player.startAnimation();
-                }
-            }
-        });
-        im.put(KeyStroke.getKeyStroke("P"), "open_player_screen");
-        am.put("open_player_screen", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(container, "PLAYER_SCREEN");
-            }
-        });
+        }
     }
 
     private void loadTallGrassSprite() {

@@ -80,8 +80,9 @@ public class Main {
         mainContainer.add(playerScreen, "PLAYER_SCREEN");
         mainContainer.add(highscorePanel, "HIGHSCORE");
         mainContainer.add(tutorialPanel, "TUTORIAL");
-        mainContainer.add(parentalPanel, "PARENTAL");
+        mainContainer.add(parentalControlPanel, "PARENTAL");
         mainContainer.add(statsPage, "STATS_PAGE");
+        mainContainer.add(adminStatsPanel, "ADMIN_STATS");
 
         // Account management panels
         mainContainer.add(accountManagementPanel, "ACCOUNT_MANAGEMENT");
@@ -114,12 +115,12 @@ public class Main {
 
     /** Called by the "START GAME" button in PlayerScreen — show team select. */
     public void startGame(String username) {
-        try {
-            mainContainer.remove(mainContainer.getComponentCount() - 1);
-        } catch (Exception ignored) {
+        if (levelSelectPanel != null) {
+            mainContainer.remove(levelSelectPanel);
         }
-        mainContainer.add(new TeamSelectPanel(mainContainer, this, username), "TEAM_SELECT");
-        cardLayout.show(mainContainer, "TEAM_SELECT");
+        levelSelectPanel = new LevelSelectPanel(mainContainer, this, username);
+        mainContainer.add(levelSelectPanel, "LEVEL_SELECT");
+        cardLayout.show(mainContainer, "LEVEL_SELECT");
     }
 
     public void continueGame(String username) {
